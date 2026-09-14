@@ -415,25 +415,32 @@
 
   <!-- ============ CTA ============ -->
   <section class="section cta-band">
+    <div class="wrap cta-solo" data-reveal>
+      <span class="kicker">When the next step matters</span>
+      <h2>Your care deserves more than separate arrangements.</h2>
+      <p>Tell us where you are in your journey. We will help you understand what comes next.</p>
+      <div class="btn-row center" style="margin-top:1.75rem">
+        <a class="btn btn--light btn--journey" href="contact.html">Begin Your Journey</a>
+        <a class="btn btn--outline-light" href="for-providers.html">For Providers</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STAY CONNECTED ============ -->
+  <section class="section section--sand section--tight">
     <div class="wrap cta-inner">
       <div data-reveal>
-        <span class="kicker">When the next step matters</span>
-        <h2 style="max-width:22ch">Your care deserves more than separate arrangements.</h2>
-        <p>Tell us where you are in your journey. We will help you understand what comes next.</p>
-        <div class="btn-row" style="margin-top:1.75rem">
-          <a class="btn btn--light btn--journey" href="contact.html">Begin Your Journey</a>
-          <a class="btn btn--outline-light" href="for-providers.html">For Providers</a>
-        </div>
+        <span class="kicker">Stay connected</span>
+        <h2 style="--fs-h2:clamp(1.6rem,1.2rem + 1.4vw,2.4rem)">Keep in touch.</h2>
+        <p>Receive occasional updates from Heal Before Home &mdash; new experiences, destinations, partnerships and thoughtful resources for your journey.</p>
       </div>
-      <div class="cta-signup" data-reveal>
-        <h3 style="font-family:var(--sans); font-size:.72rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,240,.55); margin-bottom:1rem;">Stay connected</h3>
-        <p style="margin-bottom:1.25rem">Receive occasional updates from Heal Before Home — new experiences, destinations, partnerships and thoughtful resources for your journey.</p>
-        <form class="newsletter" name="newsletter" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="thank-you.html">
+      <div data-reveal>
+        <form class="newsletter newsletter--light" name="newsletter" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="thank-you.html">
           <input type="hidden" name="form-name" value="newsletter">
           <p class="hp"><label>Do not fill this in <input name="bot-field"></label></p>
           <label class="sr-only" for="nl-email">Email address</label>
           <input id="nl-email" type="email" name="email" placeholder="Email address" required autocomplete="email">
-          <button class="btn btn--light" type="submit">Subscribe</button>
+          <button class="btn" type="submit">Subscribe</button>
         </form>
       </div>
     </div>

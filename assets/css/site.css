@@ -767,6 +767,10 @@ p:last-child{ margin-bottom:0; }
 }
 .newsletter input::placeholder{ color:rgba(255,255,240,.45); }
 .newsletter input:focus{ outline:none; border-color:rgba(255,255,240,.6); }
+/* Same form on a light band: the default is light-on-dark for the footer CTA. */
+.newsletter--light input{ background:var(--cream); border-color:var(--line); color:var(--forest); }
+.newsletter--light input::placeholder{ color:var(--ink-muted); }
+.newsletter--light input:focus{ border-color:var(--sage); background:#fff; }
 
 /* =========================================================
    CTA band
@@ -774,17 +778,12 @@ p:last-child{ margin-bottom:0; }
 .cta-band{ background:var(--green-section); color:rgba(255,255,240,.85); }
 .cta-band h2{ color:var(--ivory); max-width:18ch; }
 .cta-inner{ display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(2rem,5vw,4rem); align-items:center; }
-/* The signup opposite the CTA headline is small type and a single field, so beside a
-   three-line display heading it read as an afterthought. Setting it in a panel gives
-   it enough weight to hold its own half of the band. The headline cannot be made two
-   lines here - it needs about 800px to break that way and the column is 557. */
-.cta-signup{
-  border:1px solid rgba(255,255,240,.16);
-  border-radius:var(--radius-lg);
-  padding:clamp(1.5rem,2.6vw,2.15rem);
-}
-.cta-signup p{ color:rgba(255,255,240,.78); }
 @media (max-width:860px){ .cta-inner{ grid-template-columns:1fr; } }
+/* The home page CTA carries the band alone - the signup that used to sit opposite it
+   is its own section now - so it is centred rather than left in a half-width column. */
+.cta-solo{ text-align:center; }
+.cta-solo h2{ max-width:22ch; margin-inline:auto; }
+.cta-solo p{ margin-inline:auto; }
 
 /* =========================================================
    Footer
