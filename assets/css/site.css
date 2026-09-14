@@ -516,6 +516,12 @@ p:last-child{ margin-bottom:0; }
 }
 
 /* Page hero (interior pages) */
+/* Extra room under the CTA row on the home page only, where the carousel controls
+   sit absolutely at the foot of the hero. The shared padding left a 12px gap to the
+   play/pause row at phone and tablet widths, so the two rows read as one cluster.
+   Page heroes have no controls and override padding-block below, so they are
+   unaffected. */
+.hero--home .hero-content{ padding-bottom:clamp(6.5rem,9vw,8rem); }
 .hero--page .hero-content{ padding-block:clamp(3rem,6vw,4.75rem); }
 .hero--page h1{ font-size:var(--fs-h1); max-width:20ch; }
 .hero--page .hero-sub{ margin-bottom:0; }
