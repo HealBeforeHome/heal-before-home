@@ -246,7 +246,7 @@ p:last-child{ margin-bottom:0; }
   /* The file is the swatch joined to a mirrored copy of itself, so repeat-x has
      no seam: the centre join and the wrap-around join both match pixel for
      pixel. Do not replace it with a plain swatch without re-mirroring. */
-  background:url("/assets/img/capiz-texture.webp") center/auto var(--capiz-zoom) repeat-x;
+  background:url("../img/capiz-texture.webp") center/auto var(--capiz-zoom) repeat-x;
   opacity:var(--capiz);
   transition:opacity .4s var(--ease);
 }
