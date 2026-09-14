@@ -829,8 +829,6 @@ html.js [data-reveal].is-visible{ opacity:1; transform:none; }
 .map-split{ display:grid; grid-template-columns:.6fr 1.4fr; gap:clamp(2rem,5vw,4rem); align-items:center; }
 @media (max-width:860px){ .map-split{ grid-template-columns:1fr; } }
 .map-split .map-img{ max-width:300px; margin-inline:auto; }
-/* Lets a white-background diagram sit on a tinted section without a visible card edge. */
-.blend-multiply{ mix-blend-mode:multiply; }
 
 .mosaic{ display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(.6rem,1.2vw,1rem); }
 .mosaic .media{ aspect-ratio:1/1; }
