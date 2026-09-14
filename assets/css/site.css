@@ -774,6 +774,16 @@ p:last-child{ margin-bottom:0; }
 .cta-band{ background:var(--green-section); color:rgba(255,255,240,.85); }
 .cta-band h2{ color:var(--ivory); max-width:18ch; }
 .cta-inner{ display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(2rem,5vw,4rem); align-items:center; }
+/* The signup opposite the CTA headline is small type and a single field, so beside a
+   three-line display heading it read as an afterthought. Setting it in a panel gives
+   it enough weight to hold its own half of the band. The headline cannot be made two
+   lines here - it needs about 800px to break that way and the column is 557. */
+.cta-signup{
+  border:1px solid rgba(255,255,240,.16);
+  border-radius:var(--radius-lg);
+  padding:clamp(1.5rem,2.6vw,2.15rem);
+}
+.cta-signup p{ color:rgba(255,255,240,.78); }
 @media (max-width:860px){ .cta-inner{ grid-template-columns:1fr; } }
 
 /* =========================================================
