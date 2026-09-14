@@ -1,13 +1,13 @@
-/* Heal Before Home — site behaviour
+/* Heal Before Home site behaviour
    Vanilla JS, no dependencies. */
 (function () {
   'use strict';
 
-  /* Reveal safety net — must come before anything that could throw.
+  /* Reveal safety net: must come before anything that could throw.
      [data-reveal] content starts at opacity:0, but only because the inline head
      script sets html.js. That flag and this file fail independently, so if this
      file is blocked, 404s, or throws in any block below, every revealable element
-     would stay invisible permanently — which is all the body content on most
+     would stay invisible permanently, which is all the body content on most
      pages. Telling the inline script we got here cancels its own fallback, and
      the timer below covers a throw later in this file. */
   window.__hbhReady = true;
@@ -125,7 +125,7 @@
     }
 
     // The first advance comes 5s after load, which is not much time on a slow
-    // connection — start fetching slide two immediately rather than waiting for
+    // connection, so start fetching slide two immediately rather than waiting for
     // the browser's lazy-loading heuristic.
     if (slides.length > 1) {
       var second = slides[1].querySelector('img');
@@ -195,7 +195,7 @@
 
     /* Pause/stop control (WCAG 2.2.2). The arrows and dots only move between
        slides; this is the only thing that stops the motion itself. With reduced
-       motion, or a single slide, nothing ever advances — so the button would be
+       motion, or a single slide, nothing ever advances, so the button would be
        claiming to control something that is not happening, and is removed. */
     var toggleBtn = carousel.querySelector('[data-carousel-toggle]');
     if (toggleBtn) {
@@ -306,7 +306,7 @@
            viewportHeight / elementHeight, so a container taller than the viewport
            by enough can never reach a fractional threshold. At 400% zoom that is
            an ordinary container, and it would stay hidden at every scroll
-           position — for exactly the people who need the zoom. */
+           position, for exactly the people who need the zoom. */
       }, { rootMargin: '0px 0px -8% 0px', threshold: 0 });
       Array.prototype.forEach.call(revealables, function (el) { io.observe(el); });
     }
