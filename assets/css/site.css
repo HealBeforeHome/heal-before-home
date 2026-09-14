@@ -407,17 +407,27 @@ p:last-child{ margin-bottom:0; }
    it follows the kicker instead of guessing where it landed. Full-bleed via 100vw
    because .hero-content is max-width constrained and a band with visible side edges
    would read as a panel; .hero clips the overflow. */
+/* Starts a full viewport above the text block, not at its top edge. The block is
+   bottom-aligned, so whenever the hero is taller than its content there is a strip
+   above it - 14px on a large desktop, 134px on a phone - and anchoring the band at
+   top:0 left that strip on the base alone, with a hard edge where the band began.
+   Running it off the top and letting .hero clip the excess means full strength all
+   the way up, with the only transition being the falloff below the kicker.
+   Stops are absolute lengths rather than percentages for the same reason: the
+   element height now includes the 100vh overhang, so percentages would drift with
+   the viewport instead of tracking the text. Full strength to the end of the kicker
+   at padding-top + 2.4rem, then ~28rem of falloff so it reads as vignetting. */
 .hero-content::before{
-  content:""; position:absolute; top:0; left:50%; transform:translateX(-50%);
-  width:100vw; height:calc(clamp(3.25rem,7vw,5.5rem) + 30rem);
+  content:""; position:absolute; top:-100vh; left:50%; transform:translateX(-50%);
+  width:100vw; height:calc(100vh + clamp(3.25rem,7vw,5.5rem) + 30rem);
   z-index:-1; pointer-events:none;
-  /* Only the first 25% has to be at full strength - that is as far down as the
-     kicker reaches. The remaining three quarters is pure falloff, stretched over
-     ~430px so it reads as vignetting rather than a slab with an edge in it. An
-     earlier version ran the fade over 37px and the seam was plainly visible. */
   background:linear-gradient(to bottom,
-    rgba(var(--veil),.24) 0%, rgba(var(--veil),.24) 25%, rgba(var(--veil),.17) 45%,
-    rgba(var(--veil),.10) 65%, rgba(var(--veil),.04) 83%, rgba(var(--veil),0) 100%);
+    rgba(var(--veil),.24) 0,
+    rgba(var(--veil),.24) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 2.4rem),
+    rgba(var(--veil),.17) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 9rem),
+    rgba(var(--veil),.10) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 16rem),
+    rgba(var(--veil),.04) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 24rem),
+    rgba(var(--veil),0)   calc(100vh + clamp(3.25rem,7vw,5.5rem) + 30rem));
 }
 .hero .kicker{ color:var(--ivory); }
 .hero h1{
