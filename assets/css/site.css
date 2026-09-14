@@ -779,11 +779,6 @@ p:last-child{ margin-bottom:0; }
 .cta-band h2{ color:var(--ivory); max-width:18ch; }
 .cta-inner{ display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(2rem,5vw,4rem); align-items:center; }
 @media (max-width:860px){ .cta-inner{ grid-template-columns:1fr; } }
-/* The home page CTA carries the band alone - the signup that used to sit opposite it
-   is its own section now - so it is centred rather than left in a half-width column. */
-.cta-solo{ text-align:center; }
-.cta-solo h2{ max-width:22ch; margin-inline:auto; }
-.cta-solo p{ margin-inline:auto; }
 
 /* =========================================================
    Footer
