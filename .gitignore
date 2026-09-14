@@ -1,0 +1,8 @@
+# Python bytecode from the scratch build scripts
+__pycache__/
+*.pyc
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini

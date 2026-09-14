@@ -1,0 +1,14 @@
+# Netlify redirects — preserve inbound links from the previous Framer site.
+/how-it-works                        /#journey                          301
+/the-experience                      /#journey                          301
+/community-initiative-interest       /our-story-between-two-worlds      301
+/our-story                           /our-story-between-two-worlds      301
+/why-the-philippines                 /medical-travel-philippines        301
+
+/vision-care                         /areas-of-care                             301
+/fetility-reproductive-care          /fertility-reproductive-care               301
+/orthopedic-care                     /areas-of-care                             301
+/cardiology-advanced-heart-care      /areas-of-care                             301
+/preventive-care-diagnostics         /areas-of-care                             301
+/healthy-aging-geriatric-care        /areas-of-care                             301
+/private-nursing-caregiver-support   /areas-of-care                             301
