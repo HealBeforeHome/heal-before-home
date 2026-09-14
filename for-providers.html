@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@300;400;500;600;700&amp;family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;display=swap">
-<script>document.documentElement.className+=" js";</script>
+<script>document.documentElement.className+=" js";setTimeout(function(){if(!window.__hbhReady)document.documentElement.className+=" reveal-failsafe";},3000);</script>
 <link rel="stylesheet" href="assets/css/site.css">
 <script src="assets/js/site.js" defer></script>
 </head>
@@ -181,24 +181,25 @@
       <div class="form-panel" data-reveal>
         <form class="form" name="provider-enquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="thank-you.html">
           <input type="hidden" name="form-name" value="provider-enquiry">
-          <p class="hp"><label>Do not fill this in <input name="bot-field"></label></p>
+          <p class="hp" aria-hidden="true"><label>Do not fill this in <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+          <p class="form-legend"><span class="req" aria-hidden="true">*</span> indicates a required field.</p>
 
           <div class="field">
-            <label for="p-org">Organization name</label>
+            <label for="p-org">Organization name <span class="req" aria-hidden="true">*</span></label>
             <input id="p-org" name="organization" type="text" required autocomplete="organization">
           </div>
           <div class="form-row">
             <div class="field">
-              <label for="p-name">Contact name</label>
+              <label for="p-name">Contact name <span class="req" aria-hidden="true">*</span></label>
               <input id="p-name" name="name" type="text" required autocomplete="name">
             </div>
             <div class="field">
-              <label for="p-email">Email address</label>
+              <label for="p-email">Email address <span class="req" aria-hidden="true">*</span></label>
               <input id="p-email" name="email" type="email" required autocomplete="email">
             </div>
           </div>
           <div class="field">
-            <label for="p-type">Type of provider</label>
+            <label for="p-type">Type of provider <span class="req" aria-hidden="true">*</span></label>
             <select id="p-type" name="provider_type" required>
               <option value="">Select</option>
               <option>Hospital or medical centre</option>

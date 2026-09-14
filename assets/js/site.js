@@ -3,6 +3,22 @@
 (function () {
   'use strict';
 
+  /* Reveal safety net — must come before anything that could throw.
+     [data-reveal] content starts at opacity:0, but only because the inline head
+     script sets html.js. That flag and this file fail independently, so if this
+     file is blocked, 404s, or throws in any block below, every revealable element
+     would stay invisible permanently — which is all the body content on most
+     pages. Telling the inline script we got here cancels its own fallback, and
+     the timer below covers a throw later in this file. */
+  window.__hbhReady = true;
+
+  function revealAll() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-reveal]'), function (el) {
+      el.classList.add('is-visible');
+    });
+  }
+  var revealBackstop = window.setTimeout(revealAll, 3000);
+
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------------------------------------------------------
@@ -23,10 +39,18 @@
   var toggle = document.querySelector('.nav-toggle');
   var nav = document.getElementById('primary-nav');
   if (toggle && nav) {
+    var isOverlay = function () { return window.innerWidth <= 1120; };
+
+    /* Closing applies visibility:hidden to the panel. If focus is inside it at that
+       moment - which is the normal case when closing with Escape - the browser has
+       nowhere to put focus and drops it on <body>, so the next Tab restarts from the
+       top of the document. Hand focus back to the toggle before that can happen. */
     var setNav = function (open) {
+      var focusInside = nav.contains(document.activeElement);
       toggle.setAttribute('aria-expanded', String(open));
       nav.classList.toggle('is-open', open);
-      document.body.style.overflow = open && window.innerWidth <= 1120 ? 'hidden' : '';
+      document.body.style.overflow = open && isOverlay() ? 'hidden' : '';
+      if (!open && focusInside) toggle.focus();
     };
     toggle.addEventListener('click', function () {
       setNav(toggle.getAttribute('aria-expanded') !== 'true');
@@ -35,7 +59,37 @@
       if (e.target.closest('a')) setNav(false);
     });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') setNav(false);
+      if (e.key !== 'Escape') return;
+      if (toggle.getAttribute('aria-expanded') !== 'true') return;
+      setNav(false);
+    });
+
+    /* While the panel covers the page, Tab must not walk into the content behind it:
+       the body is scroll-locked, so focus would land somewhere the visitor cannot
+       see or scroll to. Only while it is actually an overlay - above 1120px the nav
+       is just a row in the header and should behave like ordinary content. */
+    nav.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      if (!isOverlay() || toggle.getAttribute('aria-expanded') !== 'true') return;
+      var items = nav.querySelectorAll('a[href], button:not([disabled])');
+      if (!items.length) return;
+      var first = items[0];
+      var last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        toggle.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        toggle.focus();
+      }
+    });
+
+    /* Tabbing forward off the toggle should enter the open panel rather than skip it. */
+    toggle.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab' || e.shiftKey) return;
+      if (!isOverlay() || toggle.getAttribute('aria-expanded') !== 'true') return;
+      var firstItem = nav.querySelector('a[href], button:not([disabled])');
+      if (firstItem) { e.preventDefault(); firstItem.focus(); }
     });
     window.addEventListener('resize', function () {
       if (window.innerWidth > 1120) setNav(false);
@@ -91,11 +145,14 @@
        One chained timeout that is always cleared before it is set, so
        overlapping pause/resume events can never leave a second timer
        running. Pause reasons are tracked by name rather than as a single
-       flag, so hover and keyboard focus cannot cancel each other out. */
-    var pausedBy = { pointer: false, focus: false };
+       flag, so hover and keyboard focus cannot cancel each other out.
+       `manual` is the visitor pressing pause. It outranks the others in the sense
+       that hover and focus ending cannot clear it - schedule() re-checks every
+       reason, so the carousel stays stopped until they press play again. */
+    var pausedBy = { pointer: false, focus: false, manual: false };
 
     function isPaused() {
-      return pausedBy.pointer || pausedBy.focus || document.hidden;
+      return pausedBy.pointer || pausedBy.focus || pausedBy.manual || document.hidden;
     }
 
     function stop() {
@@ -135,6 +192,28 @@
 
     if (prevBtn) prevBtn.addEventListener('click', function () { go(index - 1); });
     if (nextBtn) nextBtn.addEventListener('click', function () { go(index + 1); });
+
+    /* Pause/stop control (WCAG 2.2.2). The arrows and dots only move between
+       slides; this is the only thing that stops the motion itself. With reduced
+       motion, or a single slide, nothing ever advances — so the button would be
+       claiming to control something that is not happening, and is removed. */
+    var toggleBtn = carousel.querySelector('[data-carousel-toggle]');
+    if (toggleBtn) {
+      if (reduceMotion || slides.length < 2) {
+        toggleBtn.parentNode.removeChild(toggleBtn);
+      } else {
+        toggleBtn.addEventListener('click', function () {
+          var paused = !pausedBy.manual;
+          // Pressing play is an explicit request to move, so it also clears the
+          // focus pause. Without this a keyboard user would press play and see
+          // nothing happen until they tabbed out of the carousel.
+          if (!paused) pausedBy.focus = false;
+          setPause('manual', paused);
+          toggleBtn.classList.toggle('is-paused', paused);
+          toggleBtn.setAttribute('aria-label', paused ? 'Play image slideshow' : 'Pause image slideshow');
+        });
+      }
+    }
 
     /* Hover pauses over the controls only. The hero fills the whole first
        screen, so pausing whenever the pointer sits anywhere over it would
@@ -215,7 +294,7 @@
   var revealables = document.querySelectorAll('[data-reveal]');
   if (revealables.length) {
     if (reduceMotion || !('IntersectionObserver' in window)) {
-      Array.prototype.forEach.call(revealables, function (el) { el.classList.add('is-visible'); });
+      revealAll();
     } else {
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
@@ -223,10 +302,17 @@
           entry.target.classList.add('is-visible');
           io.unobserve(entry.target);
         });
-      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+        /* threshold is 0, not a fraction: intersectionRatio is capped by
+           viewportHeight / elementHeight, so a container taller than the viewport
+           by enough can never reach a fractional threshold. At 400% zoom that is
+           an ordinary container, and it would stay hidden at every scroll
+           position — for exactly the people who need the zoom. */
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0 });
       Array.prototype.forEach.call(revealables, function (el) { io.observe(el); });
     }
   }
+  // The observer is wired up, so the blanket timer is no longer needed.
+  window.clearTimeout(revealBackstop);
 
   /* ---------------------------------------------------------
      Stagger helper: [data-reveal-group] delays its children

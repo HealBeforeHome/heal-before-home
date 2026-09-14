@@ -28,7 +28,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@300;400;500;600;700&amp;family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;display=swap">
 <link rel="preload" as="image" href="assets/img/hero-lake.webp" imagesrcset="assets/img/hero-lake-760.webp 760w, assets/img/hero-lake-1100.webp 1100w, assets/img/hero-lake.webp 1600w" imagesizes="100vw" fetchpriority="high">
-<script>document.documentElement.className+=" js";</script>
+<script>document.documentElement.className+=" js";setTimeout(function(){if(!window.__hbhReady)document.documentElement.className+=" reveal-failsafe";},3000);</script>
 <link rel="stylesheet" href="assets/css/site.css">
 <script src="assets/js/site.js" defer></script>
 
@@ -107,7 +107,13 @@
 
     <div class="hero-controls">
       <div class="wrap hero-controls-inner">
-        <div class="hero-dots" role="group" aria-label="Choose hero image"></div>
+        <div class="hero-playback">
+          <button class="hero-toggle" type="button" data-carousel-toggle aria-label="Pause image slideshow">
+            <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="7" y="5" width="3.5" height="14" rx="1"/><rect x="13.5" y="5" width="3.5" height="14" rx="1"/></svg>
+            <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+          </button>
+          <div class="hero-dots" role="group" aria-label="Choose hero image"></div>
+        </div>
         <div class="hero-arrows">
           <button type="button" data-carousel-prev aria-label="Previous image">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
@@ -216,7 +222,7 @@
         </div>
       </div>
 
-      <p class="small muted" style="margin-top:1.75rem; letter-spacing:.12em; text-transform:uppercase; font-size:.74rem;">À la carte services or curated packages available</p>
+      <p class="small muted" style="margin-top:1.75rem; letter-spacing:.12em; text-transform:uppercase; font-size:.74rem;"><span lang="fr">À la carte</span> services or curated packages available</p>
     </div>
   </section>
 
@@ -332,23 +338,23 @@
       <h3 style="font-family:var(--sans); font-size:.72rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--sage); margin-bottom:1.25rem;" data-reveal>Five destinations</h3>
       <div class="dest-grid" data-reveal-group>
         <a class="dest" href="medical-travel-philippines.html#manila" data-reveal>
-          <img src="assets/img/dest-manila.webp" srcset="assets/img/dest-manila-560.webp 560w, assets/img/dest-manila.webp 900w" sizes="(max-width:560px) 92vw, (max-width:900px) 46vw, 31vw" width="900" height="600" alt="High-rise towers and parkland in the Makati district of Manila" loading="lazy" decoding="async">
+          <img src="assets/img/dest-manila.webp" srcset="assets/img/dest-manila-560.webp 560w, assets/img/dest-manila.webp 900w" sizes="(max-width:560px) 92vw, (max-width:900px) 46vw, 31vw" width="900" height="600" alt="" loading="lazy" decoding="async">
           <div class="dest-label"><h3>Manila</h3><p>Modern care, culture and lifestyle in the capital.</p></div>
         </a>
         <a class="dest" href="medical-travel-philippines.html#cebu" data-reveal>
-          <img src="assets/img/dest-cebu.webp" srcset="assets/img/dest-cebu-560.webp 560w, assets/img/dest-cebu.webp 900w" sizes="(max-width:560px) 92vw, (max-width:900px) 46vw, 31vw" width="900" height="600" alt="A modern building above a turquoise bay on the coast of Cebu" loading="lazy" decoding="async">
+          <img src="assets/img/dest-cebu.webp" srcset="assets/img/dest-cebu-560.webp 560w, assets/img/dest-cebu.webp 900w" sizes="(max-width:560px) 92vw, (max-width:900px) 46vw, 31vw" width="900" height="600" alt="" loading="lazy" decoding="async">
           <div class="dest-label"><h3>Cebu</h3><p>A major healthcare hub with the ease of island life.</p></div>
         </a>
         <a class="dest" href="medical-travel-philippines.html#tagaytay" data-reveal>
-          <img src="assets/img/dest-tagaytay.webp" srcset="assets/img/dest-tagaytay-560.webp 560w, assets/img/dest-tagaytay.webp 900w" sizes="(max-width:560px) 92vw, (max-width:900px) 46vw, 31vw" width="900" height="600" alt="Taal Lake and volcano viewed from the Tagaytay ridge" loading="lazy" decoding="async">
+          <img src="assets/img/dest-tagaytay.webp" srcset="assets/img/dest-tagaytay-560.webp 560w, assets/img/dest-tagaytay.webp 900w" sizes="(max-width:560px) 92vw, (max-width:900px) 46vw, 31vw" width="900" height="600" alt="" loading="lazy" decoding="async">
           <div class="dest-label"><h3>Tagaytay</h3><p>Highland calm, Taal views and cool mountain air.</p></div>
         </a>
         <a class="dest" href="medical-travel-philippines.html#batangas" data-reveal>
-          <img src="assets/img/dest-batangas.webp" srcset="assets/img/dest-batangas-560.webp 560w, assets/img/dest-batangas.webp 900w" sizes="(max-width:560px) 92vw, (max-width:900px) 46vw, 31vw" width="900" height="600" alt="A carabao cart beside crates of mangoes on a farm in Lipa, Batangas" loading="lazy" decoding="async">
+          <img src="assets/img/dest-batangas.webp" srcset="assets/img/dest-batangas-560.webp 560w, assets/img/dest-batangas.webp 900w" sizes="(max-width:560px) 92vw, (max-width:900px) 46vw, 31vw" width="900" height="600" alt="" loading="lazy" decoding="async">
           <div class="dest-label"><h3>Batangas</h3><p>Coastal ease, heritage and countryside.</p></div>
         </a>
         <a class="dest" href="medical-travel-philippines.html#palawan" data-reveal>
-          <img src="assets/img/dest-palawan.webp" srcset="assets/img/dest-palawan-560.webp 560w, assets/img/dest-palawan.webp 900w" sizes="(max-width:560px) 92vw, (max-width:900px) 46vw, 31vw" width="900" height="600" alt="Limestone cliffs surrounding a clear lagoon in Palawan" loading="lazy" decoding="async">
+          <img src="assets/img/dest-palawan.webp" srcset="assets/img/dest-palawan-560.webp 560w, assets/img/dest-palawan.webp 900w" sizes="(max-width:560px) 92vw, (max-width:900px) 46vw, 31vw" width="900" height="600" alt="" loading="lazy" decoding="async">
           <div class="dest-label"><h3>Palawan</h3><p>Island stillness, living culture and open water.</p></div>
         </a>
         <div class="dest" style="background:var(--forest); display:flex; align-items:center; justify-content:center; text-align:center;" data-reveal>
@@ -373,19 +379,19 @@
       </div>
       <div class="tiles" data-reveal-group>
         <a class="tile" href="hair-restoration.html" data-reveal>
-          <img src="assets/img/spec-hair.webp" srcset="assets/img/spec-hair-400.webp 400w, assets/img/spec-hair.webp 640w" sizes="(max-width:520px) 46vw, (max-width:980px) 46vw, 23vw" width="640" height="640" alt="A specialist assessing a patient's hairline during a hair-restoration consultation" loading="lazy" decoding="async">
+          <img src="assets/img/spec-hair.webp" srcset="assets/img/spec-hair-400.webp 400w, assets/img/spec-hair.webp 640w" sizes="(max-width:520px) 46vw, (max-width:980px) 46vw, 23vw" width="640" height="640" alt="" loading="lazy" decoding="async">
           <span>Hair Restoration</span>
         </a>
         <a class="tile" href="dental-care.html" data-reveal>
-          <img src="assets/img/spec-dental.webp" srcset="assets/img/spec-dental-400.webp 400w, assets/img/spec-dental.webp 640w" sizes="(max-width:520px) 46vw, (max-width:980px) 46vw, 23vw" width="640" height="640" alt="A patient in a dental chair during a consultation in a modern clinic" loading="lazy" decoding="async">
+          <img src="assets/img/spec-dental.webp" srcset="assets/img/spec-dental-400.webp 400w, assets/img/spec-dental.webp 640w" sizes="(max-width:520px) 46vw, (max-width:980px) 46vw, 23vw" width="640" height="640" alt="" loading="lazy" decoding="async">
           <span>Dental Care</span>
         </a>
         <a class="tile" href="longevity-wellness.html" data-reveal>
-          <img src="assets/img/spec-hbot.webp" srcset="assets/img/spec-hbot-400.webp 400w, assets/img/spec-hbot.webp 640w" sizes="(max-width:520px) 46vw, (max-width:980px) 46vw, 23vw" width="640" height="640" alt="The interior of a hyperbaric oxygen therapy chamber" loading="lazy" decoding="async">
+          <img src="assets/img/spec-hbot.webp" srcset="assets/img/spec-hbot-400.webp 400w, assets/img/spec-hbot.webp 640w" sizes="(max-width:520px) 46vw, (max-width:980px) 46vw, 23vw" width="640" height="640" alt="" loading="lazy" decoding="async">
           <span>Longevity &amp; Wellness</span>
         </a>
         <a class="tile" href="interventional-radiology.html" data-reveal>
-          <img src="assets/img/spec-radiology.webp" srcset="assets/img/spec-radiology-400.webp 400w, assets/img/spec-radiology-640.webp 640w, assets/img/spec-radiology.webp 960w" sizes="(max-width:520px) 46vw, (max-width:980px) 46vw, 23vw" width="960" height="960" alt="An interventional radiology team at work beside angiography screens in a hybrid theatre" loading="lazy" decoding="async">
+          <img src="assets/img/spec-radiology.webp" srcset="assets/img/spec-radiology-400.webp 400w, assets/img/spec-radiology-640.webp 640w, assets/img/spec-radiology.webp 960w" sizes="(max-width:520px) 46vw, (max-width:980px) 46vw, 23vw" width="960" height="960" alt="" loading="lazy" decoding="async">
           <span>Interventional Radiology</span>
         </a>
       </div>
@@ -424,7 +430,7 @@
       <div data-reveal>
         <form class="newsletter newsletter--light" name="newsletter" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="thank-you.html">
           <input type="hidden" name="form-name" value="newsletter">
-          <p class="hp"><label>Do not fill this in <input name="bot-field"></label></p>
+          <p class="hp" aria-hidden="true"><label>Do not fill this in <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
           <label class="sr-only" for="nl-email">Email address</label>
           <input id="nl-email" type="email" name="email" placeholder="Email address" required autocomplete="email">
           <button class="btn" type="submit">Subscribe</button>

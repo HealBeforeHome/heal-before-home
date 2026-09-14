@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@300;400;500;600;700&amp;family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;display=swap">
-<script>document.documentElement.className+=" js";</script>
+<script>document.documentElement.className+=" js";setTimeout(function(){if(!window.__hbhReady)document.documentElement.className+=" reveal-failsafe";},3000);</script>
 <link rel="stylesheet" href="assets/css/site.css">
 <script src="assets/js/site.js" defer></script>
 </head>
@@ -89,23 +89,24 @@
       <div class="form-panel" data-reveal>
         <form class="form" name="journey-enquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="thank-you.html">
           <input type="hidden" name="form-name" value="journey-enquiry">
-          <p class="hp"><label>Do not fill this in <input name="bot-field"></label></p>
+          <p class="hp" aria-hidden="true"><label>Do not fill this in <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
 
+          <p class="form-legend"><span class="req" aria-hidden="true">*</span> indicates a required field.</p>
           <p class="form-step">Step 1 — Tell us about the status of your journey</p>
 
           <div class="form-row">
             <div class="field">
-              <label for="c-name">Your name</label>
+              <label for="c-name">Your name <span class="req" aria-hidden="true">*</span></label>
               <input id="c-name" name="name" type="text" required autocomplete="name">
             </div>
             <div class="field">
-              <label for="c-email">Email address</label>
+              <label for="c-email">Email address <span class="req" aria-hidden="true">*</span></label>
               <input id="c-email" name="email" type="email" required autocomplete="email">
             </div>
           </div>
 
           <div class="field">
-            <label for="c-care">What type of care or journey are you considering?</label>
+            <label for="c-care">What type of care or journey are you considering? <span class="req" aria-hidden="true">*</span></label>
             <select id="c-care" name="care_type" required>
               <option value="">Select</option>
               <option>Hair restoration</option>
@@ -122,7 +123,7 @@
           </div>
 
           <div class="field">
-            <label for="c-stage">What stage are you at in your planning journey?</label>
+            <label for="c-stage">What stage are you at in your planning journey? <span class="req" aria-hidden="true">*</span></label>
             <select id="c-stage" name="planning_stage" required>
               <option value="">Select your current stage</option>
               <option>Exploring providers or options</option>
@@ -175,7 +176,7 @@
       <div data-reveal>
         <form class="newsletter" name="newsletter" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="thank-you.html">
           <input type="hidden" name="form-name" value="newsletter">
-          <p class="hp"><label>Do not fill this in <input name="bot-field"></label></p>
+          <p class="hp" aria-hidden="true"><label>Do not fill this in <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
           <label class="sr-only" for="nl-email">Email address</label>
           <input id="nl-email" type="email" name="email" placeholder="Email address" required autocomplete="email">
           <button class="btn btn--light" type="submit">Subscribe</button>

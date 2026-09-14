@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@300;400;500;600;700&amp;family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;display=swap">
-<script>document.documentElement.className+=" js";</script>
+<script>document.documentElement.className+=" js";setTimeout(function(){if(!window.__hbhReady)document.documentElement.className+=" reveal-failsafe";},3000);</script>
 <link rel="stylesheet" href="assets/css/site.css">
 <script src="assets/js/site.js" defer></script>
 </head>
@@ -72,7 +72,8 @@
         <p>You may complete the form below, and our team will be in touch as opportunities take shape.</p>
 
         <form class="form" id="community-form" novalidate>
-          <p class="hp"><label>Do not fill this in <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+          <p class="hp" aria-hidden="true"><label>Do not fill this in <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+          <p class="form-legend"><span class="req" aria-hidden="true">*</span> indicates a required field.</p>
 
           <div class="form-row">
             <div class="field">
@@ -102,27 +103,11 @@
             <option value="Club / Association">Club / Association</option>
             <option value="Creative / Artist">Creative / Artist</option>
             <option value="Public service / Government">Public service / Government</option>
-            <option value="Family Office / Private Investmen">Family Office / Private Investmen</option>
+            <option value="Family Office / Private Investment">Family Office / Private Investment</option>
             <option value="Corporate / Institutional Partner">Corporate / Institutional Partner</option>
             </select>
           </div>
 
-          <div class="field">
-            <label for="ci-contribution-role">How would you describe your role or area of contribution?</label>
-            <select id="ci-contribution-role" name="community_initiative_role">
-            <option value="">Select the option that best describes you</option>
-            <option value="Professional Expertise">Professional Expertise</option>
-            <option value="Volunteer Time / Service">Volunteer Time / Service</option>
-            <option value="Creative Talent">Creative Talent</option>
-            <option value="Mentorship / Education">Mentorship / Education</option>
-            <option value="Financial Support">Financial Support</option>
-            <option value="Sponsorship">Sponsorship</option>
-            <option value="Products / In-Kind Resources">Products / In-Kind Resources</option>
-            <option value="Facilities / Venues">Facilities / Venues</option>
-            <option value="Community Connections">Community Connections</option>
-            <option value="Media / Awareness Support">Media / Awareness Support</option>
-            </select>
-          </div>
 
           <fieldset class="check-group">
             <legend>Community Initiative Contribution Type</legend>
