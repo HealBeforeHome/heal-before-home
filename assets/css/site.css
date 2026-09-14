@@ -379,34 +379,45 @@ p:last-child{ margin-bottom:0; }
    transition suppressed; site.js drops .is-priming after the first paint, and
    the zoom then runs like every other slide. Without JS it simply stays put. */
 .hero-slide.is-active.is-priming img{ transform:scale(1.07); transition:none; }
+/* Base overlay. .49 covers large text at 3.02:1 against a white photo pixel, which
+   is the real worst case - hero-palawan peaks at 1.000 and hero-cebu at 0.999.
+   Everything in the hero is large text except the kicker, which gets its own band
+   below rather than making the whole photograph pay for one short line. */
 .hero::after{
   content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
-  /* The photos really do contain blown highlights behind the text - sampling the
-     slides puts the 99th percentile luminance at 0.92 in the text zone - so the
-     scrim is sized against a white pixel rather than against the average.
-     The floor is .62 because the text below is solid ivory: at partial opacity it
-     needed .74, and that extra .12 was darkening the whole photo to buy contrast
-     that full-strength text gets for free. It has to hold nearly to the top
-     because the headline wraps to four lines at 15ch, so the text block fills
-     most of the frame and there is little clear sky to lighten.
-     The .62 floor runs all the way to the top rather than easing off. Measured at
-     1440x900 the text block is 635px in an 831px hero, so it occupies 13% to 89%
-     of the frame: there is only ~11% of clear sky above it, and a lighter final
-     stop would put the kicker at 3.83:1 whenever the headline wraps long. With a
-     single full-width gradient, .62 is the floor. Lightening further means
-     shortening the text block - a wider measure on the h1 and standfirst would
-     drop a line from each - rather than thinning the scrim. */
-  background:linear-gradient(to top, rgba(var(--veil),.88) 0%, rgba(var(--veil),.70) 40%, rgba(var(--veil),.62) 85%);
+  background:rgba(var(--veil),.49);
 }
 .hero-content{
   position:relative; z-index:2; width:100%;
   padding-block:clamp(3.25rem,7vw,5.5rem) clamp(5rem,8vw,6.75rem);
   color:var(--ivory);
-  /* Belt and braces, not part of the contrast budget: the scrim above is sized so
-     the text passes on its own against a white pixel. This only covers the case
-     where a blown highlight lands directly behind a glyph, where the measured
-     ratio holds but the edge still reads soft. */
+  /* Belt and braces, not part of the contrast budget: the overlay is sized so the
+     text passes on its own against a white pixel. This only covers the case where a
+     blown highlight lands directly behind a glyph, where the measured ratio holds
+     but the edge still reads soft. */
   text-shadow:0 1px 12px rgba(var(--veil),.45);
+}
+/* The kicker is the one piece of small text in the hero, so it alone needs 4.5:1
+   while everything else clears 3:1. Rather than hold the whole overlay at .61 for
+   one short line, this adds .24 over the base across the top of the text block,
+   which composites to .61 there and leaves the rest of the photograph at .49.
+   Anchored to .hero-content, not to a percentage of the frame: the text block is
+   bottom-aligned and its height varies, so the kicker sits near the top of the hero
+   on desktop but around 63% of it on a phone. Tying the band to the content means
+   it follows the kicker instead of guessing where it landed. Full-bleed via 100vw
+   because .hero-content is max-width constrained and a band with visible side edges
+   would read as a panel; .hero clips the overflow. */
+.hero-content::before{
+  content:""; position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:100vw; height:calc(clamp(3.25rem,7vw,5.5rem) + 30rem);
+  z-index:-1; pointer-events:none;
+  /* Only the first 25% has to be at full strength - that is as far down as the
+     kicker reaches. The remaining three quarters is pure falloff, stretched over
+     ~430px so it reads as vignetting rather than a slab with an edge in it. An
+     earlier version ran the fade over 37px and the seam was plainly visible. */
+  background:linear-gradient(to bottom,
+    rgba(var(--veil),.24) 0%, rgba(var(--veil),.24) 25%, rgba(var(--veil),.17) 45%,
+    rgba(var(--veil),.10) 65%, rgba(var(--veil),.04) 83%, rgba(var(--veil),0) 100%);
 }
 .hero .kicker{ color:var(--ivory); }
 .hero h1{
@@ -422,12 +433,12 @@ p:last-child{ margin-bottom:0; }
    kicker above, so the two frame the headline rather than compete with it. */
 .hero-tagline{
   font-family:var(--display); font-style:italic; font-weight:300;
-  font-size:clamp(1.15rem,1rem + .8vw,1.65rem);
+  font-size:clamp(1.5rem,1.3rem + .7vw,1.85rem);   /* >=24px: large text, 3:1 */
   color:var(--ivory);
   max-width:40ch; margin:0 0 clamp(1.1rem,2vw,1.6rem);
 }
 .hero-sub{
-  font-size:clamp(1.02rem,.95rem + .4vw,1.28rem);
+  font-size:clamp(1.5rem,1.35rem + .5vw,1.75rem);  /* >=24px: large text, 3:1 */
   color:var(--ivory); max-width:52ch; line-height:1.6; margin-bottom:2rem;
 }
 .hero-controls{
