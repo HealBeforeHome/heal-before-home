@@ -1,5 +1,5 @@
 /* =========================================================
-   Heal Before Home — design system
+   Heal Before Home design system
    Base palette preserved from the original site.
    ========================================================= */
 
@@ -20,14 +20,14 @@
   --green-section: #113222;   /* dark page bands         ivory 13.9:1 */
   --green-deep:    #0d281b;   /* CTA hover / press       ivory 15.6:1 */
   --green-footer:  #0b2216;   /* footer                  ivory 16.6:1 */
-  --veil:          20,29,25;  /* neutral dark over photography — deliberately
+  --veil:          20,29,25;  /* neutral dark over photography, deliberately
                                  NOT the section green, so the images keep
                                  their own colour instead of reading tinted */
   --gold:          #d6b878;
   /* Strength of the capiz shell texture in the header. One dial, 0 to 1.
      The swatch is used untouched: every value in it already sits between 180
      and 255, so even at full strength the bar stays pale and warm and the
-     shell keeps its gold. Do not "fix" its flatness by amplifying contrast —
+     shell keeps its gold. Do not "fix" its flatness by amplifying contrast,
      that clips the low end to black and turns the shell into grey stone.
      To make it read, raise this number instead. Below about .5 it stops
      looking like shell and just faintly dirties the cream. */
@@ -35,7 +35,7 @@
   /* How much of the shell you see at once. This is the background-size height:
      100% fits the whole swatch into the bar, which is the most zoomed out it
      goes without tiling vertically, and is what makes the individual plates
-     legible as plates. Raise it to move closer — 220% is roughly the old crop. */
+     legible as plates. Raise it to move closer; 220% is roughly the old crop. */
   --capiz-zoom:    100%;
   /* The nav labels sit directly on that texture, so they are a step darker
      than --ink-muted, which is tuned for plain cream. At --capiz 1 this still
@@ -48,7 +48,7 @@
   --line:       rgba(30,42,37,.13);
   --line-soft:  rgba(30,42,37,.07);
   --line-light: rgba(255,255,240,.22);
-  /* Boundaries of actual controls — inputs, the nav toggle, the ghost button —
+  /* Boundaries of actual controls (inputs, the nav toggle, the ghost button)
      need 3:1 (SC 1.4.11), which the hairline above is nowhere near. Kept as its
      own token so the decorative rules and dividers stay as light as they are. */
   --line-strong:      rgba(30,42,37,.52);   /* 3.03:1 on cream, 2.92 on sand */
@@ -187,7 +187,7 @@ p:last-child{ margin-bottom:0; }
 .btn--light{ background:var(--ivory); color:var(--forest); border-color:var(--ivory); }
 .btn--outline-light{ background:transparent; color:var(--ivory); border-color:rgba(255,255,240,.5); }
 
-/* "Begin Your Journey" — the primary CTA. It appears over cream, over the hero
+/* "Begin Your Journey" is the primary CTA. It appears over cream, over the hero
    and inside dark sections, so it starts from three different base variants;
    these rules give all of them one shared hover and press state. Declared after
    the variants above so they win on source order. */
@@ -206,7 +206,7 @@ p:last-child{ margin-bottom:0; }
    in the dark bands, and the outlined secondaries beside them.
    Declared after the journey rule above so it wins for buttons carrying both
    classes, and before the press rule below so gold still wins on click.
-   The outlined variant keeps a light rim — on the dark green band a green fill
+   The outlined variant keeps a light rim: on the dark green band a green fill
    with a green border would all but vanish into the background. */
 .btn.btn--light:hover,
 .btn.btn--light:focus-visible,
@@ -381,18 +381,34 @@ p:last-child{ margin-bottom:0; }
 .hero-slide.is-active.is-priming img{ transform:scale(1.07); transition:none; }
 .hero::after{
   content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
-  /* Measured against a white photo pixel, the old mid-stops left the headline at
-     1.58-3.72:1 and the kicker at 1.40:1 over the bright slides. The text block is
-     bottom-aligned but tall, so the floor has to hold to ~68% rather than fading
-     out at 34%. At .74 the weakest line measures 5.98:1. */
-  background:linear-gradient(to top, rgba(var(--veil),.92) 0%, rgba(var(--veil),.80) 40%, rgba(var(--veil),.74) 68%, rgba(var(--veil),.5) 100%);
+  /* The photos really do contain blown highlights behind the text - sampling the
+     slides puts the 99th percentile luminance at 0.92 in the text zone - so the
+     scrim is sized against a white pixel rather than against the average.
+     The floor is .62 because the text below is solid ivory: at partial opacity it
+     needed .74, and that extra .12 was darkening the whole photo to buy contrast
+     that full-strength text gets for free. It has to hold nearly to the top
+     because the headline wraps to four lines at 15ch, so the text block fills
+     most of the frame and there is little clear sky to lighten.
+     The .62 floor runs all the way to the top rather than easing off. Measured at
+     1440x900 the text block is 635px in an 831px hero, so it occupies 13% to 89%
+     of the frame: there is only ~11% of clear sky above it, and a lighter final
+     stop would put the kicker at 3.83:1 whenever the headline wraps long. With a
+     single full-width gradient, .62 is the floor. Lightening further means
+     shortening the text block - a wider measure on the h1 and standfirst would
+     drop a line from each - rather than thinning the scrim. */
+  background:linear-gradient(to top, rgba(var(--veil),.88) 0%, rgba(var(--veil),.70) 40%, rgba(var(--veil),.62) 85%);
 }
 .hero-content{
   position:relative; z-index:2; width:100%;
   padding-block:clamp(3.25rem,7vw,5.5rem) clamp(5rem,8vw,6.75rem);
   color:var(--ivory);
+  /* Belt and braces, not part of the contrast budget: the scrim above is sized so
+     the text passes on its own against a white pixel. This only covers the case
+     where a blown highlight lands directly behind a glyph, where the measured
+     ratio holds but the edge still reads soft. */
+  text-shadow:0 1px 12px rgba(var(--veil),.45);
 }
-.hero .kicker{ color:rgba(255,255,240,.88); }
+.hero .kicker{ color:var(--ivory); }
 .hero h1{
   font-size:var(--fs-hero); color:var(--ivory); max-width:15ch;
   margin-bottom:.38em; letter-spacing:-.018em;
@@ -407,12 +423,12 @@ p:last-child{ margin-bottom:0; }
 .hero-tagline{
   font-family:var(--display); font-style:italic; font-weight:300;
   font-size:clamp(1.15rem,1rem + .8vw,1.65rem);
-  color:rgba(255,255,240,.88);
+  color:var(--ivory);
   max-width:40ch; margin:0 0 clamp(1.1rem,2vw,1.6rem);
 }
 .hero-sub{
   font-size:clamp(1.02rem,.95rem + .4vw,1.28rem);
-  color:rgba(255,255,240,.87); max-width:52ch; line-height:1.6; margin-bottom:2rem;
+  color:var(--ivory); max-width:52ch; line-height:1.6; margin-bottom:2rem;
 }
 .hero-controls{
   position:absolute; left:0; right:0; bottom:clamp(1.5rem,3vw,2.25rem); z-index:3;
@@ -464,7 +480,7 @@ p:last-child{ margin-bottom:0; }
 .hero--page .hero-sub{ margin-bottom:0; }
 
 /* =========================================================
-   Value bar — the concierge-not-clinic anchor
+   Value bar: the concierge-not-clinic anchor
    ========================================================= */
 .valuebar{ background:var(--green-section); color:rgba(255,255,240,.82); }
 .valuebar-grid{ display:grid; grid-template-columns:repeat(3,1fr); }
@@ -647,18 +663,24 @@ p:last-child{ margin-bottom:0; }
   position:relative; display:block; aspect-ratio:1/1; overflow:hidden;
   border-radius:var(--radius); text-decoration:none; background:var(--green-section);
 }
+
 .tile img{
   width:100%; height:100%; object-fit:cover; opacity:.74;
   transition:transform .9s var(--ease), opacity .5s var(--ease);
 }
 .tile:hover img{ transform:scale(1.06); opacity:.9; }
+/* The fade lives in the label's own top padding rather than in a separate overlay.
+   That keeps the darkened area as short as it can be and lets it track the line
+   count: the fade zone is always the 2rem of padding above the text, so a label
+   that wraps grows by exactly one line instead of a fixed scrim over-covering the
+   one-line case. Text sits below 57% of the box, where the veil is still .68. */
 .tile span{
-  position:absolute; inset:auto 0 0 0; padding:.8rem .7rem;
+  position:absolute; inset:auto 0 0 0; padding:2rem .7rem .8rem;
   font-size:.68rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase;
   color:var(--ivory); text-align:center; line-height:1.35;
-  /* The gradient is the label's own box, so text sits across all of it - fading to
-     transparent put the upper line of a wrapped label at 2.44:1. */
-  background:linear-gradient(to top, rgba(var(--veil),.94), rgba(var(--veil),.76));
+  background:linear-gradient(to top,
+    rgba(var(--veil),.85) 0%, rgba(var(--veil),.78) 45%, rgba(var(--veil),.66) 60%,
+    rgba(var(--veil),.22) 85%, rgba(var(--veil),0) 100%);
 }
 
 /* Destination cards */
@@ -670,17 +692,27 @@ p:last-child{ margin-bottom:0; }
   aspect-ratio:3/2; display:flex; align-items:flex-end; background:var(--green-section);
 }
 .dest img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform 1.1s var(--ease); }
-.dest::after{
-  content:""; position:absolute; inset:0;
-  background:linear-gradient(to top, rgba(var(--veil),.92) 6%, rgba(var(--veil),.74) 52%, rgba(var(--veil),.25) 100%);
-}
 .dest:hover img{ transform:scale(1.05); }
 .dest-label{ position:relative; z-index:2; padding:clamp(1rem,2vw,1.5rem); color:var(--ivory); }
+/* Darkening belongs to the label, not the whole card. inset:0 on a ::after meant the
+   entire photograph was veiled to make a strip of text legible; carrying it on the
+   label itself, with the fade in its own top padding, leaves the upper ~55% of the
+   image untouched and still has no hard edge.
+   Scoped to labels that follow an image: the last card in the grid is a flat promo
+   panel with no photograph behind it, and a scrim there is a band across a plain
+   background rather than protection for anything. */
+.dest img + .dest-label{
+  width:100%;
+  padding:clamp(2rem,1.5rem + 1.6vw,2.5rem) clamp(1rem,2vw,1.5rem) clamp(1rem,2vw,1.5rem);
+  background:linear-gradient(to top,
+    rgba(var(--veil),.86) 0%, rgba(var(--veil),.80) 45%, rgba(var(--veil),.68) 68%,
+    rgba(var(--veil),.25) 88%, rgba(var(--veil),0) 100%);
+}
 .dest-label h3{
   font-family:var(--sans); font-size:.74rem; font-weight:600; letter-spacing:.22em;
   text-transform:uppercase; color:var(--ivory); margin-bottom:.35rem;
 }
-.dest-label p{ font-size:.89rem; color:rgba(255,255,240,.82); margin:0; line-height:1.45; max-width:40ch; }
+.dest-label p{ font-size:.89rem; color:var(--ivory); margin:0; line-height:1.45; max-width:40ch; }
 
 /* Feature list */
 .feature-list{ list-style:none; margin:0; padding:0; display:grid; gap:.85rem; }
