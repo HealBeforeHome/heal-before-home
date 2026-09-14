@@ -379,13 +379,13 @@ p:last-child{ margin-bottom:0; }
    transition suppressed; site.js drops .is-priming after the first paint, and
    the zoom then runs like every other slide. Without JS it simply stays put. */
 .hero-slide.is-active.is-priming img{ transform:scale(1.07); transition:none; }
-/* Base overlay. .49 covers large text at 3.02:1 against a white photo pixel, which
-   is the real worst case - hero-palawan peaks at 1.000 and hero-cebu at 0.999.
-   Everything in the hero is large text except the kicker, which gets its own band
-   below rather than making the whole photograph pay for one short line. */
+/* .61 is the safe default: it covers normal-size text at 4.64:1 against a white
+   photo pixel, which is the real worst case - hero-palawan peaks at 1.000 and
+   hero-cebu at 0.999. The lighter value below is conditional on the text actually
+   being large enough to earn it. */
 .hero::after{
   content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
-  background:rgba(var(--veil),.49);
+  background:rgba(var(--veil),.61);
 }
 .hero-content{
   position:relative; z-index:2; width:100%;
@@ -407,28 +407,7 @@ p:last-child{ margin-bottom:0; }
    it follows the kicker instead of guessing where it landed. Full-bleed via 100vw
    because .hero-content is max-width constrained and a band with visible side edges
    would read as a panel; .hero clips the overflow. */
-/* Starts a full viewport above the text block, not at its top edge. The block is
-   bottom-aligned, so whenever the hero is taller than its content there is a strip
-   above it - 14px on a large desktop, 134px on a phone - and anchoring the band at
-   top:0 left that strip on the base alone, with a hard edge where the band began.
-   Running it off the top and letting .hero clip the excess means full strength all
-   the way up, with the only transition being the falloff below the kicker.
-   Stops are absolute lengths rather than percentages for the same reason: the
-   element height now includes the 100vh overhang, so percentages would drift with
-   the viewport instead of tracking the text. Full strength to the end of the kicker
-   at padding-top + 2.4rem, then ~28rem of falloff so it reads as vignetting. */
-.hero-content::before{
-  content:""; position:absolute; top:-100vh; left:50%; transform:translateX(-50%);
-  width:100vw; height:calc(100vh + clamp(3.25rem,7vw,5.5rem) + 30rem);
-  z-index:-1; pointer-events:none;
-  background:linear-gradient(to bottom,
-    rgba(var(--veil),.24) 0,
-    rgba(var(--veil),.24) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 2.4rem),
-    rgba(var(--veil),.17) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 9rem),
-    rgba(var(--veil),.10) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 16rem),
-    rgba(var(--veil),.04) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 24rem),
-    rgba(var(--veil),0)   calc(100vh + clamp(3.25rem,7vw,5.5rem) + 30rem));
-}
+
 .hero .kicker{ color:var(--ivory); }
 .hero h1{
   font-size:var(--fs-hero); color:var(--ivory); max-width:15ch;
@@ -443,12 +422,12 @@ p:last-child{ margin-bottom:0; }
    kicker above, so the two frame the headline rather than compete with it. */
 .hero-tagline{
   font-family:var(--display); font-style:italic; font-weight:300;
-  font-size:clamp(1.5rem,1.3rem + .7vw,1.85rem);   /* >=24px: large text, 3:1 */
+  font-size:clamp(1.15rem,.97rem + .92vw,1.85rem);  /* crosses 24px near 920px wide */
   color:var(--ivory);
   max-width:40ch; margin:0 0 clamp(1.1rem,2vw,1.6rem);
 }
 .hero-sub{
-  font-size:clamp(1.5rem,1.35rem + .5vw,1.75rem);  /* >=24px: large text, 3:1 */
+  font-size:clamp(1.02rem,.75rem + 1.22vw,1.75rem); /* crosses 24px near 985px wide */
   color:var(--ivory); max-width:52ch; line-height:1.6; margin-bottom:2rem;
 }
 .hero-controls{
@@ -493,6 +472,39 @@ p:last-child{ margin-bottom:0; }
 @media (max-width:560px){
   .hero-arrows{ display:none; }
   .hero-controls-inner{ justify-content:flex-start; }
+}
+
+/* Above ~1024px the standfirst and tagline render at 24px or more, which makes them
+   large text at 3:1, and the headline already was. Only the kicker still needs
+   4.5:1, so the photograph drops to .49 and the kicker gets a band of its own.
+   Below this width they render smaller - 16.8px on a phone, which is where they
+   should be - so they are normal text again and the flat .61 above applies. The
+   overlay follows the rendered size rather than assuming it. */
+@media (min-width:1024px){
+  .hero::after{ background:rgba(var(--veil),.49); }
+
+  /* Starts a full viewport above the text block, not at its top edge. The block is
+     bottom-aligned, so whenever the hero is taller than its content there is a strip
+     above it - 14px at 1920x1080 - and anchoring the band at top:0 left that strip
+     on the base alone, with a hard edge where the band began.
+     Running it off the top and letting .hero clip the excess means full strength all
+     the way up, with the only transition being the falloff below the kicker.
+     Stops are absolute lengths rather than percentages for the same reason: the
+     element height now includes the 100vh overhang, so percentages would drift with
+     the viewport instead of tracking the text. Full strength to the end of the kicker
+     at padding-top + 2.4rem, then ~28rem of falloff so it reads as vignetting. */
+  .hero-content::before{
+    content:""; position:absolute; top:-100vh; left:50%; transform:translateX(-50%);
+    width:100vw; height:calc(100vh + clamp(3.25rem,7vw,5.5rem) + 30rem);
+    z-index:-1; pointer-events:none;
+    background:linear-gradient(to bottom,
+      rgba(var(--veil),.24) 0,
+      rgba(var(--veil),.24) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 2.4rem),
+      rgba(var(--veil),.17) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 9rem),
+      rgba(var(--veil),.10) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 16rem),
+      rgba(var(--veil),.04) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 24rem),
+      rgba(var(--veil),0)   calc(100vh + clamp(3.25rem,7vw,5.5rem) + 30rem));
+  }
 }
 
 /* Page hero (interior pages) */
