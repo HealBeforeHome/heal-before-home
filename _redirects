@@ -1,7 +1,6 @@
 # Netlify redirects — preserve inbound links from the previous Framer site.
 /how-it-works                        /#journey                          301
 /the-experience                      /#journey                          301
-/community-initiative-interest       /our-story-between-two-worlds      301
 /our-story                           /our-story-between-two-worlds      301
 /why-the-philippines                 /medical-travel-philippines        301
 
@@ -12,3 +11,32 @@
 /preventive-care-diagnostics         /areas-of-care                             301
 /healthy-aging-geriatric-care        /areas-of-care                             301
 /private-nursing-caregiver-support   /areas-of-care                             301
+
+# --- Trailing-slash guard -------------------------------------------------
+# Asset paths are relative so the site also runs from a subfolder. That makes a
+# trailing slash meaningful: /contact/ would request /contact/assets/... and the
+# page would arrive unstyled. Send every slashed form to the canonical one.
+/aesthetic-reconstructive-health/   /aesthetic-reconstructive-health    301!
+/areas-of-care/                     /areas-of-care                      301!
+/community-initiative-interest/     /community-initiative-interest      301!
+/confidence-transition-coaching/    /confidence-transition-coaching     301!
+/contact/                           /contact                            301!
+/dental-care/                       /dental-care                        301!
+/executive-health/                  /executive-health                   301!
+/faq/                               /faq                                301!
+/fertility-reproductive-care/       /fertility-reproductive-care        301!
+/for-providers/                     /for-providers                      301!
+/hair-restoration/                  /hair-restoration                   301!
+/interventional-radiology/          /interventional-radiology           301!
+/longevity-wellness/                /longevity-wellness                 301!
+/medical-service-disclaimer/        /medical-service-disclaimer         301!
+/medical-travel-philippines/        /medical-travel-philippines         301!
+/our-story-between-two-worlds/      /our-story-between-two-worlds       301!
+/privacy-policy/                    /privacy-policy                     301!
+/terms-of-use/                      /terms-of-use                       301!
+/thank-you/                         /thank-you                          301!
+
+# --- Not for the public ----------------------------------------------------
+# publish = "." ships the whole folder. These are working files, not site assets.
+/_source-images/*                    /404.html                          404
+/rebuild-images.py                   /404.html                          404
