@@ -59,7 +59,7 @@ def hero_images():
     whatever shape the viewport happens to be, so its stored aspect ratio is
     not a spec — forcing a drop-in to match it just throws pixels away."""
     heroes = set()
-    pat = re.compile(r'<div class="hero-slide[^"]*"[^>]*>\s*<img[^>]*src="/assets/img/([^"]+)"', re.S)
+    pat = re.compile(r'<div class="hero-slide[^"]*"[^>]*>\s*<img[^>]*src="/?assets/img/([^"]+)"', re.S)
     for page in html_pages():
         heroes |= set(pat.findall(open(page, encoding='utf-8').read()))
     return {os.path.splitext(h)[0] for h in heroes}
@@ -73,14 +73,14 @@ def wanted_by_markup():
     for page in html_pages():
         s = open(page, encoding='utf-8').read()
         for tag in re.findall(r'<img\b[^>]*>', s):
-            src = re.search(r'src="/assets/img/([^"]+)"', tag)
+            src = re.search(r'src="/?assets/img/([^"]+)"', tag)
             if not src:
                 continue
             w = re.search(r'width="(\d+)"', tag)
             h = re.search(r'height="(\d+)"', tag)
             if w and h:
                 want.setdefault(src.group(1), (int(w.group(1)), int(h.group(1))))
-            for cand, cw in re.findall(r'/assets/img/([^\s",]+\.webp)\s+(\d+)w', tag):
+            for cand, cw in re.findall(r'/?assets/img/([^\s",]+\.webp)\s+(\d+)w', tag):
                 want.setdefault(cand, (int(cw), None))
     return want
 
@@ -228,7 +228,7 @@ def fix_markup():
     for page in sorted(glob.glob(os.path.join(ROOT, '*.html'))):
         s = original = open(page, encoding='utf-8').read()
         for tag in re.findall(r'<img\b[^>]*>', s):
-            m = re.search(r'src="/assets/img/([^"]+)"', tag)
+            m = re.search(r'src="/?assets/img/([^"]+)"', tag)
             if not m:
                 continue
             path = os.path.join(IMG, m.group(1))
@@ -239,7 +239,7 @@ def fix_markup():
             new = re.sub(r'width="\d+"', f'width="{w}"', new)
             new = re.sub(r'height="\d+"', f'height="{h}"', new)
             # the descriptor on the full-size candidate must match its real width
-            new = re.sub(r'(/assets/img/' + re.escape(m.group(1)) + r')\s+\d+w',
+            new = re.sub(r'(/?assets/img/' + re.escape(m.group(1)) + r')\s+\d+w',
                          r'\g<1> ' + str(w) + 'w', new)
             if new != tag:
                 s = s.replace(tag, new)
