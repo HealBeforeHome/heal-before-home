@@ -1,0 +1,16 @@
+{
+  // Static site: no Worker script, just the folder.
+  "name": "heal-before-home",
+  "compatibility_date": "2026-09-16",
+  "assets": {
+    "directory": ".",
+
+    // Asset paths in the markup are relative, so a trailing slash is meaningful:
+    // /contact/ would resolve assets to /contact/assets/... and arrive unstyled.
+    // This 307s /contact/ back to /contact, replacing the old "301!" block.
+    "html_handling": "drop-trailing-slash",
+
+    // Serve 404.html for anything unmatched.
+    "not_found_handling": "404-page"
+  }
+}

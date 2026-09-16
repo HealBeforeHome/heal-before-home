@@ -1,0 +1,16 @@
+# Never upload these to Cloudflare.
+#
+# The assets directory is the repo root, so without this file wrangler ships the
+# git database and the working files along with the site. Cloudflare's _redirects
+# has no 404 action, so exclusion — not a redirect — is what keeps them private.
+.git
+.gitignore
+.assetsignore
+.wrangler
+__pycache__
+_source-images
+rebuild-images.py
+README.md
+netlify.toml
+vercel.json
+wrangler.jsonc
