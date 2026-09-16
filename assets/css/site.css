@@ -6,10 +6,10 @@
 :root{
   /* --- base palette (pulled from the existing site) --- */
   --cream:      #faf7f1;
-  --sand:       #eae7df;
+  --sand:       #ede7db;   /* warm greige, leaning to the capiz shell without competing with it */
   --forest:     #1e2a25;
   --forest-2:   #24312b;
-  --sage:       #5a6a60;   /* 4.64:1 on sand, 5.36:1 on cream */
+  --sage:       #5a6a60;   /* 4.65:1 on sand, 5.36:1 on cream */
   --sage-soft:  #758078;
   --mist:       #c8cec6;
   --mist-2:     #d7dbd4;
@@ -44,14 +44,14 @@
   --nav-ink:       #3f4c46;
 
   --ink:        var(--forest);
-  --ink-muted:  #55615b;   /* 5.23:1 on sand, 6.05:1 on cream */
+  --ink-muted:  #55615b;   /* 5.25:1 on sand, 6.05:1 on cream */
   --line:       rgba(30,42,37,.13);
   --line-soft:  rgba(30,42,37,.07);
   --line-light: rgba(255,255,240,.22);
   /* Boundaries of actual controls (inputs, the nav toggle, the ghost button)
      need 3:1 (SC 1.4.11), which the hairline above is nowhere near. Kept as its
      own token so the decorative rules and dividers stay as light as they are. */
-  --line-strong:      rgba(30,42,37,.52);   /* 3.03:1 on cream, 2.92 on sand */
+  --line-strong:      rgba(30,42,37,.52);   /* 3.03:1 on cream, 2.93 on sand */
   --line-strong-light: rgba(255,255,240,.4); /* 3.49:1 on the dark bands */
 
   /* --- type --- */
