@@ -695,7 +695,10 @@ p:last-child{ margin-bottom:0; }
 .link-arrow--back{ flex-direction:row-reverse; }
 .link-arrow--back::after{ transform:rotate(180deg); }
 .link-arrow--back:hover::after{ transform:rotate(180deg) translateX(4px); }
-.area-back{ margin-bottom:clamp(1.75rem,3vw,2.75rem); }
+/* Typed selector on purpose: the back link is a row of its own above the page
+   head, so it is also its container's last child, and the bare class would lose
+   to the global p:last-child rule that zeroes trailing paragraph margins. */
+p.area-back{ margin-bottom:clamp(1.75rem,3vw,2.75rem); }
 
 .card-kicker{
   font-size:.66rem; font-weight:500; letter-spacing:.2em; text-transform:uppercase;
@@ -989,6 +992,11 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
 .note-strip p{ margin:0; font-size:.95rem; color:var(--ink-muted); max-width:80ch; }
 .section--dark .note-strip{ background:rgba(255,255,240,.06); border-left-color:rgba(255,255,240,.3); }
 .section--dark .note-strip p{ color:rgba(255,255,240,.75); }
+/* An accordion nested in a journey step. .journey-body flattens paragraph
+   margins for its own short step copy, which would otherwise run a panel of real
+   copy together; these put the rhythm back without touching the step itself. */
+.journey-body .acc-panel p{ margin:0 0 1.1em; }
+.journey-body .acc-panel .feature-list{ margin:0 0 1.35em; }
 
 .signature-block{ display:grid; gap:.3rem; justify-items:start; margin-top:2rem; }
 .signature-block img{ width:180px; opacity:.85; }

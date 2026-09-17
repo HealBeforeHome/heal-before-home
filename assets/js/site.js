@@ -289,6 +289,26 @@
   });
 
   /* ---------------------------------------------------------
+     Deep links to an accordion. The area-of-care pages link at the Complex
+     Journey Planning drawer on the home page, so a hash naming an .acc-item
+     (or a block containing one) opens it rather than landing on a shut row.
+     --------------------------------------------------------- */
+  function openAccordionAt(hash) {
+    if (!hash || hash.length < 2) return;
+    var target;
+    try { target = document.getElementById(decodeURIComponent(hash.slice(1))); } catch (e) { return; }
+    if (!target) return;
+    var item = target.classList.contains('acc-item') ? target : target.querySelector('.acc-item');
+    if (!item || item.classList.contains('is-open')) return;
+    var trigger = item.querySelector('.acc-trigger');
+    if (!trigger) return;
+    item.classList.add('is-open');
+    trigger.setAttribute('aria-expanded', 'true');
+  }
+  openAccordionAt(window.location.hash);
+  window.addEventListener('hashchange', function () { openAccordionAt(window.location.hash); });
+
+  /* ---------------------------------------------------------
      Scroll reveal
      --------------------------------------------------------- */
   var revealables = document.querySelectorAll('[data-reveal]');
