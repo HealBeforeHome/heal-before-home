@@ -154,7 +154,12 @@
 
 /* ---------- reset ---------- */
 *,*::before,*::after{ box-sizing:border-box; }
-html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+/* The background here is the CANVAS colour - what iOS paints in the rubber-band
+   area past the end of the document, not anything inside the page. body keeps the
+   cream and its box covers the whole document, so nothing in the page changes; the
+   only difference is that overscrolling past the footer now lands on the footer's
+   own green instead of cream. */
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; background:var(--green-footer); }
 @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
 
 body{
