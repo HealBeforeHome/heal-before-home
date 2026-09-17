@@ -30,6 +30,7 @@
 <script>document.documentElement.className+=" js";setTimeout(function(){if(!window.__hbhReady)document.documentElement.className+=" reveal-failsafe";},3000);</script>
 <link rel="stylesheet" href="assets/css/site.css">
 <script src="assets/js/site.js" defer></script>
+<script src="assets/js/hubspot-forms.js" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -90,8 +91,7 @@
       </div>
 
       <div class="form-panel" data-reveal>
-        <form class="form" name="journey-enquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="thank-you.html">
-          <input type="hidden" name="form-name" value="journey-enquiry">
+        <form class="form" id="journey-enquiry" novalidate>
           <p class="hp" aria-hidden="true"><label>Do not fill this in <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
 
           <p class="form-legend"><span class="req" aria-hidden="true">*</span> indicates a required field.</p>
@@ -165,6 +165,7 @@
 
           <div><button class="btn" type="submit">Send My Enquiry</button></div>
         </form>
+        <p class="form-status" id="journey-enquiry-status" role="status" aria-live="polite" hidden></p>
       </div>
     </div>
   </section>
@@ -177,13 +178,13 @@
         <p>Receive occasional updates from Heal Before Home, including new experiences, destinations, partnerships and thoughtful resources for your journey.</p>
       </div>
       <div data-reveal>
-        <form class="newsletter" name="newsletter" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="thank-you.html">
-          <input type="hidden" name="form-name" value="newsletter">
+        <form class="newsletter" id="newsletter-form" novalidate>
           <p class="hp" aria-hidden="true"><label>Do not fill this in <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
           <label class="sr-only" for="nl-email">Email address</label>
           <input id="nl-email" type="email" name="email" placeholder="Email address" required autocomplete="email">
           <button class="btn btn--light" type="submit">Subscribe</button>
         </form>
+        <p class="form-status form-status--onDark" id="newsletter-form-status" role="status" aria-live="polite" hidden></p>
         <p class="small" style="margin-top:1rem; color:rgba(255,255,240,.5)">Are you a healthcare, wellness or hospitality provider? <a href="for-providers.html" style="color:var(--ivory)">Introduce your organization</a>.</p>
       </div>
     </div>
