@@ -438,7 +438,6 @@ p:last-child{ margin-bottom:0; }
   overflow:hidden;
   isolation:isolate;
 }
-.hero--page{ min-height:clamp(380px,52vh,540px); }
 /* On a phone `vh` resolves to the LARGE viewport, so while the browser's URL bar
    is showing, the foot of the hero - which is exactly where .hero-controls sits -
    is pushed off screen. `svh` is the small viewport, so the controls are reachable
@@ -447,8 +446,26 @@ p:last-child{ margin-bottom:0; }
    uses dvh for the same reason. */
 @supports (height:100svh){
   .hero{ min-height:clamp(560px,86svh,860px); }
-  .hero--page{ min-height:clamp(380px,52svh,540px); }
 }
+/* A page hero is bottom-aligned like the home one, but unlike the home one its
+   content does not fill the frame - so every pixel by which min-height exceeds the
+   text block piles up ABOVE the text. Sized off the viewport HEIGHT, as this was,
+   that surplus grew without bound on a tall screen while the type inside - sized off
+   the viewport WIDTH - stayed put. Measured gaps above the text, at 52svh:
+
+     390x844   150px      1024x1366  168px
+     414x896   173px      1920x1032  100px
+     768x1024  221px
+
+   so the text began 198px down a 439px hero on a phone, and an iPad Pro in portrait
+   was worse than a phone. Only the laptop sizes the value was tuned on came out at
+   zero. Sizing the floor off the WIDTH instead puts it on the same axis the content
+   tracks, so the two stay in step and the content drives the height nearly
+   everywhere. The cap keeps it from overshooting content on a very wide screen.
+   No `vh` here at all. It sits AFTER the @supports block on purpose: that block
+   re-declares .hero at the same specificity, so a page-hero override placed above it
+   is silently undone - heroes came back at 726px on a phone when it was. */
+.hero--page{ min-height:clamp(260px,30vw,460px); }
 
 .hero-track{ position:absolute; inset:0; z-index:0; }
 /* The slides wrap their <img> in a <picture> so phones can be pinned to the 760w
