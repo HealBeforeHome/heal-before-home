@@ -124,12 +124,43 @@
       });
     }
 
-    // The first advance comes 5s after load, which is not much time on a slow
-    // connection, so start fetching slide two immediately rather than waiting for
-    // the browser's lazy-loading heuristic.
+    /* Every slide but the first ships with its sources parked in data-
+       attributes, so the browser cannot fetch them until we hand them over.
+       loading="lazy" alone never deferred them: the slides are absolutely
+       positioned at inset:0 inside the first viewport, so they all counted as
+       visible and the entire carousel - about 750KB - arrived with the page.
+
+       hydrate() is one-way and idempotent. Order matters: the <source> and
+       srcset have to be in place before src, or the browser starts the fetch
+       against the wrong candidate. */
+    function hydrate(slide) {
+      if (!slide || slide.getAttribute('data-hydrated')) return;
+      slide.setAttribute('data-hydrated', '1');
+      var source = slide.querySelector('source[data-srcset]');
+      if (source) {
+        source.setAttribute('srcset', source.getAttribute('data-srcset'));
+        source.removeAttribute('data-srcset');
+      }
+      var img = slide.querySelector('img[data-src]');
+      if (!img) return;
+      if (img.getAttribute('data-srcset')) {
+        img.setAttribute('srcset', img.getAttribute('data-srcset'));
+        img.removeAttribute('data-srcset');
+      }
+      img.setAttribute('src', img.getAttribute('data-src'));
+      img.removeAttribute('data-src');
+    }
+
+    /* The first advance is only 5s away, so slide two is staged up front - but at
+       idle, so it never competes with the hero image for bandwidth during the LCP.
+       Nothing beyond slide two is fetched until the carousel actually reaches it. */
     if (slides.length > 1) {
-      var second = slides[1].querySelector('img');
-      if (second && second.loading === 'lazy') second.loading = 'eager';
+      var warmSecond = function () { hydrate(slides[1]); };
+      if (window.requestIdleCallback) {
+        window.requestIdleCallback(warmSecond, { timeout: 2500 });
+      } else {
+        window.setTimeout(warmSecond, 1200);
+      }
     }
 
     // Release the primed first slide once it has painted, so its zoom runs too.
@@ -149,7 +180,14 @@
        `manual` is the visitor pressing pause. It outranks the others in the sense
        that hover and focus ending cannot clear it - schedule() re-checks every
        reason, so the carousel stays stopped until they press play again. */
-    var pausedBy = { pointer: false, focus: false, manual: false };
+    /* On a metered connection, auto-advance is the thing that quietly pulls down
+       another ~700KB of decorative photography. Rather than disabling it - which
+       would leave the pause/play button claiming to control something that is not
+       happening - the carousel simply starts paused, and the visitor can start it. */
+    var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    var saveData = !!(conn && conn.saveData);
+
+    var pausedBy = { pointer: false, focus: false, manual: saveData };
 
     function isPaused() {
       return pausedBy.pointer || pausedBy.focus || pausedBy.manual || document.hidden;
@@ -182,9 +220,11 @@
         index = next;
         slides[index].classList.add('is-active');
         if (dots[index]) dots[index].setAttribute('aria-pressed', 'true');
-        // Decode the following slide ahead of time so the fade is clean.
-        var upcoming = slides[(index + 1) % slides.length].querySelector('img');
-        if (upcoming && upcoming.loading === 'lazy') upcoming.loading = 'eager';
+        // The dots, arrows and swipe can all jump to a slide that was never
+        // staged, so hydrate the destination before staging the one after it.
+        hydrate(slides[index]);
+        // Fetch the following slide ahead of time so the next fade is clean.
+        hydrate(slides[(index + 1) % slides.length]);
       }
       // Every slide gets a full interval, however it was reached.
       schedule();
@@ -202,6 +242,10 @@
       if (reduceMotion || slides.length < 2) {
         toggleBtn.parentNode.removeChild(toggleBtn);
       } else {
+        if (pausedBy.manual) {
+          toggleBtn.classList.add('is-paused');
+          toggleBtn.setAttribute('aria-label', 'Play image slideshow');
+        }
         toggleBtn.addEventListener('click', function () {
           var paused = !pausedBy.manual;
           // Pressing play is an explicit request to move, so it also clears the

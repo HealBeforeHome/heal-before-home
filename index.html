@@ -7,6 +7,7 @@
 <meta name="description" content="Concierge coordination for medical, dental, wellness and longevity travel in the Philippines, provider introductions, private transfers, accommodation, recovery support and follow-up once you are home.">
 <link rel="canonical" href="https://www.healbeforehome.com/">
 <meta name="theme-color" content="#faf7f1">
+<meta name="color-scheme" content="light">
 <meta name="robots" content="index, follow">
 
 <meta property="og:type" content="website">
@@ -24,10 +25,10 @@
 <link rel="icon" href="assets/img/favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@300;400;500;600;700&amp;family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;display=swap">
-<link rel="preload" as="image" href="assets/img/hero-lake.webp" imagesrcset="assets/img/hero-lake-760.webp 760w, assets/img/hero-lake-1100.webp 1100w, assets/img/hero-lake.webp 1600w" imagesizes="100vw" fetchpriority="high">
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/cormorant-var.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/alegreya-sans-300.woff2" crossorigin>
+<link rel="preload" as="image" href="assets/img/hero-lake-760.webp" media="(max-width:700px)" fetchpriority="high">
+<link rel="preload" as="image" href="assets/img/hero-lake.webp" imagesrcset="assets/img/hero-lake-760.webp 760w, assets/img/hero-lake-1100.webp 1100w, assets/img/hero-lake.webp 1600w" imagesizes="100vw" media="(min-width:701px)" fetchpriority="high">
 <script>document.documentElement.className+=" js";setTimeout(function(){if(!window.__hbhReady)document.documentElement.className+=" reveal-failsafe";},3000);</script>
 <link rel="stylesheet" href="assets/css/site.css">
 <script src="assets/js/site.js" defer></script>
@@ -72,25 +73,46 @@
   <section class="hero hero--home" data-carousel data-interval="5000" aria-label="Heal Before Home">
     <div class="hero-track" aria-hidden="true">
       <div class="hero-slide is-active is-priming" data-label="Highland lake in the Philippine countryside">
-        <img src="assets/img/hero-lake.webp" srcset="assets/img/hero-lake-760.webp 760w, assets/img/hero-lake-1100.webp 1100w, assets/img/hero-lake.webp 1600w" sizes="100vw" width="1600" height="900" alt="A still highland lake ringed by forested mountains in the Philippines" fetchpriority="high" decoding="async">
+        <picture>
+          <source media="(max-width:700px)" srcset="assets/img/hero-lake-760.webp">
+          <img src="assets/img/hero-lake.webp" srcset="assets/img/hero-lake-760.webp 760w, assets/img/hero-lake-1100.webp 1100w, assets/img/hero-lake.webp 1600w" sizes="100vw" width="1600" height="900" alt="A still highland lake ringed by forested mountains in the Philippines" fetchpriority="high" decoding="async">
+        </picture>
       </div>
       <div class="hero-slide" data-label="Manila">
-        <img src="assets/img/hero-manila.webp" srcset="assets/img/hero-manila-760.webp 760w, assets/img/hero-manila.webp 1080w" sizes="100vw" width="1080" height="607" alt="The Makati skyline in Metro Manila, a leading hub for medical care in the Philippines" loading="lazy" decoding="async">
+        <picture>
+          <source media="(max-width:700px)" data-srcset="assets/img/hero-manila-760.webp">
+          <img data-src="assets/img/hero-manila.webp" data-srcset="assets/img/hero-manila-760.webp 760w, assets/img/hero-manila.webp 1080w" sizes="100vw" width="1080" height="607" alt="The Makati skyline in Metro Manila, a leading hub for medical care in the Philippines" decoding="async">
+        </picture>
       </div>
       <div class="hero-slide" data-label="Cebu">
-        <img src="assets/img/hero-cebu.webp" srcset="assets/img/hero-cebu-760.webp 760w, assets/img/hero-cebu-1100.webp 1100w, assets/img/hero-cebu.webp 1448w" sizes="100vw" width="1448" height="814" alt="A modern resort building on the turquoise coastline of Cebu" loading="lazy" decoding="async">
+        <picture>
+          <source media="(max-width:700px)" data-srcset="assets/img/hero-cebu-760.webp">
+          <img data-src="assets/img/hero-cebu.webp" data-srcset="assets/img/hero-cebu-760.webp 760w, assets/img/hero-cebu-1100.webp 1100w, assets/img/hero-cebu.webp 1448w" sizes="100vw" width="1448" height="814" alt="A modern resort building on the turquoise coastline of Cebu" decoding="async">
+        </picture>
       </div>
       <div class="hero-slide" data-label="Palawan">
-        <img src="assets/img/hero-palawan.webp" srcset="assets/img/hero-palawan-760.webp 760w, assets/img/hero-palawan-1100.webp 1100w, assets/img/hero-palawan.webp 1448w" sizes="100vw" width="1448" height="814" alt="Limestone cliffs above a clear turquoise lagoon in Palawan" loading="lazy" decoding="async">
+        <picture>
+          <source media="(max-width:700px)" data-srcset="assets/img/hero-palawan-760.webp">
+          <img data-src="assets/img/hero-palawan.webp" data-srcset="assets/img/hero-palawan-760.webp 760w, assets/img/hero-palawan-1100.webp 1100w, assets/img/hero-palawan.webp 1448w" sizes="100vw" width="1448" height="814" alt="Limestone cliffs above a clear turquoise lagoon in Palawan" decoding="async">
+        </picture>
       </div>
       <div class="hero-slide" data-label="Private recovery accommodation">
-        <img src="assets/img/hero-villa.webp" srcset="assets/img/hero-villa-760.webp 760w, assets/img/hero-villa-1100.webp 1100w, assets/img/hero-villa.webp 1536w" sizes="100vw" width="1536" height="864" alt="A private villa terrace at sunset overlooking a tropical bay" loading="lazy" decoding="async">
+        <picture>
+          <source media="(max-width:700px)" data-srcset="assets/img/hero-villa-760.webp">
+          <img data-src="assets/img/hero-villa.webp" data-srcset="assets/img/hero-villa-760.webp 760w, assets/img/hero-villa-1100.webp 1100w, assets/img/hero-villa.webp 1536w" sizes="100vw" width="1536" height="864" alt="A private villa terrace at sunset overlooking a tropical bay" decoding="async">
+        </picture>
       </div>
       <div class="hero-slide" data-label="Recovery and wellness">
-        <img src="assets/img/hero-wellness.webp" srcset="assets/img/hero-wellness-760.webp 760w, assets/img/hero-wellness-1100.webp 1100w, assets/img/hero-wellness.webp 1536w" sizes="100vw" width="1536" height="864" alt="A guest resting in a traditional kawa flower bath surrounded by tropical greenery" loading="lazy" decoding="async">
+        <picture>
+          <source media="(max-width:700px)" data-srcset="assets/img/hero-wellness-760.webp">
+          <img data-src="assets/img/hero-wellness.webp" data-srcset="assets/img/hero-wellness-760.webp 760w, assets/img/hero-wellness-1100.webp 1100w, assets/img/hero-wellness.webp 1536w" sizes="100vw" width="1536" height="864" alt="A guest resting in a traditional kawa flower bath surrounded by tropical greenery" decoding="async">
+        </picture>
       </div>
       <div class="hero-slide" data-label="Tagaytay">
-        <img src="assets/img/hero-tagaytay.webp" srcset="assets/img/hero-tagaytay-760.webp 760w, assets/img/hero-tagaytay-1100.webp 1100w, assets/img/hero-tagaytay.webp 1600w" sizes="100vw" width="1600" height="900" alt="Taal Lake and its volcanic island seen from the highland ridge at Tagaytay" loading="lazy" decoding="async">
+        <picture>
+          <source media="(max-width:700px)" data-srcset="assets/img/hero-tagaytay-760.webp">
+          <img data-src="assets/img/hero-tagaytay.webp" data-srcset="assets/img/hero-tagaytay-760.webp 760w, assets/img/hero-tagaytay-1100.webp 1100w, assets/img/hero-tagaytay.webp 1600w" sizes="100vw" width="1600" height="900" alt="Taal Lake and its volcanic island seen from the highland ridge at Tagaytay" decoding="async">
+        </picture>
       </div>
     </div>
 
