@@ -439,9 +439,9 @@ p:last-child{ margin-bottom:0; }
   isolation:isolate;
 }
 /* On a phone `vh` resolves to the LARGE viewport, so while the browser's URL bar
-   is showing, the foot of the hero - which is exactly where .hero-controls sits -
-   is pushed off screen. `svh` is the small viewport, so the controls are reachable
-   at first paint. Behind @supports because a browser without svh must keep vh
+   is showing, the foot of the hero is pushed off screen - and with it the tail of
+   the centred cluster, the carousel controls included. `svh` is the small
+   viewport, so the controls are reachable at first paint. Behind @supports because a browser without svh must keep vh
    rather than fall through to no min-height at all. Matches .nav, which already
    uses dvh for the same reason. */
 @supports (height:100svh){
@@ -530,7 +530,27 @@ p:last-child{ margin-bottom:0; }
 .hero h1 em{ font-style:italic; }
 /* The home hero leads with a longer sentence than the interior heroes, so it needs
    a wider measure than the 15ch above - at 15ch it breaks into four short lines. */
-.hero--home h1{ max-width:24ch; margin-bottom:.22em; }
+.hero--home h1{ max-width:24ch; margin-bottom:max(.75rem,.3em); }
+/* The home hero stacks five elements, and an even rhythm between them reads as
+   one undifferentiated column. So the gaps climb in four steps, each roughly a
+   third wider than the one above it, and the size of a gap is what says whether
+   two things belong together:
+
+     kicker    -> headline    tight; the kicker is a label ON the headline
+     headline  -> tagline     tight; both are display type, one display cluster
+     tagline   -> standfirst  a break; display gives way to body copy
+     standfirst-> CTA row     wider; copy gives way to an action
+     CTA row   -> controls    widest, and set by .hero-content's padding below;
+                              the carousel chrome is not part of the message
+
+   On a phone the headline gap is em-based against a 32px headline, which would
+   compute smaller than the kicker's - hence the max(); the ladder has to hold at
+   both ends of the range, not just where it was drawn.
+   Home only: .hero--page carries two elements and wants none of this. */
+.hero--home .kicker{ margin-bottom:clamp(.7rem,1.5vw,.95rem); }
+.hero--home .hero-tagline{ margin-bottom:clamp(1.5rem,2.6vw,2.1rem); }
+.hero--home .hero-sub{ line-height:1.68; margin-bottom:clamp(2rem,3.4vw,2.75rem); }
+.hero--home .btn-row{ gap:1.1rem; }
 /* The brand phrase used to be the headline; it now sits beneath it, set in the
    display italic at a fraction of the size and in the same warm tint as the
    kicker above, so the two frame the headline rather than compete with it. */
@@ -638,13 +658,46 @@ p:last-child{ margin-bottom:0; }
   .hero--page .hero-content::before{ --hero-band-solid:2.4rem; }
 }
 
+/* The home hero centres its text; the interior heroes stay bottom-aligned.
+
+   The carousel controls come out of absolute positioning here and into the column
+   with the text. Pinned to the foot of the frame they were anchored to the wrong
+   thing: once the text centred, the distance between the CTA row and the play row
+   was whatever the frame had left over - 38px on a 740px laptop and 150px on a
+   tall monitor, so the row read as orphaned chrome at the bottom of a photograph.
+   In flow the gap is set by one value (.hero-content's bottom padding) and holds
+   at every height, and the whole cluster - text plus controls - is what centres.
+
+   Side effect worth having: with min-height released on a landscape phone the old
+   absolute row sat 68px off the foot while the content cleared only 52px, so the
+   two overlapped. In flow they cannot.
+
+   align-items has to be restated: .hero sets flex-end, which in a column means the
+   cross axis, and would right-align both children. */
+.hero--home{
+  flex-direction:column;
+  justify-content:center;
+  align-items:stretch;
+}
+.hero--home .hero-content{
+  /* Even top and bottom, and the bottom value is now also the text-to-controls
+     gap. Kept in the token as well as the shorthand because the kicker's contrast
+     band under @media (min-width:1024px) is anchored to --hero-pad-top. */
+  --hero-pad-top:clamp(3.25rem,6vw,4.5rem);
+  padding-block:var(--hero-pad-top) var(--hero-pad-top);
+}
+.hero--home .hero-controls{
+  /* relative, not static: z-index only applies to a positioned box, and without it
+     .hero::after - the veil at z-index 1 - paints over the buttons. */
+  position:relative;
+  /* The foot offset is no longer an anchor; left on a relative box it would simply
+     shove the row up by its own value. It becomes padding so the row keeps the same
+     breathing room from the hero's bottom edge when content fills the frame. */
+  inset:auto;
+  padding-bottom:clamp(2rem,3.5vw,2.75rem);
+}
+
 /* Page hero (interior pages) */
-/* Extra room under the CTA row on the home page only, where the carousel controls
-   sit absolutely at the foot of the hero. The shared padding left a 12px gap to the
-   play/pause row at phone and tablet widths, so the two rows read as one cluster.
-   Page heroes have no controls and override padding-block below, so they are
-   unaffected. */
-.hero--home .hero-content{ padding-bottom:clamp(6.5rem,9vw,8rem); }
 .hero--page .hero-content{ padding-block:clamp(3rem,6vw,4.75rem); }
 .hero--page h1{ font-size:var(--fs-h1); max-width:20ch; }
 .hero--page .hero-sub{ margin-bottom:0; }
@@ -658,18 +711,27 @@ p:last-child{ margin-bottom:0; }
      What it deliberately does NOT touch is the rendered size of the standfirst and
      the tagline: both have to stay at or above 24px to count as large text at 3:1,
      which is what lets the photograph sit at .49 rather than .61. So the height
-     comes out of line count and leading instead. */
+     comes out of line count and leading instead. Which is also why the extra air
+     added to the base rhythm above is only partly carried here: at 1440x740 the
+     frame is 636px and the stack now measures ~629px, so on a laptop the added
+     room is redistributed out of the centring surplus rather than pushing the
+     controls toward the fold. Every taller window centres in a frame with
+     hundreds of pixels to spare and simply reads as more open. */
   .hero--home .hero-content{
-    --hero-pad-top:3rem;
-    padding-bottom:clamp(6rem,7vw,7rem);
+    --hero-pad-top:2.75rem;
+    padding-block:var(--hero-pad-top) var(--hero-pad-top);
   }
   /* The headline set in two lines at the old 89.6px cap and still sets in two at
      70.4px, so the extra scale was buying height, not structure. */
   .hero--home h1{
     font-size:clamp(3.4rem,1.2rem + 3.4vw,4.4rem);
-    margin-bottom:.2em;
+    margin-bottom:.26em;
   }
-  .hero--home .hero-tagline{ margin-bottom:1.15rem; }
+  /* The same four steps, held to a 1440x740 budget: 13.6 / 17.7 / 28.8 / 36 / 44px.
+     The kicker comes IN from the base value rather than out - on a laptop the
+     headline is 68px and a 24px gap under an 11.5px label detached it. */
+  .hero--home .kicker{ margin-bottom:.85rem; }
+  .hero--home .hero-tagline{ margin-bottom:1.8rem; }
   /* Down from 24.8px, which was sized to clear the 24px large-text threshold so
      the photograph could sit at .49. At 20px it is normal text needing 4.5:1, and
      .49 only carries 3.20:1 - so the kicker's band below is extended to cover this
@@ -678,7 +740,7 @@ p:last-child{ margin-bottom:0; }
      a 24.8px one, and would have taken the paragraph to seven lines rather than
      down to five. Leading comes up slightly because smaller type wants more. */
   .hero--home .hero-sub{
-    font-size:1.25rem; max-width:72ch; line-height:1.55; margin-bottom:1.75rem;
+    font-size:1.25rem; max-width:72ch; line-height:1.62; margin-bottom:2.25rem;
   }
 }
 
@@ -1052,6 +1114,16 @@ p.area-back{ margin-bottom:clamp(1.75rem,3vw,2.75rem); }
 .form-status.is-ok{ background:rgba(25,75,50,.08); border-left:2px solid var(--cta-green); color:var(--forest); }
 .form-status.is-error{ background:rgba(150,60,40,.08); border-left:2px solid #96422c; color:#7a3522; }
 
+/* The status now sits after the form rather than inside it, so that hiding the
+   form on success does not take the thank-you with it. */
+.form + .form-status{ margin-top:1.5rem; }
+.newsletter + .form-status{ margin-top:1rem; max-width:520px; }
+
+/* Same element on the dark contact band. */
+.form-status--onDark.is-ok,
+.form-status--onDark.is-error{ background:rgba(255,255,240,.09); color:rgba(255,255,240,.88); }
+.form-status--onDark.is-error{ border-left-color:#e3a58f; }
+
 .newsletter{ display:flex; gap:.75rem; flex-wrap:wrap; max-width:520px; }
 .newsletter input{
   flex:1 1 240px; background:transparent; border:1px solid var(--line-strong-light);
@@ -1231,7 +1303,9 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
   /* The sticky header takes 66px of a 390px-tall screen before the hero starts.
      The logo's own floor is 38px, so there is room to bring the bar in. */
   .header-inner{ min-height:52px; }
-  .hero--home .hero-content{ padding-block:1.25rem 3.25rem; }
+  /* The bottom value is the gap to the controls row, which is in flow here; on a
+     390px-tall screen 3.25rem of it was height the CTA row could not spare. */
+  .hero--home .hero-content{ padding-block:1.25rem 1.75rem; }
   .hero--page .hero-content{ padding-block:1.5rem; }
   /* Releasing the min-height is not enough on its own: the hero type is sized off
      the VIEWPORT WIDTH, and a landscape phone is wide. At 844px the headline
@@ -1239,7 +1313,12 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
      These cap the three fluid sizes against the axis that is actually short, so
      the headline and the CTA row land above the fold together. */
   .hero--home h1{ font-size:clamp(1.8rem,1.2rem + 2.4vw,2.3rem); margin-bottom:.28em; }
-  .hero-tagline{ font-size:1.1rem; margin-bottom:.5rem; }
+  /* Same ladder, compressed hardest: 8 / 10.3 / 13.6 / 16 / 28px. The tagline rule
+     carries .hero--home so it outranks the base ladder above rather than losing to
+     it on specificity - .hero-tagline alone would never apply here. */
+  .hero--home .kicker{ margin-bottom:.5rem; }
+  .hero--home .hero-tagline{ margin-bottom:.85rem; }
+  .hero-tagline{ font-size:1.1rem; }
   /* A landscape phone is WIDE - 844px - so the portrait 52ch measure wastes the
      width and runs this standfirst to six lines. At 90ch it sets in three, which
      is what puts the CTA row back above the fold.
