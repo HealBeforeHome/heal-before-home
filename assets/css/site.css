@@ -477,7 +477,11 @@ p:last-child{ margin-bottom:0; }
 }
 .hero-content{
   position:relative; z-index:2; width:100%;
-  padding-block:clamp(3.25rem,7vw,5.5rem) clamp(5rem,8vw,6.75rem);
+  /* Held in a token because the kicker's contrast band under @media (min-width:1024px)
+     is anchored to the top padding: the two have to move together or the band stops
+     covering the kicker. */
+  --hero-pad-top:clamp(3.25rem,7vw,5.5rem);
+  padding-block:var(--hero-pad-top) clamp(5rem,8vw,6.75rem);
   color:var(--ivory);
   /* Belt and braces, not part of the contrast budget: the overlay is sized so the
      text passes on its own against a white pixel. This only covers the case where a
@@ -587,15 +591,15 @@ p:last-child{ margin-bottom:0; }
      at padding-top + 2.4rem, then ~28rem of falloff so it reads as vignetting. */
   .hero-content::before{
     content:""; position:absolute; top:-100vh; left:50%; transform:translateX(-50%);
-    width:100vw; height:calc(100vh + clamp(3.25rem,7vw,5.5rem) + 30rem);
+    width:100vw; height:calc(100vh + var(--hero-pad-top) + 30rem);
     z-index:-1; pointer-events:none;
     background:linear-gradient(to bottom,
       rgba(var(--veil),.24) 0,
-      rgba(var(--veil),.24) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 2.4rem),
-      rgba(var(--veil),.17) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 9rem),
-      rgba(var(--veil),.10) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 16rem),
-      rgba(var(--veil),.04) calc(100vh + clamp(3.25rem,7vw,5.5rem) + 24rem),
-      rgba(var(--veil),0)   calc(100vh + clamp(3.25rem,7vw,5.5rem) + 30rem));
+      rgba(var(--veil),.24) calc(100vh + var(--hero-pad-top) + 2.4rem),
+      rgba(var(--veil),.17) calc(100vh + var(--hero-pad-top) + 9rem),
+      rgba(var(--veil),.10) calc(100vh + var(--hero-pad-top) + 16rem),
+      rgba(var(--veil),.04) calc(100vh + var(--hero-pad-top) + 24rem),
+      rgba(var(--veil),0)   calc(100vh + var(--hero-pad-top) + 30rem));
   }
 }
 
@@ -609,6 +613,32 @@ p:last-child{ margin-bottom:0; }
 .hero--page .hero-content{ padding-block:clamp(3rem,6vw,4.75rem); }
 .hero--page h1{ font-size:var(--fs-h1); max-width:20ch; }
 .hero--page .hero-sub{ margin-bottom:0; }
+
+@media (min-width:1024px){
+  /* The home hero was running past the fold: measured at 1440x740 the CTA row
+     ended at 821px against a 740px fold, so the buttons had to be scrolled to -
+     and the carousel controls sat 172px under it. Everything here is the same
+     fix the landscape-phone block makes for the same reason - widen the measure,
+     ease the type, close the gaps - applied to the axis that is short on a laptop.
+     What it deliberately does NOT touch is the rendered size of the standfirst and
+     the tagline: both have to stay at or above 24px to count as large text at 3:1,
+     which is what lets the photograph sit at .49 rather than .61. So the height
+     comes out of line count and leading instead. */
+  .hero--home .hero-content{
+    --hero-pad-top:3rem;
+    padding-bottom:clamp(6rem,7vw,7rem);
+  }
+  /* The headline set in two lines at the old 89.6px cap and still sets in two at
+     70.4px, so the extra scale was buying height, not structure. */
+  .hero--home h1{
+    font-size:clamp(3.4rem,1.2rem + 3.4vw,4.4rem);
+    margin-bottom:.18em;
+  }
+  .hero--home .hero-tagline{ margin-bottom:1rem; }
+  /* 52ch ran this standfirst to six lines. At 66ch it sets in five, and 1.5 is the
+     leading the same paragraph already uses in the landscape-phone block. */
+  .hero--home .hero-sub{ max-width:66ch; line-height:1.5; margin-bottom:1.5rem; }
+}
 
 /* =========================================================
    Value bar: the concierge-not-clinic anchor
@@ -1168,7 +1198,10 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
      the headline and the CTA row land above the fold together. */
   .hero--home h1{ font-size:clamp(1.8rem,1.2rem + 2.4vw,2.3rem); margin-bottom:.28em; }
   .hero-tagline{ font-size:1.1rem; margin-bottom:.5rem; }
-  .hero-sub{ font-size:1rem; line-height:1.5; margin-bottom:1rem; }
+  /* A landscape phone is WIDE - 844px - so the portrait 52ch measure wastes the
+     width and runs this standfirst to six lines. At 90ch it sets in three, which
+     is what puts the CTA row back above the fold. */
+  .hero-sub{ font-size:.94rem; line-height:1.5; margin-bottom:1rem; max-width:90ch; }
 }
 
 /* ---- small uppercase labels ----
