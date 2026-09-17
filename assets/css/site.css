@@ -575,12 +575,14 @@ p:last-child{ margin-bottom:0; }
   .hero-controls-inner{ justify-content:flex-start; }
 }
 
-/* Above ~1024px the standfirst and tagline render at 24px or more, which makes them
-   large text at 3:1, and the headline already was. Only the kicker still needs
-   4.5:1, so the photograph drops to .49 and the kicker gets a band of its own.
-   Below this width they render smaller - 16.8px on a phone, which is where they
-   should be - so they are normal text again and the flat .61 above applies. The
-   overlay follows the rendered size rather than assuming it. */
+/* Above ~1024px the tagline renders at 24px or more, which makes it large text at
+   3:1, and the headline already was. The kicker and - since it came down to 20px -
+   the standfirst are normal text needing 4.5:1, which .49 does not carry (3.20:1
+   against a white photo pixel; 4.5:1 needs .601). So the photograph drops to .49
+   and a band covers the text block from the kicker through the standfirst.
+   Below this width everything renders smaller - 16.8px on a phone, which is where
+   it should be - so the flat .61 above applies. The overlay follows the rendered
+   size rather than assuming it. */
 @media (min-width:1024px){
   .hero::after{ background:rgba(var(--veil),.49); }
 
@@ -589,23 +591,34 @@ p:last-child{ margin-bottom:0; }
      above it - 14px at 1920x1080 - and anchoring the band at top:0 left that strip
      on the base alone, with a hard edge where the band began.
      Running it off the top and letting .hero clip the excess means full strength all
-     the way up, with the only transition being the falloff below the kicker.
+     the way up, with the only transition being the falloff below the text.
      Stops are absolute lengths rather than percentages for the same reason: the
      element height now includes the 100vh overhang, so percentages would drift with
-     the viewport instead of tracking the text. Full strength to the end of the kicker
-     at padding-top + 2.4rem, then ~28rem of falloff so it reads as vignetting. */
+     the viewport instead of tracking the text.
+     --hero-band-solid is where full strength ends. It used to be 2.4rem, the foot of
+     the kicker, because everything below the kicker was large text. The standfirst
+     is normal text at 20px now, so it has to reach the foot of THAT instead:
+     measured from the top of .hero-content the paragraph ends at 441px at 1440 and
+     448px at 1920, which is padding-top + 24.6rem and + 25rem, so 26rem clears both
+     with room for the headline to breathe at other widths. The falloff keeps its
+     original ~28rem span below that so it still reads as vignetting. */
   .hero-content::before{
+    --hero-band-solid:26rem;
     content:""; position:absolute; top:-100vh; left:50%; transform:translateX(-50%);
-    width:100vw; height:calc(100vh + var(--hero-pad-top) + 30rem);
+    width:100vw;
+    height:calc(100vh + var(--hero-pad-top) + var(--hero-band-solid) + 27.6rem);
     z-index:-1; pointer-events:none;
     background:linear-gradient(to bottom,
       rgba(var(--veil),.24) 0,
-      rgba(var(--veil),.24) calc(100vh + var(--hero-pad-top) + 2.4rem),
-      rgba(var(--veil),.17) calc(100vh + var(--hero-pad-top) + 9rem),
-      rgba(var(--veil),.10) calc(100vh + var(--hero-pad-top) + 16rem),
-      rgba(var(--veil),.04) calc(100vh + var(--hero-pad-top) + 24rem),
-      rgba(var(--veil),0)   calc(100vh + var(--hero-pad-top) + 30rem));
+      rgba(var(--veil),.24) calc(100vh + var(--hero-pad-top) + var(--hero-band-solid)),
+      rgba(var(--veil),.17) calc(100vh + var(--hero-pad-top) + var(--hero-band-solid) + 6.6rem),
+      rgba(var(--veil),.10) calc(100vh + var(--hero-pad-top) + var(--hero-band-solid) + 13.6rem),
+      rgba(var(--veil),.04) calc(100vh + var(--hero-pad-top) + var(--hero-band-solid) + 21.6rem),
+      rgba(var(--veil),0)   calc(100vh + var(--hero-pad-top) + var(--hero-band-solid) + 27.6rem));
   }
+  /* Page heroes keep the old geometry: their standfirst is untouched at 24.8px, so
+     large text at 3:1, and only the kicker needs the band. */
+  .hero--page .hero-content::before{ --hero-band-solid:2.4rem; }
 }
 
 /* Page hero (interior pages) */
@@ -637,12 +650,19 @@ p:last-child{ margin-bottom:0; }
      70.4px, so the extra scale was buying height, not structure. */
   .hero--home h1{
     font-size:clamp(3.4rem,1.2rem + 3.4vw,4.4rem);
-    margin-bottom:.18em;
+    margin-bottom:.2em;
   }
-  .hero--home .hero-tagline{ margin-bottom:1rem; }
-  /* 52ch ran this standfirst to six lines. At 66ch it sets in five, and 1.5 is the
-     leading the same paragraph already uses in the landscape-phone block. */
-  .hero--home .hero-sub{ max-width:66ch; line-height:1.5; margin-bottom:1.5rem; }
+  .hero--home .hero-tagline{ margin-bottom:1.15rem; }
+  /* Down from 24.8px, which was sized to clear the 24px large-text threshold so
+     the photograph could sit at .49. At 20px it is normal text needing 4.5:1, and
+     .49 only carries 3.20:1 - so the kicker's band below is extended to cover this
+     paragraph too, which is what pays for the smaller size. The measure opens to
+     72ch at the same time: 66ch of a 20px face is a narrower column than it was of
+     a 24.8px one, and would have taken the paragraph to seven lines rather than
+     down to five. Leading comes up slightly because smaller type wants more. */
+  .hero--home .hero-sub{
+    font-size:1.25rem; max-width:72ch; line-height:1.55; margin-bottom:1.75rem;
+  }
 }
 
 /* =========================================================
@@ -1205,8 +1225,13 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
   .hero-tagline{ font-size:1.1rem; margin-bottom:.5rem; }
   /* A landscape phone is WIDE - 844px - so the portrait 52ch measure wastes the
      width and runs this standfirst to six lines. At 90ch it sets in three, which
-     is what puts the CTA row back above the fold. */
-  .hero-sub{ font-size:.94rem; line-height:1.5; margin-bottom:1rem; max-width:90ch; }
+     is what puts the CTA row back above the fold.
+     Carries .hero--home so it outranks the desktop block's own .hero--home .hero-sub
+     rather than tying with it: a window both wide (>=1024) and short (<=600) matches
+     BOTH media queries, and on a tie the desktop one would win on source order and
+     put the height back. Everything short and landscape wants these values. */
+  .hero-sub,
+  .hero--home .hero-sub{ font-size:.94rem; line-height:1.5; margin-bottom:1rem; max-width:90ch; }
 }
 
 /* ---- small uppercase labels ----
