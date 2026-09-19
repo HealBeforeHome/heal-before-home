@@ -9,19 +9,28 @@
  * HTML, run this again, and the new field is added.
  *
  *   USAGE
- *     export HUBSPOT_TOKEN=pat-na1-...        (see below)
+ *     $env:HUBSPOT_TOKEN = "pat-na1-..."      PowerShell    (see below)
+ *     export HUBSPOT_TOKEN=pat-na1-...        bash
+ *
  *     node hubspot-provision.mjs --dry-run    show what it would create
  *     node hubspot-provision.mjs              create it
  *     node hubspot-provision.mjs --write      create it, then paste the GUIDs
+ *     node hubspot-provision.mjs --check      list what HubSpot has received
+ *     node hubspot-provision.mjs --inspect    compare each form to what its page sends
+ *     node hubspot-provision.mjs --repair     turn off CAPTCHA, add missing dropdown values
+ *     node hubspot-provision.mjs --repair --prune   ...and DELETE dropdown values the
+ *                                             pages no longer offer. Only safe when no
+ *                                             contact holds one - it clears the field on
+ *                                             any record that does.
  *
  *   THE TOKEN
  *     HubSpot > Settings > Integrations > Private Apps > Create a private app.
  *     Scopes: crm.schemas.contacts.write, crm.schemas.contacts.read, forms.
  *     The token is a CRM-wide credential. It is read from the environment and
- *     never written to a file - keep it out of the repo, and out of anything
- *     that gets deployed. The site itself needs no token: it posts to HubSpot's
- *     public form submission endpoint, which is designed to be called from a
- *     browser.
+ *     never written to a file - set it in the shell and keep it out of the repo,
+ *     which IS the deploy directory: a .env here would be downloadable from the
+ *     live site. The site itself needs no token - it posts to HubSpot's public
+ *     form submission endpoint, which is designed to be called from a browser.
  *
  *   SAFE TO RE-RUN
  *     A property that already exists is left exactly as it is, and a form whose
@@ -34,6 +43,10 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const TOKEN = process.env.HUBSPOT_TOKEN;
 const DRY = process.argv.includes('--dry-run');
 const WRITE = process.argv.includes('--write');
+const CHECK = process.argv.includes('--check');
+const INSPECT = process.argv.includes('--inspect');
+const REPAIR = process.argv.includes('--repair');
+const PRUNE = process.argv.includes('--prune');
 
 const API = 'https://api.hubapi.com';
 const GROUP = 'contactinformation';
@@ -46,7 +59,12 @@ const STANDARD = new Set(['email', 'firstname', 'lastname', 'company', 'website'
 const FORMS = [
   { key: 'journey-enquiry',  file: 'contact.html',       hsName: 'Website: journey enquiry'  },
   { key: 'provider-enquiry', file: 'for-providers.html', hsName: 'Website: provider enquiry' },
-  { key: 'newsletter-form',  file: 'index.html',         hsName: 'Website: newsletter'       }
+  { key: 'newsletter-form',  file: 'index.html',         hsName: 'Website: newsletter'       },
+  /* The original "HBH Community Initiative Interest" was built in HubSpot's v4
+     forms editor, which the API may read but not modify - so its CAPTCHA could
+     never be turned off and it has never accepted a submission. Recreated here
+     as a form we own. */
+  { key: 'community-form',   file: 'community-initiative-interest.html', hsName: 'Website: community interest' }
 ];
 
 /* ---------------------------------------------------------------- markup --- */
@@ -77,6 +95,16 @@ function labelFor(html, elementId) {
   if (!m) return null;
   /* Drop the asterisk that marks a field required on the page. */
   return text(m[1]).replace(/\s*\*\s*$/, '').trim();
+}
+
+/* A checkbox group's name comes from its fieldset legend - the inputs carry no
+   label of their own, only a span per box. */
+function legendFor(html, index) {
+  const before = html.slice(0, index);
+  const at = before.lastIndexOf('<legend');
+  if (at === -1) return null;
+  const end = before.indexOf('</legend>', at);
+  return end === -1 ? null : text(before.slice(at, end));
 }
 
 const attr = (tag, name) => {
@@ -126,7 +154,30 @@ function readFields(file, id) {
         if (!value) continue;                       /* the empty "Select" prompt */
         options.push({ label: text(o[2]) || value, value, displayOrder: options.length });
       }
-      fields.push({ ...field(name, label, 'dropdown', required), options });
+      fields.push({ ...field(name, label, 'dropdown', required), options, defaultValues: [] });
+      continue;
+    }
+
+    /* Ten checkboxes sharing one name are ONE HubSpot field with ten options,
+       not ten fields. Each box contributes an option; the group is named by its
+       fieldset legend. */
+    if (inputType === 'checkbox' || inputType === 'radio') {
+      const value = attr(tag, 'value');
+      if (!value) continue;
+
+      const group = fields.find((x) => x.name === name);
+      if (group) {
+        group.options.push({ label: value, value, displayOrder: group.options.length });
+        continue;
+      }
+
+      const groupLabel = legendFor(html, c.index) || label;
+      const kindOf = inputType === 'checkbox' ? 'multiple_checkboxes' : 'radio';
+      fields.push({
+        ...field(name, groupLabel, kindOf, required),
+        options: [{ label: value, value, displayOrder: 0 }],
+        defaultValues: []
+      });
       continue;
     }
 
@@ -137,7 +188,17 @@ function readFields(file, id) {
 }
 
 function field(name, label, fieldType, required) {
-  return { objectTypeId: '0-1', name, label, fieldType, required: !!required, hidden: false, dependentFields: [] };
+  const f = { objectTypeId: '0-1', name, label, fieldType, required: !!required, hidden: false, dependentFields: [] };
+
+  /* Only email, phone and number fields carry a validation object, and on those
+     it is REQUIRED - leaving it off fails the whole form with
+     "Some required fields were not set: [validation]". The site asks for no
+     phone or number, so email is the only case here. */
+  if (fieldType === 'email') {
+    f.validation = { useDefaultBlockList: false, blockedEmailDomains: [] };
+  }
+
+  return f;
 }
 
 /* ------------------------------------------------------------------- api --- */
@@ -173,14 +234,37 @@ const PROPERTY_TYPE = {
   single_line_text: { type: 'string', fieldType: 'text' },
   multi_line_text: { type: 'string', fieldType: 'textarea' },
   dropdown: { type: 'enumeration', fieldType: 'select' },
+  multiple_checkboxes: { type: 'enumeration', fieldType: 'checkbox' },
+  radio: { type: 'enumeration', fieldType: 'radio' },
   email: { type: 'string', fieldType: 'text' }
 };
+
+/* A property that already exists is not necessarily the RIGHT property - one made
+   by hand can carry the wrong field type, or dropdown values that differ from what
+   the page sends. HubSpot accepts the submission and then rejects the value, so
+   the mismatch only shows up as a failed enquiry. Say so here instead. */
+function checkMatches(f, prop) {
+  const problems = [];
+
+  const want = PROPERTY_TYPE[f.fieldType];
+  if (want && prop.fieldType !== want.fieldType) {
+    problems.push(`field type is ${prop.fieldType}, page needs ${want.fieldType}`);
+  }
+
+  if (f.options) {
+    const have = new Set((prop.options || []).map((o) => o.value));
+    const missing = f.options.map((o) => o.value).filter((v) => !have.has(v));
+    if (missing.length) problems.push(`missing option(s): ${missing.join(' | ')}`);
+  }
+
+  return problems.length ? `MISMATCH  ${problems.join('; ')}` : 'exists';
+}
 
 async function ensureProperty(f) {
   if (STANDARD.has(f.name)) return 'standard';
 
   const existing = await hs('GET', `/crm/v3/properties/contacts/${f.name}`);
-  if (existing.ok) return 'exists';
+  if (existing.ok) return checkMatches(f, existing.data);
 
   const body = {
     groupName: GROUP,
@@ -193,6 +277,10 @@ async function ensureProperty(f) {
   if (DRY) return 'would create';
 
   const made = await hs('POST', '/crm/v3/properties/contacts', body);
+  /* 409 means it is already there. That happens when the read above could not
+     see it - a token with schema write but not schema read - and it is not a
+     failure: the property exists, which is all this needed to guarantee. */
+  if (made.status === 409) return 'exists';
   if (!made.ok) throw new Error(`property ${f.name}: ${JSON.stringify(made.data)}`);
   return 'created';
 }
@@ -250,6 +338,232 @@ async function ensureForm(spec, fields) {
   return { guid: made.data.id, state: 'created' };
 }
 
+/* ----------------------------------------------------------------- check --- */
+
+/* The GUIDs the SITE is actually configured with, read back out of the script
+   rather than from the FORMS table above - those are the ones a visitor's
+   submission would have used, which is the thing being verified. */
+function configuredForms() {
+  const src = readFileSync(SCRIPT, 'utf8');
+  const out = [];
+  for (const m of src.matchAll(/'([a-z][a-z-]*)':\s*\{[\s\S]*?guid:\s*'([^']+)'/g)) {
+    out.push({ key: m[1], guid: m[2] });
+  }
+  return out;
+}
+
+/* Which page each configured form lives on, for --inspect. Kept separate from
+   FORMS above because that list drives CREATION: the community form already
+   exists in HubSpot under its own name and must never be recreated. */
+const PAGE_OF = {
+  'journey-enquiry': ['contact.html', 'journey-enquiry'],
+  'provider-enquiry': ['for-providers.html', 'provider-enquiry'],
+  'newsletter-form': ['index.html', 'newsletter-form'],
+  'community-form': ['community-initiative-interest.html', 'community-form']
+};
+
+/* Compare each HubSpot form against what its page actually sends. Answers the
+   two questions a rejected submission raises - is CAPTCHA on, and does the form
+   know every field - without another round trip through the browser. */
+async function inspectForms() {
+  for (const f of configuredForms()) {
+    console.log(`\n${f.key}`);
+
+    if (f.guid.indexOf('PASTE') === 0) {
+      console.log('  NOT CONNECTED - no GUID in ' + SCRIPT);
+      continue;
+    }
+
+    const res = await hs('GET', `/marketing/v3/forms/${f.guid}`);
+    if (!res.ok) {
+      console.log(`  could not read form: ${JSON.stringify(res.data)}`);
+      continue;
+    }
+
+    const def = res.data;
+    const captcha = !!(def.configuration && def.configuration.recaptchaEnabled);
+    console.log(`  name      : ${def.name}`);
+    console.log(`  CAPTCHA   : ${captcha ? 'ON  <-- rejects EVERY API submission' : 'off'}`);
+    console.log(`  consent   : ${(def.legalConsentOptions && def.legalConsentOptions.type) || 'none'}`);
+
+    const have = new Map();
+    for (const g of def.fieldGroups || []) {
+      for (const fl of g.fields || []) have.set(fl.name, fl);
+    }
+    console.log(`  fields    : ${[...have.keys()].join(', ') || '(none)'}`);
+
+    const page = PAGE_OF[f.key];
+    if (!page) continue;
+
+    let sends;
+    try {
+      sends = readFields(page[0], page[1]);
+    } catch (err) {
+      console.log(`  ${err.message}`);
+      continue;
+    }
+
+    const missing = sends.filter((s) => !have.has(s.name)).map((s) => s.name);
+    if (missing.length) {
+      console.log(`  MISSING   : the page sends these, the form has no such field:`);
+      console.log(`              ${missing.join(', ')}`);
+    }
+
+    for (const s of sends) {
+      if (!s.options) continue;
+      const hf = have.get(s.name);
+      if (!hf) continue;
+      const hv = new Set((hf.options || []).map((o) => o.value));
+      const bad = s.options.map((o) => o.value).filter((v) => !hv.has(v));
+      if (bad.length) {
+        console.log(`  ${s.name}:`);
+        console.log(`    page sends, form rejects : ${bad.join(' | ')}`);
+        console.log(`    form actually accepts    : ${[...hv].join(' | ')}`);
+      }
+    }
+
+    if (!missing.length && !captcha) console.log('  looks correct');
+  }
+}
+
+/* Bring HubSpot into line with the pages, over the API, so nobody has to go
+   clicking around the CRM: turn off any CAPTCHA that would reject our
+   submissions, and add any dropdown value a page offers that the property does
+   not yet accept.
+
+   ADDITIVE by default. An option HubSpot has that the page no longer offers is
+   left alone rather than deleted, because deleting one strips that value from
+   any contact already carrying it; stale options are reported instead. Pass
+   --prune to delete them anyway, once you know no record uses them. */
+async function repair() {
+  for (const f of configuredForms()) {
+    console.log(`\n${f.key}`);
+
+    if (f.guid.indexOf('PASTE') === 0) {
+      console.log('  NOT CONNECTED - no GUID in ' + SCRIPT);
+      continue;
+    }
+
+    const res = await hs('GET', `/marketing/v3/forms/${f.guid}`);
+    if (!res.ok) {
+      console.log(`  could not read form: ${JSON.stringify(res.data)}`);
+      continue;
+    }
+    const def = res.data;
+
+    if (def.configuration && def.configuration.recaptchaEnabled) {
+      /* Send the whole configuration back with the one flag changed, rather
+         than the flag alone - a partial object risks clearing the rest. */
+      const patched = await hs('PATCH', `/marketing/v3/forms/${f.guid}`, {
+        configuration: { ...def.configuration, recaptchaEnabled: false }
+      });
+      console.log(patched.ok
+        ? '  CAPTCHA turned OFF'
+        : `  could not turn CAPTCHA off: ${JSON.stringify(patched.data)}`);
+    } else {
+      console.log('  CAPTCHA already off');
+    }
+
+    const page = PAGE_OF[f.key];
+    if (!page) continue;
+
+    let sends;
+    try {
+      sends = readFields(page[0], page[1]);
+    } catch (err) {
+      console.log(`  ${err.message}`);
+      continue;
+    }
+
+    for (const s of sends) {
+      if (!s.options) continue;
+
+      const prop = await hs('GET', `/crm/v3/properties/contacts/${s.name}`);
+      if (!prop.ok) {
+        console.log(`  ${s.name}: could not read property: ${JSON.stringify(prop.data)}`);
+        continue;
+      }
+
+      const existing = prop.data.options || [];
+      const have = new Set(existing.map((o) => o.value));
+      const added = s.options.filter((o) => !have.has(o.value)).map((o) => o.value);
+      const stale = existing.filter((e) => !s.options.some((o) => o.value === e.value));
+
+      /* Page order, keeping each existing option's own label. Options HubSpot
+         has that the page does not offer are kept on the end - unless --prune,
+         which makes the list exactly what the page offers. */
+      const desired = [];
+      for (const o of s.options) {
+        const found = existing.find((e) => e.value === o.value);
+        desired.push({
+          label: found ? found.label : o.label,
+          value: o.value,
+          displayOrder: desired.length,
+          hidden: found ? !!found.hidden : false
+        });
+      }
+      if (!PRUNE) {
+        for (const e of stale) {
+          desired.push({ label: e.label, value: e.value, displayOrder: desired.length, hidden: !!e.hidden });
+        }
+      }
+
+      const unchanged = desired.length === existing.length &&
+        desired.every((d, i) => existing[i] && existing[i].value === d.value);
+      if (unchanged) {
+        console.log(`  ${s.name}: options already match`);
+        continue;
+      }
+
+      const upd = await hs('PATCH', `/crm/v3/properties/contacts/${s.name}`, { options: desired });
+      if (!upd.ok) {
+        console.log(`  ${s.name}: could not update options: ${JSON.stringify(upd.data)}`);
+        continue;
+      }
+
+      if (added.length) console.log(`  ${s.name}: added -> ${added.join(' | ')}`);
+      if (stale.length) {
+        console.log(PRUNE
+          ? `  ${s.name}: REMOVED -> ${stale.map((e) => e.value).join(' | ')}`
+          : `  ${s.name}: still there but now unused: ${stale.map((e) => e.value).join(' | ')}`);
+      }
+      if (!added.length && !stale.length) console.log(`  ${s.name}: options reordered to match the page`);
+    }
+  }
+}
+
+async function checkSubmissions() {
+  for (const f of configuredForms()) {
+    console.log(`\n${f.key}`);
+
+    if (f.guid.indexOf('PASTE') === 0) {
+      console.log('  NOT CONNECTED - no GUID in ' + SCRIPT);
+      continue;
+    }
+
+    const res = await hs('GET', `/form-integrations/v1/submissions/forms/${f.guid}?limit=5`);
+    if (!res.ok) {
+      console.log(`  could not read submissions: ${JSON.stringify(res.data)}`);
+      continue;
+    }
+
+    const rows = res.data.results || [];
+    if (!rows.length) {
+      console.log('  no submissions yet');
+      continue;
+    }
+
+    console.log(`  ${rows.length} recent submission(s):`);
+    for (const r of rows) {
+      const when = new Date(r.submittedAt).toISOString().replace('T', ' ').slice(0, 16);
+      console.log(`\n    ${when} UTC`);
+      for (const v of r.values || []) {
+        console.log(`      ${String(v.name).padEnd(24)} ${String(v.value).slice(0, 70)}`);
+      }
+    }
+  }
+}
+
 /* ------------------------------------------------------------------ main --- */
 
 function paste(guids) {
@@ -272,7 +586,13 @@ async function main() {
     process.exit(1);
   }
 
+  /* Read-only: report what HubSpot has actually received, and stop. */
+  if (CHECK) return checkSubmissions();
+  if (INSPECT) return inspectForms();
+  if (REPAIR) return repair();
+
   const guids = {};
+  const failed = [];
 
   for (const spec of FORMS) {
     const fields = readFields(spec.file, spec.key);
@@ -291,9 +611,26 @@ async function main() {
       continue;
     }
 
-    const form = await ensureForm(spec, fields);
-    guids[spec.key] = form.guid;
-    console.log(`  form ${form.state}${form.guid ? `: ${form.guid}` : ''}`);
+    /* A form failure must not abandon the remaining forms' properties, which are
+       the slower half of the job and are worth having even if the forms scope is
+       missing. Report it and carry on. */
+    try {
+      const form = await ensureForm(spec, fields);
+      guids[spec.key] = form.guid;
+      console.log(`  form ${form.state}${form.guid ? `: ${form.guid}` : ''}`);
+    } catch (err) {
+      failed.push(spec.hsName);
+      console.log(`  FORM FAILED  ${err.message}`);
+    }
+  }
+
+  if (failed.length) {
+    console.log(`
+${failed.length} form(s) not created: ${failed.join(', ')}`);
+    console.log('The error on each FORM FAILED line above says why. MISSING_SCOPES means');
+    console.log('the private app needs the "forms" scope (Settings > Integrations >');
+    console.log('Private Apps > your app > Auth); anything else is a bad request body.');
+    console.log('Properties are unaffected either way - fix it and run this again.');
   }
 
   const found = Object.entries(guids).filter(([, g]) => g);

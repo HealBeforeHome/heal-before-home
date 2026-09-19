@@ -25,7 +25,7 @@
      --------------------------------------------------------------------- */
   var FORMS = {
     'community-form': {
-      guid: '17de38a9-c398-430f-b442-047c41bb80e1',
+      guid: '6923309e-5ff5-4333-aa2b-b94b62b72240',
       consent:
         'By submitting this form, you agree that Heal Before Home may use the information ' +
         'provided to respond to your expression of interest and communicate with you about ' +
@@ -33,21 +33,21 @@
       success: 'Thank you. Your interest has been received, and our team will be in touch as opportunities take shape.'
     },
     'journey-enquiry': {
-      guid: 'PASTE-HUBSPOT-FORM-GUID',
+      guid: 'ef75739b-99dd-4e20-a5eb-ac24a7c42dc3',
       consent:
         'By submitting this form, you agree that Heal Before Home may use the information ' +
         'provided to respond to your enquiry and communicate with you about your journey.',
       success: 'Thank you. Your enquiry has been received, and our team will be in touch shortly.'
     },
     'provider-enquiry': {
-      guid: 'PASTE-HUBSPOT-FORM-GUID',
+      guid: '8a7b23bb-ef40-440e-adcb-64efe1930b14',
       consent:
         'By submitting this form, you agree that Heal Before Home may use the information ' +
         'provided to respond to your enquiry and communicate with you about a possible partnership.',
       success: 'Thank you. Your enquiry has been received, and our team will review it shortly.'
     },
     'newsletter-form': {
-      guid: 'PASTE-HUBSPOT-FORM-GUID',
+      guid: 'b9f3af16-f3f1-4e18-8e7e-42f201f3a1e3',
       consent:
         'By subscribing, you agree that Heal Before Home may use your email address to send ' +
         'you occasional updates.',
@@ -158,6 +158,41 @@
     });
   }
 
+  /* A url input rejects "example.com" outright - browsers want a scheme. People
+     type the bare domain anyway, so put the scheme they left off rather than
+     making them discover the rule from a rejection. */
+  function normalizeUrls(form) {
+    var urls = form.querySelectorAll('input[type="url"]');
+    Array.prototype.forEach.call(urls, function (el) {
+      var value = String(el.value || '').trim();
+      if (!value || /^[a-z][a-z0-9+.-]*:\/\//i.test(value)) return;
+      el.value = 'https://' + value.replace(/^\/+/, '');
+    });
+  }
+
+  /* The first control the browser objects to, and why - "Please complete the
+     required fields" is no help when the real problem is one malformed field
+     halfway down a long form. */
+  function firstInvalid(form) {
+    for (var i = 0; i < form.elements.length; i++) {
+      var el = form.elements[i];
+      if (el.willValidate && !el.checkValidity()) return el;
+    }
+    return null;
+  }
+
+  function describe(form, el) {
+    var message = el.validationMessage || 'Please check this field.';
+    var label = el.id ? form.querySelector('label[for="' + el.id + '"]') : null;
+    if (!label) return message;
+    var name = label.textContent.replace(/\*/g, '').replace(/\s+/g, ' ').trim().replace(/:$/, '');
+    if (!name) return message;
+    /* Most of these labels are whole questions, where a colon reads badly:
+       "...are you considering?: Please select an item." Punctuation already
+       ends the sentence, so just follow it with a space. */
+    return name + (/[?.!]$/.test(name) ? ' ' : ': ') + message;
+  }
+
   function mentionsConsent(data) {
     var text = JSON.stringify(data || {}).toLowerCase();
     return text.indexOf('consent') !== -1 || text.indexOf('legal') !== -1;
@@ -196,13 +231,12 @@
 
       /* The forms carry novalidate so that the browser's own bubble does not
          pre-empt this handler; the same checks still run, just from here. */
-      if (!form.checkValidity()) {
-        var firstInvalid = form.querySelector(':invalid');
-        say('Please complete the required fields before sending.', 'error');
-        if (firstInvalid) {
-          firstInvalid.focus();
-          if (firstInvalid.reportValidity) firstInvalid.reportValidity();
-        }
+      normalizeUrls(form);
+      var bad = firstInvalid(form);
+      if (bad) {
+        say(describe(form, bad), 'error');
+        bad.focus();
+        if (bad.reportValidity) bad.reportValidity();
         return;
       }
 

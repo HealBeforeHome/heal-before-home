@@ -154,6 +154,12 @@
 
 /* ---------- reset ---------- */
 *,*::before,*::after{ box-sizing:border-box; }
+
+/* The browser's own [hidden] rule loses to ANY author rule that sets display -
+   .form{display:grid} and .newsletter{display:flex} both silently beat it - so
+   setting el.hidden would do nothing on exactly the elements that rely on it.
+   This restores the attribute's meaning. */
+[hidden]{ display:none !important; }
 /* The background here is the CANVAS colour - what iOS paints in the rubber-band
    area past the end of the document, not anything inside the page. body keeps the
    cream and its box covers the whole document, so nothing in the page changes; the
