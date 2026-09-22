@@ -61,6 +61,28 @@
   };
 
   var ENDPOINT = 'https://api.hsforms.com/submissions/v3/integration/submit/';
+
+  /* Spam guards. HubSpot's own CAPTCHA has to stay off (see the note at the top
+     of this file), the portal id and every GUID are public, and the endpoint
+     takes anonymous POSTs - so these are what stands between a scripted bot and
+     the CRM. Neither stops anyone who has read this file; they stop the
+     commodity bots that crawl for exposed form endpoints, which is what
+     actually shows up. If real spam ever arrives, the answer is Turnstile
+     behind a Worker that proxies the submission, which would also let HubSpot's
+     own protection be switched back on.
+
+     Every name here is a decoy field, hidden by .hp and skipped by collect().
+     Anything typed into one came from something that cannot see the page. */
+  var TRAPS = ['bot-field', 'company-url'];
+
+  /* A submit this soon after the form was wired did not come from someone
+     reading the page. Kept deliberately low: a false positive here is silently
+     answered with a fake success, which would lose a real enquiry - the same
+     failure the autocomplete="off" on the decoys exists to prevent. 1.5s still
+     catches the instant-POST scripts this is aimed at, which fire in well under
+     a tenth of that, while leaving no realistic way for a person to trip it.
+     Measured from wiring, so a page left open is never penalised. */
+  var MIN_SUBMIT_MS = 1500;
   var ERROR = 'Something went wrong sending this. Please try again, or reach us through the contact page.';
 
   function warn(message, detail) {
@@ -95,7 +117,7 @@
     }
 
     Array.prototype.forEach.call(form.elements, function (el) {
-      if (!el.name || el.name === 'bot-field' || el.type === 'submit' || el.disabled) return;
+      if (!el.name || TRAPS.indexOf(el.name) !== -1 || el.type === 'submit' || el.disabled) return;
       if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) return;
 
       var value = String(el.value || '').trim();
@@ -120,7 +142,7 @@
     var body = {
       fields: collect(form),
       context: {
-        pageUri: window.location.href,
+        pageUri: window.location.origin + window.location.pathname,
         pageName: document.title
       }
     };
@@ -204,6 +226,7 @@
        it and the thank-you would never be seen. */
     var status = document.getElementById(form.id + '-status') || form.querySelector('.form-status');
     var button = form.querySelector('[type="submit"]');
+    var wiredAt = Date.now();
 
     /* Whatever classes the markup gave the status element are kept - the
        newsletter's sits on a dark band and carries a modifier for it. */
@@ -219,11 +242,16 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
 
-      /* Honeypot: a real visitor never sees this field, so anything in it is a
-         bot. Answer as though it worked rather than telling the bot it was
-         caught. */
-      var trap = form.querySelector('[name="bot-field"]');
-      if (trap && trap.value) {
+      /* Honeypots: a real visitor never sees these fields, so anything in one
+         is a bot. Paired with the elapsed-time floor, since a bot that skips
+         the decoys usually submits instantly instead. Answer as though it
+         worked rather than telling the bot it was caught - a bot told it
+         failed simply tries again differently. */
+      var tripped = TRAPS.some(function (name) {
+        var trap = form.querySelector('[name="' + name + '"]');
+        return trap && trap.value;
+      });
+      if (tripped || Date.now() - wiredAt < MIN_SUBMIT_MS) {
         form.hidden = true;
         say(config.success, 'ok');
         return;

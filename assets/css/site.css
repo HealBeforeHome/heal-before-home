@@ -218,13 +218,18 @@ p:last-child{ margin-bottom:0; }
 /* ---------- utilities ---------- */
 .wrap{ width:100%; max-width:var(--max); margin-inline:auto; padding-inline:var(--gutter); }
 .wrap--narrow{ max-width:var(--max-narrow); }
-.wrap--wide{ max-width:1400px; }
 .section{ padding-block:var(--section-y); }
 .section--tight{ padding-block:var(--section-y-tight); }
 .section--sand{ background:var(--sand); }
 .section--dark{ background:var(--green-section); color:rgba(255,255,240,.86); }
 .section--dark h1,.section--dark h2,.section--dark h3,.section--dark h4{ color:var(--ivory); }
 .section--dark .kicker{ color:rgba(255,255,240,.55); }
+/* .cta-band is a dark band too, but it is not .section--dark, so the override
+   above never reached it and the kicker fell through to --sage: 2.44:1 on
+   --green-section, against the 4.5:1 AA floor. This measures 5.26:1.
+   The card-kicker twin of this rule lives next to .card-kicker itself, since it
+   has to come after that declaration in source order to win. */
+.cta-band .kicker{ color:rgba(255,255,240,.55); }
 .section--dark .lead{ color:rgba(255,255,240,.78); }
 .section--dark p{ color:rgba(255,255,240,.82); }
 
@@ -255,7 +260,6 @@ p:last-child{ margin-bottom:0; }
 
 .section-head{ max-width:56ch; margin-bottom:clamp(2rem,3.6vw,3.25rem); }
 .section-head.center{ margin-inline:auto; }
-.rule{ height:1px; background:var(--line); border:0; margin:0; }
 
 /* ---------- buttons ---------- */
 .btn{
@@ -778,7 +782,6 @@ p:last-child{ margin-bottom:0; }
 .split--media-right .split-media{ order:2; }
 .split--40{ grid-template-columns:.85fr 1.15fr; }
 .split--60{ grid-template-columns:1.15fr .85fr; }
-.split--top{ align-items:start; }
 @media (max-width:900px){
   .split,.split--40,.split--60{ grid-template-columns:1fr; gap:2.25rem; }
   .split--media-right .split-media{ order:0; }
@@ -931,6 +934,11 @@ p.area-back{ margin-bottom:clamp(1.75rem,3vw,2.75rem); }
   font-size:.66rem; font-weight:500; letter-spacing:.2em; text-transform:uppercase;
   color:var(--sage); margin-bottom:.55rem; display:block;
 }
+/* Same 2.44:1 trap as .cta-band .kicker above. :where() holds this at the same
+   specificity as .card-kicker so source order decides - it must stay below that
+   rule - while .section--dark h3 (0,1,1) still wins for the card kickers that
+   are headings, leaving their ivory untouched. This only rescues the span case. */
+:where(.section--dark,.cta-band) .card-kicker{ color:rgba(255,255,240,.55); }
 
 /* Tiles (specialties) */
 .tiles{ display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(.6rem,1.2vw,1rem); }
@@ -1030,10 +1038,6 @@ p.area-back{ margin-bottom:clamp(1.75rem,3vw,2.75rem); }
 .acc-item.is-open .acc-panel{ grid-template-rows:1fr; }
 .acc-panel p,.acc-panel ul{ color:var(--ink-muted); max-width:76ch; }
 .acc-panel > div > *:first-child{ padding-top:.15rem; }
-.area-tagline{
-  font-family:var(--display); font-style:italic; font-size:1.12rem;
-  color:var(--sage); margin-bottom:.7rem;
-}
 .acc-panel > div > *:last-child{ margin-bottom:1.4rem; }
 @media (prefers-reduced-motion: reduce){ .acc-panel{ transition:none; } }
 
@@ -1212,14 +1216,6 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
 .map-split{ display:grid; grid-template-columns:.6fr 1.4fr; gap:clamp(2rem,5vw,4rem); align-items:center; }
 @media (max-width:860px){ .map-split{ grid-template-columns:1fr; } }
 .map-split .map-img{ max-width:300px; margin-inline:auto; }
-
-.mosaic{ display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(.6rem,1.2vw,1rem); }
-.mosaic .media{ aspect-ratio:1/1; }
-.mosaic .media--lead{ grid-column:span 2; grid-row:span 2; }
-@media (max-width:720px){
-  .mosaic{ grid-template-columns:repeat(2,1fr); }
-  .mosaic .media--lead{ grid-column:span 2; grid-row:auto; aspect-ratio:3/2; }
-}
 
 .note-strip{
   background:var(--sand); border-left:2px solid var(--mist);

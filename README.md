@@ -5,12 +5,19 @@ dependencies. Everything in this folder is what gets deployed.
 
 ## Deploying
 
-**Netlify** — drag this folder onto the Netlify dashboard, or connect the repo with
-`publish = "."` (already set in `netlify.toml`). Pretty URLs, redirects, caching headers
-and form handling all work out of the box.
+**Cloudflare** — the live target, and the only one. `wrangler.jsonc` publishes the repo
+root as a Workers static-assets project:
 
-**Vercel** — import the folder as a static project. `vercel.json` sets `cleanUrls`,
-the redirects and the caching headers.
+```
+npx wrangler deploy
+```
+
+Clean URLs, the trailing-slash guard and the 404 page are configured there. `_headers`
+carries the security and cache headers, `_redirects` the 301s from the old Framer URLs.
+
+> **`.assetsignore` is load-bearing.** The deploy directory is the repo root, so every
+> file here is public on the live site unless `.assetsignore` names it — `.git` included.
+> Add a working file to that list *before* committing it, not after.
 
 **Domain** — point `www.healbeforehome.com` at the deploy and keep the apex redirecting
 to `www`, as it does today. Every canonical URL, the sitemap and the Open Graph tags all
@@ -26,14 +33,19 @@ use `https://www.healbeforehome.com`.
 | `/our-story-between-two-worlds` | `our-story-between-two-worlds.html` |
 | `/for-providers` | `for-providers.html` |
 | `/contact` | `contact.html` |
+| `/faq` | `faq.html` |
+| `/meet-the-founder` | `meet-the-founder.html` |
+| `/community-initiative-interest` | `community-initiative-interest.html` |
+| `/dental-care`, `/hair-restoration`, `/fertility-reproductive-care`, `/aesthetic-reconstructive-health`, `/confidence-transition-coaching`, `/longevity-wellness`, `/executive-health`, `/interventional-radiology` | the eight area-of-care detail pages |
 | `/terms-of-use`, `/privacy-policy`, `/medical-service-disclaimer` | legal pages |
 | `/thank-you` | form confirmation (noindex) |
 | `/404` | not found |
 
 URLs match the old Framer site exactly, so existing links and search rankings carry over.
-Pages that no longer exist (`/how-it-works`, the fourteen individual area-of-care pages,
-`/the-experience`, `/community-initiative-interest`) 301 to their new homes — see
-`_redirects` (Netlify) and `vercel.json` (Vercel).
+Pages that no longer exist (`/how-it-works`, `/the-experience`, and seven of the old
+area-of-care URLs) 301 to their new homes — see `_redirects`, which Cloudflare reads.
+`/community-initiative-interest` is **not** among them: that page is live and carries a
+working form.
 
 ## Forms
 
@@ -74,8 +86,8 @@ every command, the field list per form, troubleshooting, and the traps already h
 - Forms carry `novalidate` so a failed check does not discard typed answers. The script
   runs the same validity check itself, names the offending field in the message, and adds
   a missing `https://` to URL fields rather than rejecting a bare domain.
-- The old Netlify Forms wiring has been removed. It had stopped working anyway — the site
-  deploys to Cloudflare (see `wrangler.jsonc`), where `data-netlify` does nothing.
+- Nothing is posted to the host. The whole form path is the site's own markup plus
+  `hubspot-forms.js`, so it behaves identically wherever this is deployed.
 - **No one is emailed when an enquiry arrives.** See the end of HUBSPOT-SETUP.md.
 
 ## Structure
@@ -87,20 +99,31 @@ assets/js/site.js              carousel, mobile nav, accordions, scroll reveal
 assets/js/hubspot-forms.js     form submissions to HubSpot
 assets/img/*.webp              optimized imagery (multiple widths per image)
 assets/img/logo*.png           transparent logo, dark and light
+assets/fonts/*.woff2           the two typefaces, self-hosted
+_source-images/                drop-in originals, kept for re-cropping; never deployed
+rebuild-images.py              crops/converts/resizes a dropped-in photo, fixes the markup
 hubspot-provision.mjs          one-off: creates the HubSpot properties and forms
 robots.txt, sitemap.xml        search
-netlify.toml, vercel.json      host config, redirects, cache headers
-_redirects                     Netlify redirect table
+wrangler.jsonc                 the Cloudflare deploy config
+_headers                       security headers and the cache policy
+_redirects                     301s from the old Framer URLs
+.assetsignore                  what Cloudflare must NOT publish
 ```
 
 ### Design tokens
 
 The base palette is carried over from the original site and lives at the top of
-`site.css`: cream `#faf7f1` (page ground), sand `#eae7df` (alternating sections,
-form panels, inset notes), forest `#1e2a25` (ink), sage `#65766b`, ivory `#fffff0`.
+`site.css`: cream `#faf7f1` (page ground), sand `#ede7db` (alternating sections,
+form panels, inset notes), forest `#1e2a25` (ink), sage `#5a6a60`, ivory `#fffff0`.
 The original site's third cream `#f7f4ed` was dropped — it sat only 3 points off the
-page ground and read as no separation at all. Type is Cormorant (display) over Alegreya Sans (body),
-both loaded from Google Fonts — the same pairing the Framer site used.
+page ground and read as no separation at all. Type is Cormorant (display) over Alegreya
+Sans (body) — the same pairing the Framer site used, but **self-hosted** from
+`assets/fonts/` rather than fetched from Google Fonts, so the site loads no third-party
+resources at all. Keep it that way: the Content-Security-Policy in `_headers` allows no
+external origin except the HubSpot form endpoint.
+
+The contrast ratios in the comments throughout `site.css` are measured, not estimated.
+If you change a colour, re-measure the pairs the comments name.
 
 Spacing, type sizes and section rhythm are all `clamp()`-based, so the layout scales
 continuously rather than jumping at breakpoints. Grids collapse at 980px and 620px;
@@ -114,11 +137,22 @@ needs to be made in every page. `grep` for the string you're changing to find th
 
 ### Replacing images
 
-Photography lives in `assets/img/`. Each image ships at two or three widths referenced
-through `srcset`; when swapping one in, either match the existing filenames and aspect
-ratios or update the `src`, `srcset`, `width`, `height` and `alt` together. Aspect ratios
-in use: 16:9 (heroes), 4:3 (feature cards), 3:2 (destinations), 1:1 (specialty tiles),
-4:5 (portraits), 21:9 (full-width bands).
+Photography lives in `assets/img/`, each image at two or three widths referenced through
+`srcset`. **Do not do this by hand — `rebuild-images.py` automates it:**
+
+```
+python rebuild-images.py --check     report what would change, write nothing
+python rebuild-images.py             do it
+```
+
+Drop the replacement into `assets/img/` named after the file it replaces, in any format
+(`spec-hair.jpg`), and run it. It crops to the shape that slot already uses, converts to
+WebP, rebuilds every smaller rendition, corrects `width`/`height`/`srcset` in the markup,
+and moves your original to `_source-images/`. Heroes are exempt from the crop — CSS
+frames those — so their original framing is kept.
+
+Only `alt` is left to you. Aspect ratios in use: 16:9 (heroes), 4:3 (feature cards),
+3:2 (destinations), 1:1 (specialty tiles), 4:5 (portraits), 21:9 (full-width bands).
 
 ## Local preview
 

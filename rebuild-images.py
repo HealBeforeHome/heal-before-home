@@ -59,7 +59,17 @@ def hero_images():
     whatever shape the viewport happens to be, so its stored aspect ratio is
     not a spec — forcing a drop-in to match it just throws pixels away."""
     heroes = set()
-    pat = re.compile(r'<div class="hero-slide[^"]*"[^>]*>\s*<img[^>]*src="/?assets/img/([^"]+)"', re.S)
+    # The <img> is wrapped in a <picture> on the carousel and on the interior
+    # heroes, so allow any number of <picture>/<source> tags before reaching it.
+    # Without this the pattern matched two non-hero images and every hero
+    # drop-in was silently centre-cropped to the old file's aspect ratio.
+    #
+    # `src="/?assets/img/` has no word boundary on purpose: it also matches the
+    # tail of data-src="assets/img/..." on the lazily-hydrated carousel slides,
+    # which is the only reason those slides are seen at all. Do not add a word boundary.
+    pat = re.compile(
+        r'<div class="hero-slide[^"]*"[^>]*>(?:\s*<(?:picture|source)[^>]*>)*'
+        r'\s*<img[^>]*src="/?assets/img/([^"]+)"', re.S)
     for page in html_pages():
         heroes |= set(pat.findall(open(page, encoding='utf-8').read()))
     return {os.path.splitext(h)[0] for h in heroes}
@@ -103,12 +113,15 @@ def adopt_drop_ins():
     """A file named <base>.<ext> next to an existing <base>.webp replaces it,
     keeping the shape and width the layout already expects."""
     done = []
+    # Both of these read every page on the site. Hoisted out of the loop: inside
+    # it they re-parsed all 22 files on each of ~130 iterations.
+    want = wanted_by_markup()
+    heroes = hero_images()
     for f in sorted(os.listdir(IMG)):
         base, ext = os.path.splitext(f)
         if ext.lower() not in DROP_IN_EXTS or re.search(r'-\d+$', base):
             continue
         target = os.path.join(IMG, base + '.webp')
-        want = wanted_by_markup()
 
         # Read the drop-in fully and let the file handle close. Pillow keeps the
         # file open lazily, and on Windows that blocks moving it afterwards.
@@ -121,7 +134,7 @@ def adopt_drop_ins():
             else:
                 new = _im.convert('RGB')
 
-        if base in hero_images():
+        if base in heroes:
             # Keep the photographer's framing; CSS does the final crop.
             aspect, width = src_size[0] / src_size[1], min(src_size[0], HERO_MAX)
         elif os.path.exists(target):
@@ -185,25 +198,31 @@ def rebuild():
         parent = os.path.join(IMG, m.group(1) + '.webp')
         if not os.path.exists(parent):
             continue
-        src = Image.open(parent).convert('RGB')
+        with Image.open(parent) as _parent:
+            src = _parent.convert('RGB')
         width = min(int(m.group(2)), src.width)
         if CHECK:
             missing[name] = f'{name}  MISSING — would rebuild from {m.group(1)}.webp'
             continue
         out = src.resize((width, round(src.height * width / src.width)), Image.LANCZOS)
-        out.save(os.path.join(IMG, name), 'WEBP', quality=quality_for(src.width), method=6)
+        out.save(os.path.join(IMG, name), 'WEBP', quality=quality_for(out.width), method=6)
         missing[name] = f'{name}  RECREATED  {out.width}x{out.height}  {os.path.getsize(os.path.join(IMG, name))//1024}KB'
     rebuilt.extend(missing.values())
 
     for parent, kids in sorted(variants().items()):
-        src = Image.open(os.path.join(IMG, parent)).convert('RGB')
+        with Image.open(os.path.join(IMG, parent)) as _parent:
+            src = _parent.convert('RGB')
         for name, width in sorted(kids, key=lambda k: -k[1]):
             path = os.path.join(IMG, name)
-            cur = Image.open(path)
+            # Read the size and let go of the handle: out.save() below writes
+            # back to this same path, and Pillow's lazy handle blocks that on
+            # Windows - the same trap adopt_drop_ins() already guards against.
+            with Image.open(path) as _cur:
+                cur_size = _cur.size
             target_h = round(src.height * width / src.width)
 
             # Already correct, and drawn from an image of this aspect? leave it.
-            same_size = cur.size == (width, target_h)
+            same_size = cur_size == (width, target_h)
             newer_parent = os.path.getmtime(os.path.join(IMG, parent)) > os.path.getmtime(path)
             if same_size and not newer_parent:
                 skipped.append(name)
@@ -217,7 +236,7 @@ def rebuild():
 
             before = os.path.getsize(path)
             out = src.resize((width, target_h), Image.LANCZOS)
-            out.save(path, 'WEBP', quality=quality_for(src.width), method=6)
+            out.save(path, 'WEBP', quality=quality_for(out.width), method=6)
             rebuilt.append(f'{name}  {width}x{target_h}  {before//1024}KB -> {os.path.getsize(path)//1024}KB')
     return rebuilt, skipped
 
@@ -234,7 +253,8 @@ def fix_markup():
             path = os.path.join(IMG, m.group(1))
             if not os.path.exists(path):
                 continue
-            w, h = Image.open(path).size
+            with Image.open(path) as _im:
+                w, h = _im.size
             new = tag
             new = re.sub(r'width="\d+"', f'width="{w}"', new)
             new = re.sub(r'height="\d+"', f'height="{h}"', new)

@@ -1,5 +1,4 @@
-# Cloudflare reads this file; netlify.toml and vercel.json are legacy and are
-# never consulted by the current deploy (see wrangler.jsonc).
+# Cloudflare reads this file on deploy (see wrangler.jsonc).
 #
 # Caching note: there is no build step here, so nothing is content-hashed and
 # rebuild-images.py rewrites photographs UNDER THEIR EXISTING NAME. That rules
@@ -25,7 +24,31 @@
 
 # HTML deliberately has no Cache-Control here: Cloudflare's default for static
 # assets already revalidates every time, which is what these pages want.
+# Security headers. X-Frame-Options is DENY - the site embeds no iframes of its
+# own, so nothing needs to frame it.
+#
+# HSTS is deliberately without includeSubDomains and without preload: the first
+# would break any subdomain still served over HTTP, the second is effectively
+# irreversible. Add includeSubDomains once every subdomain is confirmed HTTPS.
+#
+# CSP: everything is first-party except the HubSpot form POST, so the policy is
+# tight. Two deliberate concessions:
+#   - style-src needs 'unsafe-inline' for the ~200 inline style="" attributes and
+#     site.js's el.style.setProperty for --reveal-delay.
+#   - form-action 'none' is intentional. No form here submits natively; every one
+#     goes out through fetch(), which connect-src governs. This blocks the
+#     browser's default GET fallback that would otherwise put enquiry field
+#     values into the URL if hubspot-forms.js ever failed to load.
+#
+# The script-src hash covers the one inline <script> in every page (identical on
+# all 22). EDIT THAT SNIPPET AND THE SITE BREAKS until this hash is recomputed -
+# CSP would block the very failsafe that reveals the content. To recompute:
+#   python -c "import re,hashlib,base64;s=re.search(rb'<script>(.*?)</script>',open('index.html','rb').read(),re.S).group(1);print('sha256-'+base64.b64encode(hashlib.sha256(s).digest()).decode())"
 /*
   X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
+  Strict-Transport-Security: max-age=31536000
+  Cross-Origin-Opener-Policy: same-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), display-capture=(), autoplay=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-67F3+sihOvmHhP28srzYcny0qh3HqnWxeWkNMAhKNgY='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.hsforms.com; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; upgrade-insecure-requests

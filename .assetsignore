@@ -13,6 +13,4 @@ rebuild-images.py
 hubspot-provision.mjs
 README.md
 HUBSPOT-SETUP.md
-netlify.toml
-vercel.json
 wrangler.jsonc

@@ -1,3 +1,14 @@
+# Secrets. The repo root IS the deploy directory, so anything committed here is
+# a file on the live site - hubspot-provision.mjs reads HUBSPOT_TOKEN from the
+# environment for exactly this reason. Never let a .env land here.
+.env
+.env.*
+*.key
+*.pem
+
+# Wrangler dev/build state
+.wrangler/
+
 # Python bytecode from the scratch build scripts
 __pycache__/
 *.pyc

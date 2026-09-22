@@ -1,7 +1,8 @@
 # Redirects — preserve inbound links from the previous Framer site.
 #
-# Cloudflare-flavoured: only 200/301/302/303/307/308 are valid statuses, and there
-# is no Netlify-style "!" force flag. Two things that used to live here moved:
+# Cloudflare-flavoured: only 200/301/302/303/307/308 are valid statuses, and the
+# "!" force flag some other hosts accept is a parse error here. Two things that
+# used to live in this file moved:
 #   - the trailing-slash guard  -> assets.html_handling in wrangler.jsonc
 #   - the 404 rules for working files -> .assetsignore (they are never uploaded)
 /how-it-works                        /#journey                          301

@@ -22,7 +22,7 @@
 <meta name="twitter:image" content="https://www.healbeforehome.com/assets/img/og-image.jpg">
 
 <link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="icon" href="assets/img/favicon.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/cormorant-var.woff2" crossorigin>
@@ -558,13 +558,14 @@
         <p>Receive occasional updates from Heal Before Home &mdash; new experiences, destinations, partnerships and thoughtful resources for your journey.</p>
       </div>
       <div data-reveal>
-        <form class="newsletter newsletter--light" id="newsletter-form" novalidate>
-          <p class="hp" aria-hidden="true"><label>Do not fill this in <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+        <form class="newsletter newsletter--light" id="newsletter-form" method="post" novalidate>
+          <p class="hp" aria-hidden="true"><label>Do not fill this in <input name="bot-field" tabindex="-1" autocomplete="off"></label><label>Leave this empty <input name="company-url" tabindex="-1" autocomplete="off"></label></p>
           <label class="sr-only" for="nl-email">Email address</label>
           <input id="nl-email" type="email" name="email" placeholder="Email address" required autocomplete="email">
           <button class="btn" type="submit">Subscribe</button>
         </form>
         <p class="form-status" id="newsletter-form-status" role="status" aria-live="polite" hidden></p>
+        <p class="field-hint" style="margin-top:.85rem">By subscribing, you agree that Heal Before Home may use your email address to send you occasional updates. We care about your privacy. Learn how we handle your data in our <a href="privacy-policy.html">Privacy Policy</a>.</p>
         <p class="small" style="margin-top:1rem">Are you a healthcare, wellness or hospitality provider? <a href="for-providers.html">Introduce your organization</a>.</p>
       </div>
     </div>
@@ -576,7 +577,7 @@
   <div class="wrap">
     <div class="footer-top">
       <div class="footer-brand">
-        <img src="assets/img/logo-light.png" srcset="assets/img/logo-light.png 180w, assets/img/logo-light@2x.png 360w" sizes="70px" width="180" height="179" alt="Heal Before Home">
+        <img src="assets/img/logo-light.png" loading="lazy" decoding="async" srcset="assets/img/logo-light.png 180w, assets/img/logo-light@2x.png 360w" sizes="70px" width="180" height="179" alt="Heal Before Home">
         <p>Thoughtfully curated healing journeys, where care beyond treatment is designed around you.</p>
       </div>
       <div class="footer-col">
