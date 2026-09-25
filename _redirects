@@ -5,7 +5,7 @@
 # used to live in this file moved:
 #   - the trailing-slash guard  -> assets.html_handling in wrangler.jsonc
 #   - the 404 rules for working files -> .assetsignore (they are never uploaded)
-/how-it-works                        /#journey                          301
+/how-it-works                        /getting-started                   301
 /the-experience                      /#journey                          301
 /our-story                           /our-story-between-two-worlds      301
 /why-the-philippines                 /medical-travel-philippines        301

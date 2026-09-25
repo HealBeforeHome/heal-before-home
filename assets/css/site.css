@@ -374,6 +374,10 @@ p:last-child{ margin-bottom:0; }
   display:flex; align-items:center; justify-content:space-between; gap:1.5rem;
   min-height:clamp(66px,7vw,84px);
 }
+/* The nine-item nav does not fit the 1220px body measure. The header bar is
+   chrome rather than reading matter, so it is allowed to run wider than the
+   text column; below the drawer breakpoint this has no effect. */
+.site-header .wrap.header-inner{ max-width:1560px; }
 .brand{ display:flex; align-items:center; gap:.75rem; text-decoration:none; flex:0 0 auto; }
 .brand img{ width:auto; height:clamp(38px,4.2vw,50px); }
 .brand-name{
@@ -382,10 +386,11 @@ p:last-child{ margin-bottom:0; }
 }
 @media (max-width:430px){ .brand-name{ display:none; } }
 
-.nav{ display:flex; align-items:center; gap:clamp(1.15rem,2.3vw,2.1rem); }
+.nav{ display:flex; align-items:center; gap:clamp(.9rem,1.5vw,1.6rem); }
 .nav a{
-  text-decoration:none; font-size:.79rem; font-weight:400; letter-spacing:.14em;
+  text-decoration:none; font-size:.72rem; font-weight:400; letter-spacing:.1em;
   text-transform:uppercase; color:var(--nav-ink); padding-block:.4rem; position:relative;
+  white-space:nowrap;
   transition:color .3s var(--ease);
 }
 .nav a::after{
@@ -420,7 +425,9 @@ p:last-child{ margin-bottom:0; }
 .nav-toggle[aria-expanded="true"] span::before{ top:0; transform:rotate(45deg); }
 .nav-toggle[aria-expanded="true"] span::after{ top:0; transform:rotate(-45deg); }
 
-@media (max-width:1120px){
+.nav-whatsapp{ display:none; }
+
+@media (max-width:1400px){
   .nav-toggle{ display:flex; }
   .nav{
     position:fixed; left:0; right:0; top:clamp(66px,7vw,84px); bottom:auto;
@@ -435,6 +442,15 @@ p:last-child{ margin-bottom:0; }
   .nav a{ padding:1.05rem 0; border-bottom:1px solid var(--line-soft); font-size:.85rem; }
   .nav a::after{ display:none; }
   .nav .btn{ margin-top:1.4rem; border:1px solid var(--forest); justify-content:center; padding:1rem; }
+  /* The WhatsApp row is a mobile affordance only; on desktop the nav is
+     already nine items wide and the enquiry form is the intended route. */
+  .nav-whatsapp{
+    display:flex; align-items:center; justify-content:center; gap:.6rem;
+    margin-top:1.1rem; padding:.9rem 1rem; border:0;
+    font-size:.8rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--sage); text-decoration:none;
+  }
+  .nav-whatsapp:hover,.nav-whatsapp:focus-visible{ color:var(--cta-green); }
 }
 
 /* =========================================================
@@ -840,6 +856,17 @@ p:last-child{ margin-bottom:0; }
   letter-spacing:-.01em; text-transform:none; color:var(--forest); line-height:1.15;
 }
 .journey-body p{ color:var(--ink-muted); margin:0; max-width:62ch; }
+
+/* Asterisk on a procedure card whose title may fall under the Well-Being First
+   Protocol. It is a jump link to that section, not decoration, so it keeps a
+   focus ring and an accessible name; the visible glyph itself stays quiet. */
+.protocol-mark{
+  display:inline-block; margin-left:.12em; vertical-align:super;
+  font-size:.62em; line-height:1; color:var(--sage);
+  text-decoration:none; border-bottom:0;
+}
+.protocol-mark:hover,.protocol-mark:focus-visible{ color:var(--cta-green); }
+.section--dark .protocol-mark{ color:var(--gold); }
 .badge{
   display:inline-block; margin-left:.7rem; vertical-align:middle;
   font-family:var(--sans); font-size:.6rem; font-weight:500; letter-spacing:.16em;
@@ -1248,7 +1275,7 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
    Phone & touch refinements
    Kept together at the foot of the file, after every component, so these win on
    source order without needing specificity bumps. Nothing here fires above
-   1120px, so the desktop rendering is untouched.
+   1400px, so the desktop rendering is untouched.
    ========================================================= */
 
 /* ---- touch targets ----
@@ -1287,7 +1314,7 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
    breakpoint the bar goes opaque and the blur is dropped. The mobile nav panel
    is already solid cream, so the two now match; the only loss is the faint
    see-through at rest, which is not worth the frame budget on a phone. */
-@media (max-width:1120px){
+@media (max-width:1400px){
   .site-header,
   .site-header.is-scrolled{
     background:var(--cream);

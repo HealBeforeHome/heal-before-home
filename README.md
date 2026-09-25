@@ -28,7 +28,10 @@ use `https://www.healbeforehome.com`.
 | URL | File |
 | --- | --- |
 | `/` | `index.html` |
+| `/getting-started` | `getting-started.html` |
 | `/areas-of-care` | `areas-of-care.html` |
+| `/recovery-experience` | `recovery-experience.html` |
+| `/standards-trust` | `standards-trust.html` |
 | `/medical-travel-philippines` | `medical-travel-philippines.html` (Why the Philippines) |
 | `/our-story-between-two-worlds` | `our-story-between-two-worlds.html` |
 | `/for-providers` | `for-providers.html` |
@@ -36,7 +39,7 @@ use `https://www.healbeforehome.com`.
 | `/faq` | `faq.html` |
 | `/meet-the-founder` | `meet-the-founder.html` |
 | `/community-initiative-interest` | `community-initiative-interest.html` |
-| `/dental-care`, `/hair-restoration`, `/fertility-reproductive-care`, `/aesthetic-reconstructive-health`, `/confidence-transition-coaching`, `/longevity-wellness`, `/executive-health`, `/interventional-radiology` | the eight area-of-care detail pages |
+| `/dental-care`, `/oral-maxillofacial-surgery`, `/hair-restoration`, `/fertility-reproductive-care`, `/women-s-health-healthy-aging`, `/aesthetic-reconstructive-health`, `/confidence-transition-coaching`, `/longevity-wellness`, `/executive-health`, `/interventional-radiology` | the ten area-of-care detail pages |
 | `/terms-of-use`, `/privacy-policy`, `/medical-service-disclaimer` | legal pages |
 | `/thank-you` | form confirmation (noindex) |
 | `/404` | not found |
@@ -127,7 +130,11 @@ If you change a colour, re-measure the pairs the comments name.
 
 Spacing, type sizes and section rhythm are all `clamp()`-based, so the layout scales
 continuously rather than jumping at breakpoints. Grids collapse at 980px and 620px;
-the navigation becomes a drawer at 1120px.
+the navigation becomes a drawer at 1400px. That breakpoint is high because the nav
+carries nine items plus the CTA, which needs roughly 1150px of bar to sit on one line
+— `.site-header .wrap.header-inner` is allowed to run wider than the 1220px body
+measure for the same reason. **The 1400 in `site.css` and the 1400 in `site.js` must
+stay in sync.**
 
 ### Editing content
 
@@ -165,6 +172,32 @@ npx serve .
 Opening `index.html` straight off disk will load, but the nav links will not resolve.
 
 ## Known follow-ups
+
+- **The journey enquiry form needs provisioning before it will accept anything.** The
+  intake form gained residence, companion, requested-services, mobility and "how may we
+  be of service" fields. A new field cannot be added to an existing HubSpot form, so
+  `hubspot-provision.mjs` now names it *Website: journey enquiry v2* and the GUID in
+  `hubspot-forms.js` is deliberately blank. Run `node hubspot-provision.mjs --write`
+  with `HUBSPOT_TOKEN` set, then `--inspect`, then send a real test enquiry. Until then
+  the form shows visitors the "not configured" message.
+- **Placeholder imagery.** Nine slots currently render `capiz-texture.webp`. Find them
+  with `grep -rn "PLACEHOLDER ASSET" *.html`; each comment names the file to drop in.
+  They cover the Getting Started hero, the Recovery Experience hero and its home
+  preview, the Standards & Trust hero and its home preview, and the Oral &
+  Maxillofacial and Women's Health heroes plus their two Areas of Care cards. Drop the
+  approved photo in under the filename the comment names and run `rebuild-images.py`,
+  which fixes `srcset`, `width` and `height` for you.
+- **`/standards-trust` is deliberately short.** It carries only what the approved
+  source page carries — the H1, one intro paragraph and Our Promise — plus the standard
+  CTA band. Part 3 of the handoff describes four Our Promise items and six further
+  sections (Our Role, Provider Navigation, Our Partner Standards, Privacy & Discretion,
+  Clinical Boundaries, Continuity Across Borders); none of that copy exists in the
+  approved source, so none of it is on the page. Add those sections only when the copy
+  is supplied.
+- **Travelling Together on `/recovery-experience` ships as three bare titles.** Stay
+  Together, Practical Support and Move Together carry no body copy because the source
+  page has none, and it repeats the Welcome Amenity paragraph there by mistake. Signed
+  off in this state; add descriptions if that source is ever corrected.
 
 - **Batangas copy** on `/medical-travel-philippines` was rewritten. The original site
   repeated the Tagaytay paragraph there by mistake; the replacement is short and neutral

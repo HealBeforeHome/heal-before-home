@@ -39,7 +39,7 @@
   var toggle = document.querySelector('.nav-toggle');
   var nav = document.getElementById('primary-nav');
   if (toggle && nav) {
-    var isOverlay = function () { return window.innerWidth <= 1120; };
+    var isOverlay = function () { return window.innerWidth <= 1400; };
 
     /* Closing applies visibility:hidden to the panel. If focus is inside it at that
        moment - which is the normal case when closing with Escape - the browser has
@@ -66,7 +66,7 @@
 
     /* While the panel covers the page, Tab must not walk into the content behind it:
        the body is scroll-locked, so focus would land somewhere the visitor cannot
-       see or scroll to. Only while it is actually an overlay - above 1120px the nav
+       see or scroll to. Only while it is actually an overlay - above 1400px the nav
        is just a row in the header and should behave like ordinary content. */
     nav.addEventListener('keydown', function (e) {
       if (e.key !== 'Tab') return;
@@ -92,7 +92,7 @@
       if (firstItem) { e.preventDefault(); firstItem.focus(); }
     });
     window.addEventListener('resize', function () {
-      if (window.innerWidth > 1120) setNav(false);
+      if (window.innerWidth > 1400) setNav(false);
     });
   }
 
@@ -337,17 +337,33 @@
      Journey Planning drawer on the home page, so a hash naming an .acc-item
      (or a block containing one) opens it rather than landing on a shut row.
      --------------------------------------------------------- */
+  function openItem(item) {
+    if (!item || item.classList.contains('is-open')) return;
+    var trigger = item.querySelector('.acc-trigger');
+    if (!trigger) return;
+    item.classList.add('is-open');
+    trigger.setAttribute('aria-expanded', 'true');
+  }
+
   function openAccordionAt(hash) {
     if (!hash || hash.length < 2) return;
     var target;
     try { target = document.getElementById(decodeURIComponent(hash.slice(1))); } catch (e) { return; }
     if (!target) return;
     var item = target.classList.contains('acc-item') ? target : target.querySelector('.acc-item');
-    if (!item || item.classList.contains('is-open')) return;
-    var trigger = item.querySelector('.acc-trigger');
-    if (!trigger) return;
-    item.classList.add('is-open');
-    trigger.setAttribute('aria-expanded', 'true');
+    if (!item) return;
+    /* Open the ancestors first. Since the home page put the journey steps behind
+       their own drawer, the Complex Journey Planning item is nested one level
+       down, and opening it alone would leave it inside a shut panel. */
+    var chain = [], node = item;
+    while (node) { chain.push(node); node = node.parentElement && node.parentElement.closest('.acc-item'); }
+    chain.reverse();
+    for (var i = 0; i < chain.length; i++) openItem(chain[i]);
+    /* The outer panel animates its height, so the browser's own scroll ran
+       against a collapsed box. Re-aim once the panel has settled. */
+    if (chain.length > 1 && typeof target.scrollIntoView === 'function') {
+      setTimeout(function () { target.scrollIntoView({ block: 'start' }); }, 420);
+    }
   }
   openAccordionAt(window.location.hash);
   window.addEventListener('hashchange', function () { openAccordionAt(window.location.hash); });
@@ -387,6 +403,33 @@
         child.style.setProperty('--reveal-delay', Math.min(i, 5) * 80 + 'ms');
       }
     });
+  });
+
+  /* ---------------------------------------------------------
+     Conditional form fields. A control carrying data-controls="<id>" and
+     data-show-value="<value>" reveals that block only while it holds that
+     value. Hiding also clears the block, so hubspot-forms.js never posts an
+     answer to a question the guest can no longer see.
+     --------------------------------------------------------- */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-controls]'), function (control) {
+    var target = document.getElementById(control.getAttribute('data-controls'));
+    if (!target) return;
+    var want = control.getAttribute('data-show-value');
+
+    function sync(clearOnHide) {
+      var show = control.value === want;
+      if (!show && clearOnHide) {
+        Array.prototype.forEach.call(target.querySelectorAll('input, select, textarea'), function (f) {
+          if (f.type === 'checkbox' || f.type === 'radio') f.checked = false;
+          else f.value = '';
+        });
+      }
+      target.hidden = !show;
+    }
+
+    control.addEventListener('change', function () { sync(true); });
+    /* On load the browser may have restored a previous selection. */
+    sync(false);
   });
 
   /* ---------------------------------------------------------
