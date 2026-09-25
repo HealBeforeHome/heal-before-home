@@ -18,6 +18,7 @@
  *     node hubspot-provision.mjs --check      list what HubSpot has received
  *     node hubspot-provision.mjs --inspect    compare each form to what its page sends
  *     node hubspot-provision.mjs --repair     turn off CAPTCHA, add missing dropdown values
+ *                                             to both the properties and the forms
  *     node hubspot-provision.mjs --repair --prune   ...and DELETE dropdown values the
  *                                             pages no longer offer. Only safe when no
  *                                             contact holds one - it clears the field on
@@ -55,9 +56,17 @@ const SCRIPT = 'assets/js/hubspot-forms.js';
 /* Properties HubSpot ships with - never create these. */
 const STANDARD = new Set(['email', 'firstname', 'lastname', 'company', 'website', 'phone']);
 
+/* Honeypot decoys - the same list as TRAPS in hubspot-forms.js, which never
+   sends them. A form field for one would only ever collect bot input. */
+const TRAPS = new Set(['bot-field', 'company-url']);
+
 /* Which form lives where, and the key it uses in the FORMS table of the script. */
 const FORMS = [
-  { key: 'journey-enquiry',  file: 'contact.html',       hsName: 'Website: journey enquiry'  },
+  /* Rebuilt for the expanded intake form (residence, companion, requested
+     services, mobility, "how may we be of service"). A new field cannot be
+     added to an existing HubSpot form, so this is deliberately a new name:
+     `--write` creates it and pastes the new GUID into hubspot-forms.js. */
+  { key: 'journey-enquiry',  file: 'contact.html',       hsName: 'Website: journey enquiry v2' },
   { key: 'provider-enquiry', file: 'for-providers.html', hsName: 'Website: provider enquiry' },
   { key: 'newsletter-form',  file: 'index.html',         hsName: 'Website: newsletter'       },
   /* The original "HBH Community Initiative Interest" was built in HubSpot's v4
@@ -122,7 +131,7 @@ function readFields(file, id) {
     const [, kind, rest] = c;
     const tag = `<${kind}${rest}>`;
     const name = attr(tag, 'name');
-    if (!name || name === 'bot-field') continue;
+    if (!name || TRAPS.has(name)) continue;
     if (kind === 'input' && /type="(submit|hidden|button)"/.test(tag)) continue;
 
     const elementId = attr(tag, 'id');
@@ -346,7 +355,9 @@ async function ensureForm(spec, fields) {
 function configuredForms() {
   const src = readFileSync(SCRIPT, 'utf8');
   const out = [];
-  for (const m of src.matchAll(/'([a-z][a-z-]*)':\s*\{[\s\S]*?guid:\s*'([^']+)'/g)) {
+  /* [^}] keeps each match inside its own entry, so an empty GUID reads as
+     empty rather than borrowing the next form's. */
+  for (const m of src.matchAll(/'([a-z][a-z-]*)':\s*\{[^}]*?guid:\s*'([^']*)'/g)) {
     out.push({ key: m[1], guid: m[2] });
   }
   return out;
@@ -369,7 +380,7 @@ async function inspectForms() {
   for (const f of configuredForms()) {
     console.log(`\n${f.key}`);
 
-    if (f.guid.indexOf('PASTE') === 0) {
+    if (!f.guid || f.guid.indexOf('PASTE') === 0) {
       console.log('  NOT CONNECTED - no GUID in ' + SCRIPT);
       continue;
     }
@@ -439,7 +450,7 @@ async function repair() {
   for (const f of configuredForms()) {
     console.log(`\n${f.key}`);
 
-    if (f.guid.indexOf('PASTE') === 0) {
+    if (!f.guid || f.guid.indexOf('PASTE') === 0) {
       console.log('  NOT CONNECTED - no GUID in ' + SCRIPT);
       continue;
     }
@@ -529,14 +540,65 @@ async function repair() {
       }
       if (!added.length && !stale.length) console.log(`  ${s.name}: options reordered to match the page`);
     }
+
+    await repairFormOptions(f.guid, def, sends);
   }
+}
+
+/* The form keeps its OWN copy of each dropdown's options, taken when the form
+   was built - adding a value to the property does not add it to the form, and
+   the submission API validates against the form's copy. Bring those in line
+   too, with the same keep-unless---prune rule as the properties. */
+async function repairFormOptions(guid, def, sends) {
+  const wanted = new Map(sends.filter((s) => s.options).map((s) => [s.name, s.options]));
+  const changed = [];
+
+  const fieldGroups = (def.fieldGroups || []).map((g) => ({
+    ...g,
+    fields: (g.fields || []).map((fl) => {
+      const page = wanted.get(fl.name);
+      if (!page) return fl;
+
+      const existing = fl.options || [];
+      const options = page.map((o) => {
+        const found = existing.find((e) => e.value === o.value);
+        return found ? { ...found } : { label: o.label, value: o.value, description: '' };
+      });
+      if (!PRUNE) {
+        for (const e of existing) {
+          if (!page.some((o) => o.value === e.value)) options.push({ ...e });
+        }
+      }
+      options.forEach((o, i) => { o.displayOrder = i; });
+
+      const same = options.length === existing.length &&
+        options.every((o, i) => existing[i].value === o.value);
+      if (same) return fl;
+
+      const added = options.filter((o) => !existing.some((e) => e.value === o.value)).map((o) => o.value);
+      changed.push(`${fl.name}${added.length ? ` (added ${added.join(' | ')})` : ' (reordered)'}`);
+      return { ...fl, options };
+    })
+  }));
+
+  if (!changed.length) {
+    console.log('  form options already match');
+    return;
+  }
+
+  /* The whole fieldGroups array goes back, as read - a partial one would drop
+     every field it left out. */
+  const upd = await hs('PATCH', `/marketing/v3/forms/${guid}`, { fieldGroups });
+  console.log(upd.ok
+    ? `  form options updated: ${changed.join('; ')}`
+    : `  could not update form options: ${JSON.stringify(upd.data)}`);
 }
 
 async function checkSubmissions() {
   for (const f of configuredForms()) {
     console.log(`\n${f.key}`);
 
-    if (f.guid.indexOf('PASTE') === 0) {
+    if (!f.guid || f.guid.indexOf('PASTE') === 0) {
       console.log('  NOT CONNECTED - no GUID in ' + SCRIPT);
       continue;
     }
@@ -571,7 +633,8 @@ function paste(guids) {
   let changed = 0;
   for (const [key, guid] of Object.entries(guids)) {
     if (!guid) continue;
-    const re = new RegExp(`('${key}':\\s*\\{[\\s\\S]*?guid:\\s*')PASTE-HUBSPOT-FORM-GUID(')`);
+    /* An unset GUID is either the placeholder or empty. */
+    const re = new RegExp(`('${key}':\\s*\\{[^}]*?guid:\\s*')(?:PASTE-HUBSPOT-FORM-GUID)?(')`);
     if (!re.test(src)) continue;
     src = src.replace(re, `$1${guid}$2`);
     changed++;

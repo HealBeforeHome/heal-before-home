@@ -33,7 +33,10 @@
       success: 'Thank you. Your interest has been received, and our team will be in touch as opportunities take shape.'
     },
     'journey-enquiry': {
-      guid: 'ef75739b-99dd-4e20-a5eb-ac24a7c42dc3',
+      /* Set by `node hubspot-provision.mjs --write` after the v2 form is created.
+         The old form (ef75739b-99dd-4e20-a5eb-ac24a7c42dc3) lacks the new fields
+         and would reject every submission, so it is not left in place here. */
+      guid: '564001be-be00-4cbe-b214-e87a4b5d69aa',
       consent:
         'By submitting this form, you agree that Heal Before Home may use the information ' +
         'provided to respond to your enquiry and communicate with you about your journey.',
