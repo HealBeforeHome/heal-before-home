@@ -76,7 +76,7 @@
 
      Every name here is a decoy field, hidden by .hp and skipped by collect().
      Anything typed into one came from something that cannot see the page. */
-  var TRAPS = ['bot-field', 'company-url'];
+  var TRAPS = ['bot-field', 'hbh-leave-blank'];
 
   /* A submit this soon after the form was wired did not come from someone
      reading the page. Kept deliberately low: a false positive here is silently
