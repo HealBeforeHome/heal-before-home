@@ -36,10 +36,54 @@
   /* ---------------------------------------------------------
      Mobile navigation
      --------------------------------------------------------- */
+  var NAV_BREAKPOINT = 1180; // keep in step with the drawer @media in site.css
   var toggle = document.querySelector('.nav-toggle');
   var nav = document.getElementById('primary-nav');
+
+  /* About dropdown: a disclosure button, not an ARIA menu, so the links inside
+     stay ordinary links. Hover opens it on desktop through CSS alone; this is
+     the click, keyboard and touch route, and it doubles as the accordion row
+     inside the mobile drawer. */
+  var groups = nav ? Array.prototype.slice.call(nav.querySelectorAll('.nav-group')) : [];
+  var setGroup = function (group, open) {
+    var btn = group.querySelector('.nav-group-toggle');
+    if (btn) btn.setAttribute('aria-expanded', String(open));
+  };
+  var closeGroups = function (except) {
+    groups.forEach(function (g) { if (g !== except) setGroup(g, false); });
+  };
+  groups.forEach(function (group) {
+    var btn = group.querySelector('.nav-group-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var open = btn.getAttribute('aria-expanded') !== 'true';
+      closeGroups(group);
+      setGroup(group, open);
+    });
+    /* Escape shuts the submenu before the drawer, and puts focus back on the
+       toggle, since the link it was on is about to be hidden. */
+    group.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || btn.getAttribute('aria-expanded') !== 'true') return;
+      e.stopPropagation();
+      setGroup(group, false);
+      btn.focus();
+    });
+    /* Tabbing out of the open panel on desktop would leave it floating over
+       the page. In the drawer it is inline content, so leave it be. */
+    group.addEventListener('focusout', function (e) {
+      if (window.innerWidth <= NAV_BREAKPOINT) return;
+      if (!group.contains(e.relatedTarget)) setGroup(group, false);
+    });
+  });
+  if (groups.length) {
+    document.addEventListener('click', function (e) {
+      if (window.innerWidth <= NAV_BREAKPOINT) return;
+      groups.forEach(function (g) { if (!g.contains(e.target)) setGroup(g, false); });
+    });
+  }
+
   if (toggle && nav) {
-    var isOverlay = function () { return window.innerWidth <= 1400; };
+    var isOverlay = function () { return window.innerWidth <= NAV_BREAKPOINT; };
 
     /* Closing applies visibility:hidden to the panel. If focus is inside it at that
        moment - which is the normal case when closing with Escape - the browser has
@@ -51,6 +95,7 @@
       nav.classList.toggle('is-open', open);
       document.body.style.overflow = open && isOverlay() ? 'hidden' : '';
       if (!open && focusInside) toggle.focus();
+      if (!open) closeGroups();
     };
     toggle.addEventListener('click', function () {
       setNav(toggle.getAttribute('aria-expanded') !== 'true');
@@ -66,7 +111,7 @@
 
     /* While the panel covers the page, Tab must not walk into the content behind it:
        the body is scroll-locked, so focus would land somewhere the visitor cannot
-       see or scroll to. Only while it is actually an overlay - above 1400px the nav
+       see or scroll to. Only while it is actually an overlay - above the breakpoint the nav
        is just a row in the header and should behave like ordinary content. */
     nav.addEventListener('keydown', function (e) {
       if (e.key !== 'Tab') return;
@@ -92,7 +137,7 @@
       if (firstItem) { e.preventDefault(); firstItem.focus(); }
     });
     window.addEventListener('resize', function () {
-      if (window.innerWidth > 1400) setNav(false);
+      if (window.innerWidth > NAV_BREAKPOINT) setNav(false);
     });
   }
 

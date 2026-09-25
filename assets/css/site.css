@@ -374,7 +374,7 @@ p:last-child{ margin-bottom:0; }
   display:flex; align-items:center; justify-content:space-between; gap:1.5rem;
   min-height:clamp(66px,7vw,84px);
 }
-/* The nine-item nav does not fit the 1220px body measure. The header bar is
+/* The nav plus the CTA does not fit the 1220px body measure. The header bar is
    chrome rather than reading matter, so it is allowed to run wider than the
    text column; below the drawer breakpoint this has no effect. */
 .site-header .wrap.header-inner{ max-width:1560px; }
@@ -410,6 +410,56 @@ p:last-child{ margin-bottom:0; }
 .nav a.btn:hover,
 .nav a.btn:focus-visible{ color:var(--ivory); }
 
+/* About dropdown. The toggle wears the link styling so it reads as one more
+   nav item; the panel opens on hover or on click (aria-expanded, set by
+   site.js), so keyboard and touch visitors get it without hover. */
+.nav-group{ position:relative; }
+.nav-group-toggle{
+  display:inline-flex; align-items:center; gap:.45rem;
+  background:none; border:0; cursor:pointer; font:inherit;
+  font-size:.72rem; font-weight:400; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--nav-ink); padding:.4rem 0; position:relative; white-space:nowrap;
+  transition:color .3s var(--ease);
+}
+.nav-group-toggle::before{
+  content:""; order:1; width:5px; height:5px; margin-top:-3px;
+  border-right:1px solid currentColor; border-bottom:1px solid currentColor;
+  transform:rotate(45deg); transition:transform .3s var(--ease), margin .3s var(--ease);
+}
+.nav-group-toggle[aria-expanded="true"]::before{ transform:rotate(-135deg); margin-top:3px; }
+.nav-group-toggle::after{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:1px;
+  background:var(--forest); transform:scaleX(0); transform-origin:left;
+  transition:transform .35s var(--ease);
+}
+.nav-group-toggle:hover,
+.nav-group--current .nav-group-toggle{ color:var(--forest); }
+.nav-group-toggle:hover::after,
+.nav-group--current .nav-group-toggle::after{ transform:scaleX(1); }
+
+/* padding-top bridges the gap under the toggle, so the pointer can travel
+   down into the panel without leaving .nav-group and closing it. */
+.nav-sub{
+  position:absolute; top:100%; left:50%; padding-top:.9rem; min-width:13.5rem;
+  transform:translate(-50%,-6px); opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity .25s var(--ease), transform .25s var(--ease), visibility .25s;
+}
+.nav-sub::before{
+  content:""; position:absolute; inset:.9rem 0 0; z-index:-1;
+  background:var(--cream); border:1px solid var(--line); border-radius:var(--radius);
+  box-shadow:0 12px 30px rgba(30,42,37,.08);
+}
+.nav-sub a{ display:block; padding:.7rem 1.2rem; }
+.nav-sub a::after{ left:1.2rem; right:1.2rem; bottom:.45rem; }
+.nav-group-toggle[aria-expanded="true"] + .nav-sub{
+  opacity:1; visibility:visible; pointer-events:auto; transform:translate(-50%,0);
+}
+@media (hover:hover) and (min-width:1181px){
+  .nav-group:hover .nav-sub{
+    opacity:1; visibility:visible; pointer-events:auto; transform:translate(-50%,0);
+  }
+}
+
 .nav-toggle{
   display:none; width:44px; height:44px; align-items:center; justify-content:center;
   background:none; border:1px solid var(--line-strong); border-radius:var(--radius); cursor:pointer;
@@ -427,7 +477,8 @@ p:last-child{ margin-bottom:0; }
 
 .nav-whatsapp{ display:none; }
 
-@media (max-width:1400px){
+/* Keep this breakpoint in step with NAV_BREAKPOINT in site.js. */
+@media (max-width:1180px){
   .nav-toggle{ display:flex; }
   .nav{
     position:fixed; left:0; right:0; top:clamp(66px,7vw,84px); bottom:auto;
@@ -442,8 +493,24 @@ p:last-child{ margin-bottom:0; }
   .nav a{ padding:1.05rem 0; border-bottom:1px solid var(--line-soft); font-size:.85rem; }
   .nav a::after{ display:none; }
   .nav .btn{ margin-top:1.4rem; border:1px solid var(--forest); justify-content:center; padding:1rem; }
-  /* The WhatsApp row is a mobile affordance only; on desktop the nav is
-     already nine items wide and the enquiry form is the intended route. */
+  /* In the drawer the About group is an accordion row rather than a floating
+     panel: display:none while shut keeps its links out of the Tab order. */
+  .nav-group-toggle{
+    display:flex; width:100%; justify-content:space-between;
+    padding:1.05rem 0; border-bottom:1px solid var(--line-soft); font-size:.85rem;
+  }
+  .nav-group-toggle::after{ display:none; }
+  .nav-group--current .nav-group-toggle{ color:var(--nav-ink); }
+  .nav-sub,
+  .nav-group-toggle[aria-expanded="true"] + .nav-sub{
+    position:static; display:none; padding:0 0 0 1.1rem; min-width:0;
+    transform:none; opacity:1; visibility:visible; pointer-events:auto; transition:none;
+  }
+  .nav-group-toggle[aria-expanded="true"] + .nav-sub{ display:block; }
+  .nav-sub::before{ display:none; }
+  .nav-sub a{ padding:.95rem 0; }
+  /* The WhatsApp row is a mobile affordance only; on desktop the header is
+     already full and the enquiry form is the intended route. */
   .nav-whatsapp{
     display:flex; align-items:center; justify-content:center; gap:.6rem;
     margin-top:1.1rem; padding:.9rem 1rem; border:0;
@@ -1275,7 +1342,7 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
    Phone & touch refinements
    Kept together at the foot of the file, after every component, so these win on
    source order without needing specificity bumps. Nothing here fires above
-   1400px, so the desktop rendering is untouched.
+   1180px, so the desktop rendering is untouched.
    ========================================================= */
 
 /* ---- touch targets ----
@@ -1314,7 +1381,7 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
    breakpoint the bar goes opaque and the blur is dropped. The mobile nav panel
    is already solid cream, so the two now match; the only loss is the faint
    see-through at rest, which is not worth the frame budget on a phone. */
-@media (max-width:1400px){
+@media (max-width:1180px){
   .site-header,
   .site-header.is-scrolled{
     background:var(--cream);
