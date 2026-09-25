@@ -58,7 +58,7 @@ const STANDARD = new Set(['email', 'firstname', 'lastname', 'company', 'website'
 
 /* Honeypot decoys - the same list as TRAPS in hubspot-forms.js, which never
    sends them. A form field for one would only ever collect bot input. */
-const TRAPS = new Set(['bot-field', 'company-url']);
+const TRAPS = new Set(['bot-field', 'hbh-leave-blank']);
 
 /* Which form lives where, and the key it uses in the FORMS table of the script. */
 const FORMS = [
@@ -603,22 +603,40 @@ async function checkSubmissions() {
       continue;
     }
 
-    const res = await hs('GET', `/form-integrations/v1/submissions/forms/${f.guid}?limit=5`);
-    if (!res.ok) {
-      console.log(`  could not read submissions: ${JSON.stringify(res.data)}`);
+    /* Read every page and sort here. Asking for "limit=5" and printing them as
+       returned showed an old submission and hid the newest, since the order
+       the API returns is not newest-first to be relied on. */
+    const rows = [];
+    let after = '';
+    let failed = null;
+    for (let page = 0; page < 40; page++) {
+      const res = await hs('GET', `/form-integrations/v1/submissions/forms/${f.guid}?limit=50${after ? `&after=${after}` : ''}`);
+      if (!res.ok) { failed = res.data; break; }
+      rows.push(...(res.data.results || []));
+      after = res.data.paging && res.data.paging.next && res.data.paging.next.after;
+      if (!after) break;
+    }
+    if (failed && !rows.length) {
+      console.log(`  could not read submissions: ${JSON.stringify(failed)}`);
       continue;
     }
 
-    const rows = res.data.results || [];
     if (!rows.length) {
       console.log('  no submissions yet');
       continue;
     }
 
-    console.log(`  ${rows.length} recent submission(s):`);
-    for (const r of rows) {
-      const when = new Date(r.submittedAt).toISOString().replace('T', ' ').slice(0, 16);
-      console.log(`\n    ${when} UTC`);
+    rows.sort((a, b) => b.submittedAt - a.submittedAt);
+    const recent = rows.slice(0, 5);
+    console.log(`  ${rows.length} submission(s) in total, newest ${recent.length}:`);
+    for (const r of recent) {
+      /* Local time, not UTC - an evening submission read as UTC lands on the
+         next day and looks wrong. */
+      const when = new Date(r.submittedAt).toLocaleString('en-CA', {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
+      });
+      console.log(`\n    ${when}`);
       for (const v of r.values || []) {
         console.log(`      ${String(v.name).padEnd(24)} ${String(v.value).slice(0, 70)}`);
       }
