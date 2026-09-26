@@ -1348,6 +1348,10 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
   font-size:.9rem; font-weight:500; letter-spacing:.06em; color:var(--forest);
 }
 .experience-grid{ display:grid; grid-template-columns:1.45fr 1fr; gap:clamp(1.75rem,4vw,3.5rem); align-items:start; }
+/* Corporate packages: a short intro beside a long feature list, so the list
+   takes the wider column and its lines stay at a readable length. */
+.experience-grid--list{ grid-template-columns:1fr 1.55fr; }
+.experience-grid--list > p{ font-size:var(--fs-lead); line-height:1.6; color:var(--ink-muted); margin:0; }
 @media (max-width:980px){ .experience-grid{ grid-template-columns:1fr; } }
 .experience-parts{ display:grid; grid-template-columns:1fr 1fr; gap:1.4rem clamp(1.25rem,3vw,2.25rem); margin:1.75rem 0; }
 @media (max-width:620px){ .experience-parts{ grid-template-columns:1fr; } }
