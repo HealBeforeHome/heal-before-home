@@ -1163,6 +1163,9 @@ p.area-back{ margin-bottom:clamp(1.75rem,3vw,2.75rem); }
   font-size:.86rem; color:var(--ink-muted); line-height:1.55;
   background:var(--sand); border-left:2px solid var(--mist); padding:.9rem 1.1rem; border-radius:2px;
 }
+/* A run of fields shown or hidden together (the enquiry routes in site.js).
+   Carries the form's own rhythm so wrapping fields in one changes nothing. */
+.form-group{ display:grid; gap:1.3rem; }
 .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:1.3rem; }
 @media (max-width:620px){ .form-row{ grid-template-columns:1fr; } }
 /* Clipped rather than pushed off-canvas: a -9999px offset can create horizontal
@@ -1323,6 +1326,45 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
    copy together; these put the rhythm back without touching the step itself. */
 .journey-body .acc-panel p{ margin:0 0 1.1em; }
 .journey-body .acc-panel .feature-list{ margin:0 0 1.35em; }
+
+/* ---- Executive & Private Client experience panels ----
+   Full-width editorial panels, deliberately not the small .card: each carries a
+   whole proposed itinerary, and the stay and destination have to read first.
+   Reused on /corporate-offerings for the three Canadian packages. */
+.experience-stack{ display:grid; gap:clamp(1.75rem,3.4vw,2.75rem); }
+.experience-panel{
+  background:var(--cream); border:1px solid var(--line-soft); border-radius:var(--radius-lg);
+  padding:clamp(1.5rem,4vw,3.25rem);
+}
+.section--sand .experience-panel{ background:var(--cream); }
+.section:not(.section--sand) .experience-panel{ background:var(--sand); }
+.experience-panel > .card-kicker{ margin-bottom:.8rem; }
+.experience-panel h3,
+.experience-panel > h2{ font-size:clamp(1.7rem,1.3rem + 1.5vw,2.6rem); margin-bottom:.9rem; }
+/* The stay and destination line, set off the way the brief draws it. */
+.experience-dest{
+  margin:0 0 clamp(1.4rem,2.6vw,2rem); max-width:none;
+  padding:.8rem 1.1rem; border:1px solid var(--gold); border-radius:2px;
+  font-size:.9rem; font-weight:500; letter-spacing:.06em; color:var(--forest);
+}
+.experience-grid{ display:grid; grid-template-columns:1.45fr 1fr; gap:clamp(1.75rem,4vw,3.5rem); align-items:start; }
+@media (max-width:980px){ .experience-grid{ grid-template-columns:1fr; } }
+.experience-parts{ display:grid; grid-template-columns:1fr 1fr; gap:1.4rem clamp(1.25rem,3vw,2.25rem); margin:1.75rem 0; }
+@media (max-width:620px){ .experience-parts{ grid-template-columns:1fr; } }
+.experience-parts h4{ font-size:.72rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--sage); margin-bottom:.45rem; }
+.experience-parts p{ font-size:.97rem; color:var(--ink-muted); margin:0; }
+.experience-aside{ border-top:1px solid var(--line); padding-top:1.4rem; }
+@media (min-width:981px){ .experience-aside{ border-top:0; padding-top:0; border-left:1px solid var(--line); padding-left:clamp(1.5rem,3vw,2.5rem); } }
+.experience-aside .card-kicker{ margin-bottom:.9rem; }
+.experience-aside .btn-row{ margin-top:1.75rem; }
+
+/* Three short labels in a bordered strip (the wedge pillow callouts). */
+.callout-strip{
+  list-style:none; margin:clamp(1.75rem,3vw,2.5rem) 0 0; padding:1rem 1.25rem;
+  display:flex; flex-wrap:wrap; justify-content:center; gap:.75rem clamp(1.5rem,4vw,3.5rem);
+  border:1px solid var(--gold); border-radius:2px;
+}
+.callout-strip li{ font-size:.78rem; font-weight:500; letter-spacing:.18em; text-transform:uppercase; color:var(--forest); }
 
 .signature-block{ display:grid; gap:.3rem; justify-items:start; margin-top:2rem; }
 .signature-block img{ width:180px; opacity:.85; }

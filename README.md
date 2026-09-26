@@ -39,6 +39,8 @@ use `https://www.healbeforehome.com`.
 | `/faq` | `faq.html` |
 | `/meet-the-founder` | `meet-the-founder.html` |
 | `/community-initiative-interest` | `community-initiative-interest.html` |
+| `/oncology-second-opinion` | `oncology-second-opinion.html` (linked from Areas of Care) |
+| `/corporate-offerings` | `corporate-offerings.html` (Canadian itineraries; About menu and footer) |
 | `/dental-care`, `/oral-maxillofacial-surgery`, `/hair-restoration`, `/fertility-reproductive-care`, `/women-s-health-healthy-aging`, `/aesthetic-reconstructive-health`, `/confidence-transition-coaching`, `/longevity-wellness`, `/executive-health`, `/interventional-radiology` | the ten area-of-care detail pages |
 | `/terms-of-use`, `/privacy-policy`, `/medical-service-disclaimer` | legal pages |
 | `/thank-you` | form confirmation (noindex) |
@@ -173,18 +175,28 @@ Opening `index.html` straight off disk will load, but the nav links will not res
 
 ## Known follow-ups
 
-- **The journey enquiry form needs provisioning before it will accept anything.** The
-  intake form gained residence, companion, requested-services, mobility and "how may we
-  be of service" fields. A new field cannot be added to an existing HubSpot form, so
-  `hubspot-provision.mjs` now names it *Website: journey enquiry v2* and the GUID in
-  `hubspot-forms.js` is deliberately blank. Run `node hubspot-provision.mjs --write`
-  with `HUBSPOT_TOKEN` set, then `--inspect`, then send a real test enquiry. Until then
-  the form shows visitors the "not configured" message.
-- **Placeholder imagery.** Nine slots currently render `capiz-texture.webp`. Find them
+- **The journey enquiry form needs provisioning (v3) before it will accept anything.**
+  It now serves three routes from one form: a general journey, an Executive & Private
+  Client proposal, and an oncology second opinion. The route is picked by the first
+  dropdown, or on arrival by `/contact?enquiry=proposal|oncology` (plus
+  `&experience=<slug>` from the homepage panels); `site.js` shows each route's fields and
+  clears and disables the rest. The new fields need a new HubSpot form, so the GUID in
+  `hubspot-forms.js` is blank until `node hubspot-provision.mjs --write` runs. Deploy
+  only after that, `--inspect`, and a test submission on each route.
+- **Corporate Offerings CTA is a dead link.** "Design a Bespoke Corporate Itinerary"
+  points at `#` until Agnes's scheduling URL is supplied — grep for `TODO` in
+  `corporate-offerings.html`.
+- **Executive & Private Client copy carries operational promises.** The 20-client cap
+  (homepage and the proposal route) must come down if it stops being true, and every
+  named hotel, vehicle, spa and Canadian supplier is a *proposed* supplier until
+  confirmed in writing. No prices are published; none should be until validated.
+
+- **Placeholder imagery.** Eleven slots currently render `capiz-texture.webp`. Find them
   with `grep -rn "PLACEHOLDER ASSET" *.html`; each comment names the file to drop in.
   They cover the Getting Started hero, the Recovery Experience hero and its home
   preview, the Standards & Trust hero and its home preview, and the Oral &
-  Maxillofacial and Women's Health heroes plus their two Areas of Care cards. Drop the
+  Maxillofacial, Women's Health and Oncology Second Opinion page images plus their
+  three Areas of Care cards. Drop the
   approved photo in under the filename the comment names and run `rebuild-images.py`,
   which fixes `srcset`, `width` and `height` for you.
 - **`/standards-trust` is deliberately short.** It carries only what the approved

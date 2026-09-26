@@ -52,6 +52,7 @@
           <a href="our-story-between-two-worlds.html">Our Story</a>
           <a href="medical-travel-philippines.html">Why the Philippines</a>
           <a href="standards-trust.html">Standards &amp; Trust</a>
+          <a href="corporate-offerings.html">Corporate Offerings</a>
         </div>
       </div>
       <a href="faq.html">FAQ</a>
@@ -80,19 +81,43 @@
     </div>
   </section>
 
+  <!-- One form, three routes. "What would you like to discuss?" decides which
+       blocks marked data-routes are shown; site.js clears and disables the rest,
+       so a hidden question is neither validated nor sent. The homepage proposal
+       buttons arrive with ?enquiry=proposal&experience=<slug>, the oncology page
+       with ?enquiry=oncology. Without JavaScript every block shows. -->
   <section class="section anchor-offset" id="enquiry">
     <div class="wrap split split--40" style="align-items:start">
       <div class="split-body" data-reveal>
-        <span class="kicker">When the next step matters</span>
-        <h2>Your care deserves more than separate arrangements.</h2>
-        <p class="lead">Tell us where you are in your journey. We will help you understand what comes next.</p>
+        <div data-routes="general">
+          <span class="kicker">When the next step matters</span>
+          <h2>Your care deserves more than separate arrangements.</h2>
+          <p class="lead">Tell us where you are in your journey. We will help you understand what comes next.</p>
 
-        <h3 style="font-family:var(--sans); font-size:.72rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--sage); margin:2.5rem 0 1rem;">What happens next</h3>
-        <ul class="feature-list">
-          <li><strong>Initial enquiry.</strong> Tell us what you are considering. No medical records or sensitive health information are required at this stage.</li>
-          <li><strong>Discovery conversation.</strong> We learn about your goals, provider status, travel plans, preferences, timing and the level of support you are looking for.</li>
-          <li><strong>Journey planning.</strong> If needed, we introduce carefully considered provider options for you to explore directly, then build the coordination around the care plan they establish.</li>
-        </ul>
+          <h3 style="font-family:var(--sans); font-size:.72rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--sage); margin:2.5rem 0 1rem;">What happens next</h3>
+          <ul class="feature-list">
+            <li><strong>Initial enquiry.</strong> Tell us what you are considering. No medical records or sensitive health information are required at this stage.</li>
+            <li><strong>Discovery conversation.</strong> We learn about your goals, provider status, travel plans, preferences, timing and the level of support you are looking for.</li>
+            <li><strong>Journey planning.</strong> If needed, we introduce carefully considered provider options for you to explore directly, then build the coordination around the care plan they establish.</li>
+          </ul>
+        </div>
+
+        <div data-routes="proposal" hidden>
+          <span class="kicker">Executive &amp; Private Client Experiences</span>
+          <h2>Private Access. Personally Arranged.</h2>
+          <p class="lead">A private experience should begin with an itinerary designed around the individual, not a fixed package.</p>
+          <p>Tell us which HBH experience interests you, the healthcare or wellness options you are exploring, and whether your journey will be privately funded or may include employer support. Our team will discuss your preferences and arrangements before your dedicated advisor prepares a confidential private proposal for HBH review.</p>
+          <p>To protect the level of personal attention behind each journey, no more than 20 inaugural primary clients will be accepted into this collection.</p>
+          <p class="small" style="margin-top:1.5rem"><a class="link-arrow" href="index.html#private-client">View the three experiences</a></p>
+        </div>
+
+        <div data-routes="oncology" hidden>
+          <span class="kicker">Oncology Second Opinion</span>
+          <h2>Discuss a Second Opinion</h2>
+          <p class="lead">Begin with a complimentary conversation about the second-opinion process.</p>
+          <p>You may contact a provider directly or ask HBH to coordinate the arrangements. The independent specialist reviews your case and makes all clinical recommendations. HBH does not assess whether immunotherapy is appropriate or advise you to delay time-sensitive treatment.</p>
+          <p class="small" style="margin-top:1.5rem"><a class="link-arrow" href="oncology-second-opinion.html">About the second-opinion pathway</a></p>
+        </div>
 
         <div class="note-strip" style="margin-top:2rem">
           <p>Heal Before Home does not determine medical suitability, provide medical treatment, or replace your licensed healthcare providers.</p>
@@ -100,11 +125,25 @@
       </div>
 
       <div class="form-panel" data-reveal>
-        <form class="form" id="journey-enquiry" method="post" novalidate>
+        <h2 class="form-heading" data-routes="proposal" style="margin-top:0" hidden>Request a Private Proposal</h2>
+        <form class="form" id="journey-enquiry" method="post" novalidate
+              data-success-proposal="Thank you for considering Heal Before Home. Our team will contact you to discuss the details needed to prepare your private proposal."
+              data-success-oncology="Thank you. Our team will contact you to arrange your complimentary conversation about the second-opinion process.">
           <p class="hp" aria-hidden="true"><label>Do not fill this in <input name="bot-field" tabindex="-1" autocomplete="off"></label><label>Leave this empty <input name="hbh-leave-blank" tabindex="-1" autocomplete="off"></label></p>
 
           <p class="form-legend"><span class="req" aria-hidden="true">*</span> indicates a required field.</p>
-          <p class="form-step">Step 1: Tell us about the status of your journey</p>
+
+          <div class="field">
+            <label for="c-route">What would you like to discuss? <span class="req" aria-hidden="true">*</span></label>
+            <select id="c-route" name="enquiry_route" required data-route-select>
+              <option value="General journey enquiry" data-route="general" selected>A healthcare, wellness or recovery journey</option>
+              <option value="Executive &amp; Private Client proposal" data-route="proposal">An Executive &amp; Private Client proposal</option>
+              <option value="Oncology second opinion" data-route="oncology">An oncology second opinion</option>
+            </select>
+          </div>
+
+          <p class="form-step" data-routes="general">Step 1: Tell us about the status of your journey</p>
+          <p class="form-step" data-routes="proposal oncology" hidden>Your contact details</p>
 
           <div class="form-row">
             <div class="field">
@@ -114,6 +153,25 @@
             <div class="field">
               <label for="c-email">Email address <span class="req" aria-hidden="true">*</span></label>
               <input id="c-email" name="email" type="email" required autocomplete="email">
+            </div>
+          </div>
+
+          <div class="form-group" data-routes="proposal oncology" hidden>
+            <div class="form-row">
+              <div class="field">
+                <label for="c-contact-method">Preferred contact method <span class="req" aria-hidden="true">*</span></label>
+                <select id="c-contact-method" name="preferred_contact_method" required>
+                  <option value="">Select</option>
+                  <option>Email</option>
+                  <option>Telephone</option>
+                  <option>WhatsApp</option>
+                  <option>Video call</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="c-phone">Telephone (optional)</label>
+                <input id="c-phone" name="phone" type="tel" autocomplete="tel">
+              </div>
             </div>
           </div>
 
@@ -135,122 +193,213 @@
             <input id="c-residence-other-input" name="residence_other" type="text" autocomplete="country-name">
           </div>
 
-          <div class="field">
-            <label for="c-care">What type of care or journey are you considering? <span class="req" aria-hidden="true">*</span></label>
-            <select id="c-care" name="care_type" required>
-              <option value="">Select</option>
-              <option>Hair restoration</option>
-              <option>Dental care</option>
-              <option>Oral &amp; maxillofacial surgery</option>
-              <option>Fertility &amp; reproductive care</option>
-              <option>Women&rsquo;s health &amp; healthy aging</option>
-              <option>Aesthetic, regenerative or reconstructive care</option>
-              <option>Longevity &amp; wellness</option>
-              <option>Executive health</option>
-              <option>Interventional radiology</option>
-              <option>Spiritual or restorative retreat</option>
-              <option>Recovery support after a scheduled procedure</option>
-              <option>Other</option>
-            </select>
+          <div class="form-group" data-routes="general">
+            <div class="field">
+              <label for="c-care">What type of care or journey are you considering? <span class="req" aria-hidden="true">*</span></label>
+              <select id="c-care" name="care_type" required>
+                <option value="">Select</option>
+                <option>Hair restoration</option>
+                <option>Dental care</option>
+                <option>Oral &amp; maxillofacial surgery</option>
+                <option>Fertility &amp; reproductive care</option>
+                <option>Women&rsquo;s health &amp; healthy aging</option>
+                <option>Aesthetic, regenerative or reconstructive care</option>
+                <option>Longevity &amp; wellness</option>
+                <option>Executive health</option>
+                <option>Interventional radiology</option>
+                <option>Spiritual or restorative retreat</option>
+                <option>Recovery support after a scheduled procedure</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="c-stage">What stage are you at in your planning journey? <span class="req" aria-hidden="true">*</span></label>
+              <select id="c-stage" name="planning_stage" required>
+                <option value="">Select your current stage</option>
+                <option>Exploring providers or options</option>
+                <option>Provider selected</option>
+                <option>Consultation completed</option>
+                <option>Date scheduled</option>
+                <option>Planning a wellness or longevity journey</option>
+                <option>Not sure where to begin</option>
+              </select>
+            </div>
+
+            <p class="form-step">Step 2: Support &amp; journey details</p>
+
+            <div class="field">
+              <label for="c-detail">What care, procedure, program or retreat are you considering?</label>
+              <textarea id="c-detail" name="care_detail" style="min-height:90px"></textarea>
+            </div>
+
+            <div class="field">
+              <label for="c-arrangements">What arrangements are already in place?</label>
+              <textarea id="c-arrangements" name="existing_arrangements" style="min-height:90px"></textarea>
+            </div>
+
+            <fieldset class="check-group">
+              <legend>Which parts of your journey would you like us to coordinate?</legend>
+              <label class="check">
+                <input type="checkbox" name="requested_services" value="Private transportation">
+                <span>Private transportation</span>
+              </label>
+              <label class="check">
+                <input type="checkbox" name="requested_services" value="Accommodation">
+                <span>Accommodation</span>
+              </label>
+              <label class="check">
+                <input type="checkbox" name="requested_services" value="Meals and nutrition">
+                <span>Meals and nutrition</span>
+              </label>
+              <label class="check">
+                <input type="checkbox" name="requested_services" value="Caregiving or nursing coordination">
+                <span>Caregiving or nursing coordination</span>
+              </label>
+              <label class="check">
+                <input type="checkbox" name="requested_services" value="Recovery support">
+                <span>Recovery support</span>
+              </label>
+              <label class="check">
+                <input type="checkbox" name="requested_services" value="Wellness services">
+                <span>Wellness services</span>
+              </label>
+              <label class="check">
+                <input type="checkbox" name="requested_services" value="Return-home preparation">
+                <span>Return-home preparation</span>
+              </label>
+            </fieldset>
+            <p class="field-hint">Select all that apply. You can tell us about anything else further down.</p>
           </div>
 
-          <div class="field">
-            <label for="c-stage">What stage are you at in your planning journey? <span class="req" aria-hidden="true">*</span></label>
-            <select id="c-stage" name="planning_stage" required>
-              <option value="">Select your current stage</option>
-              <option>Exploring providers or options</option>
-              <option>Provider selected</option>
-              <option>Consultation completed</option>
-              <option>Date scheduled</option>
-              <option>Planning a wellness or longevity journey</option>
-              <option>Not sure where to begin</option>
-            </select>
+          <div class="form-group" data-routes="proposal" hidden>
+            <p class="form-step">Your private experience</p>
+
+            <div class="form-row">
+              <div class="field">
+                <label for="c-role">Role (optional)</label>
+                <input id="c-role" name="jobtitle" type="text" autocomplete="organization-title">
+              </div>
+              <div class="field">
+                <label for="c-org">Organization (optional)</label>
+                <input id="c-org" name="company" type="text" autocomplete="organization">
+              </div>
+            </div>
+            <p class="field-hint">Neither is required. The collection is open to private clients as well as executives.</p>
+
+            <div class="field">
+              <label for="c-experience">Which experience interests you? <span class="req" aria-hidden="true">*</span></label>
+              <select id="c-experience" name="experience_of_interest" required>
+                <option value="">Select</option>
+                <option value="Executive Diagnostic Frame" data-slug="executive-diagnostic-frame">The Executive Diagnostic Frame</option>
+                <option value="C-Suite Radiance &amp; Longevity Shield" data-slug="c-suite-radiance-longevity-shield">The C-Suite Radiance &amp; Longevity Shield</option>
+                <option value="Founder's Continuum" data-slug="founders-continuum">The Founder&rsquo;s Continuum</option>
+                <option value="Exploring" data-slug="exploring">Still exploring</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="c-area">Area of interest <span class="req" aria-hidden="true">*</span></label>
+              <select id="c-area" name="area_of_interest" required>
+                <option value="">Select</option>
+                <option>Dental</option>
+                <option>Executive screening</option>
+                <option>Longevity and wellness</option>
+                <option>Oncology second opinion</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="c-payment">How do you expect your journey to be funded? <span class="req" aria-hidden="true">*</span></label>
+              <select id="c-payment" name="payment_pathway" required>
+                <option value="">Select</option>
+                <option>Privately funded</option>
+                <option>Employer-sponsored</option>
+                <option>Exploring HSA</option>
+                <option>Exploring LSA</option>
+                <option>Unsure</option>
+              </select>
+            </div>
           </div>
 
-          <p class="form-step">Step 2: Support &amp; journey details</p>
-
-          <div class="field">
-            <label for="c-detail">What care, procedure, program or retreat are you considering?</label>
-            <textarea id="c-detail" name="care_detail" style="min-height:90px"></textarea>
-          </div>
-
-          <div class="field">
-            <label for="c-arrangements">What arrangements are already in place?</label>
-            <textarea id="c-arrangements" name="existing_arrangements" style="min-height:90px"></textarea>
-          </div>
-
-          <fieldset class="check-group">
-            <legend>Which parts of your journey would you like us to coordinate?</legend>
-            <label class="check">
-              <input type="checkbox" name="requested_services" value="Private transportation">
-              <span>Private transportation</span>
-            </label>
-            <label class="check">
-              <input type="checkbox" name="requested_services" value="Accommodation">
-              <span>Accommodation</span>
-            </label>
-            <label class="check">
-              <input type="checkbox" name="requested_services" value="Meals and nutrition">
-              <span>Meals and nutrition</span>
-            </label>
-            <label class="check">
-              <input type="checkbox" name="requested_services" value="Caregiving or nursing coordination">
-              <span>Caregiving or nursing coordination</span>
-            </label>
-            <label class="check">
-              <input type="checkbox" name="requested_services" value="Recovery support">
-              <span>Recovery support</span>
-            </label>
-            <label class="check">
-              <input type="checkbox" name="requested_services" value="Wellness services">
-              <span>Wellness services</span>
-            </label>
-            <label class="check">
-              <input type="checkbox" name="requested_services" value="Return-home preparation">
-              <span>Return-home preparation</span>
-            </label>
-          </fieldset>
-          <p class="field-hint">Select all that apply. You can tell us about anything else further down.</p>
-
-          <div class="field">
-            <label for="c-dates">Preferred travel dates and expected length of stay</label>
+          <div class="field" data-routes="general proposal">
+            <label for="c-dates">Preferred travel dates or travel window, and expected length of stay</label>
             <input id="c-dates" name="travel_dates" type="text">
           </div>
 
-          <div class="field">
-            <label for="c-companion">Will anyone be travelling with you?</label>
-            <select id="c-companion" name="companion" data-controls="c-companion-count" data-show-value="Yes">
+          <div class="form-group" data-routes="general">
+            <div class="field">
+              <label for="c-companion">Will anyone be travelling with you?</label>
+              <select id="c-companion" name="companion" data-controls="c-companion-count" data-show-value="Yes">
+                <option value="">Select</option>
+                <option>Yes</option>
+                <option>No</option>
+                <option>Not yet decided</option>
+              </select>
+            </div>
+
+            <div class="field" id="c-companion-count" hidden>
+              <label for="c-companion-count-input">How many companions will be travelling with you?</label>
+              <input id="c-companion-count-input" name="companion_count" type="number" min="1" max="10" inputmode="numeric">
+            </div>
+
+            <div class="field">
+              <label for="c-mobility">Do you have any mobility or accessibility preferences we should plan around?</label>
+              <textarea id="c-mobility" name="mobility_accessibility" style="min-height:90px"></textarea>
+              <p class="field-hint">For example step-free access, ground-floor accommodation, wheelchair or walking support, or extra space for a companion.</p>
+            </div>
+
+            <div class="field">
+              <label for="c-service">How may we be of service?</label>
+              <textarea id="c-service" name="how_may_we_serve" style="min-height:110px"></textarea>
+            </div>
+          </div>
+
+          <div class="form-group" data-routes="proposal" hidden>
+            <div class="field">
+              <label for="c-guests">Number of guests, including you</label>
+              <input id="c-guests" name="guest_count" type="number" min="1" max="20" inputmode="numeric">
+            </div>
+
+            <div class="field">
+              <label for="c-companion-details">Companion details</label>
+              <textarea id="c-companion-details" name="companion_details" style="min-height:90px"></textarea>
+              <p class="field-hint">For example a spouse, family member or colleague, and anything we should plan around for them. A companion travels within your journey and does not take a separate place.</p>
+            </div>
+          </div>
+
+          <div class="field" data-routes="proposal oncology" hidden>
+            <label for="c-confidentiality">Would you like a confidentiality agreement before sharing detailed clinical information? <span class="req" aria-hidden="true">*</span></label>
+            <select id="c-confidentiality" name="confidentiality_agreement" required>
               <option value="">Select</option>
               <option>Yes</option>
               <option>No</option>
-              <option>Not yet decided</option>
             </select>
           </div>
 
-          <div class="field" id="c-companion-count" hidden>
-            <label for="c-companion-count-input">How many companions will be travelling with you?</label>
-            <input id="c-companion-count-input" name="companion_count" type="number" min="1" max="10" inputmode="numeric">
-          </div>
-
-          <div class="field">
-            <label for="c-mobility">Do you have any mobility or accessibility preferences we should plan around?</label>
-            <textarea id="c-mobility" name="mobility_accessibility" style="min-height:90px"></textarea>
-            <p class="field-hint">For example step-free access, ground-floor accommodation, wheelchair or walking support, or extra space for a companion.</p>
-          </div>
-
-          <div class="field">
-            <label for="c-service">How may we be of service?</label>
-            <textarea id="c-service" name="how_may_we_serve" style="min-height:110px"></textarea>
-          </div>
-
-          <p class="form-note">Please do not submit medical records, diagnostic reports, prescriptions or photographs of medical conditions through this form. This enquiry is intended only for general planning and coordination.</p>
+          <p class="form-note" data-routes="general">Please do not submit medical records, diagnostic reports, prescriptions or photographs of medical conditions through this form. This enquiry is intended only for general planning and coordination.</p>
+          <p class="form-note" data-routes="proposal oncology" hidden>Please do not include diagnoses, medical histories, receipts or clinical records in this initial form. Our team will explain the appropriate process if information is needed later.</p>
 
           <p class="field-hint">By submitting this form, you agree that Heal Before Home may use the information provided to respond to your enquiry and communicate with you about your journey.</p>
           <p class="field-hint">We care about your privacy. Learn how we handle your data in our <a href="privacy-policy.html">Privacy Policy</a>.</p>
 
-          <div><button class="btn" type="submit">Send My Enquiry</button></div>
+          <div><button class="btn" type="submit" data-text-proposal="Request My Private Proposal" data-text-oncology="Discuss a Second Opinion">Send My Enquiry</button></div>
         </form>
         <p class="form-status" id="journey-enquiry-status" role="status" aria-live="polite" hidden></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRIVACY & DISCRETION ============ -->
+  <section class="section section--sand">
+    <div class="wrap wrap--narrow">
+      <div class="prose" data-reveal>
+        <span class="kicker">Privacy &amp; Discretion</span>
+        <h2>Your Information. Handled With Care.</h2>
+        <p class="lead">Privacy matters throughout your healthcare journey, from the first conversation to your return home.</p>
+        <p>Heal Before Home coordinates authorized information-sharing arrangements with your consent and according to the requirements of the independent healthcare providers involved. Where appropriate, we can arrange a medical-continuity package containing records supplied or authorized for release by your providers for your return-home care.</p>
+        <p>Please tell us if you would like to discuss an additional confidentiality agreement before sharing sensitive information. Clinical providers remain responsible for their own records and clinical decisions.</p>
       </div>
     </div>
   </section>
@@ -294,6 +443,7 @@
           <li><a href="medical-travel-philippines.html">Why the Philippines</a></li>
           <li><a href="standards-trust.html">Standards &amp; Trust</a></li>
           <li><a href="our-story-between-two-worlds.html">Our Story: Between Two Worlds</a></li>
+          <li><a href="corporate-offerings.html">Corporate Offerings</a></li>
           <li><a href="for-providers.html">For Providers</a></li>
           <li><a href="contact.html">Contact</a></li>
         </ul>

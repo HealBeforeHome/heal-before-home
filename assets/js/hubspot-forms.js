@@ -33,10 +33,11 @@
       success: 'Thank you. Your interest has been received, and our team will be in touch as opportunities take shape.'
     },
     'journey-enquiry': {
-      /* Set by `node hubspot-provision.mjs --write` after the v2 form is created.
-         The old form (ef75739b-99dd-4e20-a5eb-ac24a7c42dc3) lacks the new fields
-         and would reject every submission, so it is not left in place here. */
-      guid: '564001be-be00-4cbe-b214-e87a4b5d69aa',
+      /* Set by `node hubspot-provision.mjs --write` after the v3 form is created.
+         v2 (564001be-be00-4cbe-b214-e87a4b5d69aa) lacks the enquiry-route fields
+         and would reject every proposal or oncology submission, so it is not
+         left in place here. */
+      guid: '',
       consent:
         'By submitting this form, you agree that Heal Before Home may use the information ' +
         'provided to respond to your enquiry and communicate with you about your journey.',
@@ -235,6 +236,12 @@
        newsletter's sits on a dark band and carries a modifier for it. */
     var statusClasses = status ? status.className : '';
 
+    /* A form serving several enquiry routes (see "Enquiry routes" in site.js)
+       carries the thank-you for the current route in data-success. */
+    function successText() {
+      return form.getAttribute('data-success') || config.success;
+    }
+
     function say(message, kind) {
       if (!status) return;
       status.textContent = message;
@@ -256,7 +263,7 @@
       });
       if (tripped || Date.now() - wiredAt < MIN_SUBMIT_MS) {
         form.hidden = true;
-        say(config.success, 'ok');
+        say(successText(), 'ok');
         return;
       }
 
@@ -292,7 +299,7 @@
         .then(function (r) {
           if (r.ok) {
             form.hidden = true;
-            say(config.success, 'ok');
+            say(successText(), 'ok');
             return;
           }
           say(ERROR, 'error');

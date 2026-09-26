@@ -478,6 +478,83 @@
   });
 
   /* ---------------------------------------------------------
+     Enquiry routes. The contact form serves three enquiries - a general
+     journey, an Executive & Private Client proposal and an oncology second
+     opinion - from one HubSpot form. The <select data-route-select> picks the
+     route from each option's data-route; every element carrying
+     data-routes="<route> <route>" shows only on the routes it names.
+
+     A hidden block has its controls cleared and DISABLED, not just hidden:
+     disabled controls are skipped by the browser's validity check and by
+     collect() in hubspot-forms.js, so a required question on another route
+     neither blocks the submit nor gets sent. Each control is disabled itself
+     rather than through a fieldset, because collect() reads el.disabled and a
+     control inside a disabled fieldset still reports false.
+
+     ?enquiry=proposal|oncology picks the route on arrival, and
+     ?experience=<slug> preselects the experience the visitor came from.
+     --------------------------------------------------------- */
+  var routeSelect = document.querySelector('[data-route-select]');
+  if (routeSelect) {
+    var routeForm = routeSelect.form;
+    var routeBlocks = document.querySelectorAll('[data-routes]');
+    var submitBtn = routeForm && routeForm.querySelector('[type="submit"]');
+    var submitDefault = submitBtn ? submitBtn.textContent : '';
+
+    var routeOf = function () {
+      var opt = routeSelect.options[routeSelect.selectedIndex];
+      return (opt && opt.getAttribute('data-route')) || 'general';
+    };
+
+    var applyRoute = function (clearOnHide) {
+      var route = routeOf();
+      Array.prototype.forEach.call(routeBlocks, function (block) {
+        var show = (' ' + block.getAttribute('data-routes') + ' ').indexOf(' ' + route + ' ') !== -1;
+        block.hidden = !show;
+        var controls = block.matches('input, select, textarea') ? [block] : block.querySelectorAll('input, select, textarea');
+        Array.prototype.forEach.call(controls, function (f) {
+          if (!show && clearOnHide) {
+            if (f.type === 'checkbox' || f.type === 'radio') f.checked = false;
+            else f.value = '';
+          }
+          f.disabled = !show;
+        });
+        /* Clearing a controlling select does not fire its change event, so any
+           data-controls block beneath it would stay open. Close them here. */
+        if (!show && clearOnHide) {
+          Array.prototype.forEach.call(block.querySelectorAll('[data-controls]'), function (c) {
+            var t = document.getElementById(c.getAttribute('data-controls'));
+            if (t) t.hidden = true;
+          });
+        }
+      });
+      if (submitBtn) submitBtn.textContent = submitBtn.getAttribute('data-text-' + route) || submitDefault;
+      if (routeForm) {
+        var success = routeForm.getAttribute('data-success-' + route);
+        if (success) routeForm.setAttribute('data-success', success);
+        else routeForm.removeAttribute('data-success');
+      }
+    };
+
+    var params = new URLSearchParams(window.location.search);
+    var wanted = params.get('enquiry');
+    if (wanted) {
+      Array.prototype.forEach.call(routeSelect.options, function (o) {
+        if (o.getAttribute('data-route') === wanted) routeSelect.value = o.value;
+      });
+    }
+    applyRoute(false);
+
+    var slug = params.get('experience');
+    if (slug && routeForm) {
+      var match = routeForm.querySelector('option[data-slug="' + slug.replace(/[^a-z0-9-]/gi, '') + '"]');
+      if (match && !match.parentNode.disabled) match.parentNode.value = match.value;
+    }
+
+    routeSelect.addEventListener('change', function () { applyRoute(true); });
+  }
+
+  /* ---------------------------------------------------------
      Current year in footer
      --------------------------------------------------------- */
   Array.prototype.forEach.call(document.querySelectorAll('[data-year]'), function (el) {

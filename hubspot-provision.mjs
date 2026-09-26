@@ -54,7 +54,7 @@ const GROUP = 'contactinformation';
 const SCRIPT = 'assets/js/hubspot-forms.js';
 
 /* Properties HubSpot ships with - never create these. */
-const STANDARD = new Set(['email', 'firstname', 'lastname', 'company', 'website', 'phone']);
+const STANDARD = new Set(['email', 'firstname', 'lastname', 'company', 'website', 'phone', 'jobtitle']);
 
 /* Honeypot decoys - the same list as TRAPS in hubspot-forms.js, which never
    sends them. A form field for one would only ever collect bot input. */
@@ -62,11 +62,12 @@ const TRAPS = new Set(['bot-field', 'hbh-leave-blank']);
 
 /* Which form lives where, and the key it uses in the FORMS table of the script. */
 const FORMS = [
-  /* Rebuilt for the expanded intake form (residence, companion, requested
-     services, mobility, "how may we be of service"). A new field cannot be
-     added to an existing HubSpot form, so this is deliberately a new name:
-     `--write` creates it and pastes the new GUID into hubspot-forms.js. */
-  { key: 'journey-enquiry',  file: 'contact.html',       hsName: 'Website: journey enquiry v2' },
+  /* Rebuilt for the enquiry routes (general journey, Executive & Private
+     Client proposal, oncology second opinion) and their new fields. A new field
+     cannot be added to an existing HubSpot form, so this is deliberately a new
+     name: `--write` creates it and pastes the new GUID into hubspot-forms.js.
+     v2 (564001be-...) is left in HubSpot, unused. */
+  { key: 'journey-enquiry',  file: 'contact.html',       hsName: 'Website: journey enquiry v3' },
   { key: 'provider-enquiry', file: 'for-providers.html', hsName: 'Website: provider enquiry' },
   { key: 'newsletter-form',  file: 'index.html',         hsName: 'Website: newsletter'       },
   /* The original "HBH Community Initiative Interest" was built in HubSpot's v4
@@ -197,7 +198,13 @@ function readFields(file, id) {
 }
 
 function field(name, label, fieldType, required) {
-  const f = { objectTypeId: '0-1', name, label, fieldType, required: !!required, hidden: false, dependentFields: [] };
+  /* HubSpot enforces a form's required flags itself, server-side. The journey
+     form shows different questions on different routes, so a question required
+     on one route is simply absent on another - and HubSpot would reject that
+     submission. The page does the per-route checking; HubSpot is only asked to
+     insist on the identity every submission carries. */
+  const hsRequired = !!required && (name === 'email' || name === 'firstname');
+  const f = { objectTypeId: '0-1', name, label, fieldType, required: hsRequired, hidden: false, dependentFields: [] };
 
   /* Only email, phone and number fields carry a validation object, and on those
      it is REQUIRED - leaving it off fails the whole form with
@@ -235,7 +242,15 @@ const PROPERTY_LABELS = {
   travel_dates: 'Preferred travel dates',
   provider_type: 'Provider type',
   locations: 'Locations served',
-  about: 'About the organization'
+  about: 'About the organization',
+  enquiry_route: 'Enquiry route',
+  preferred_contact_method: 'Preferred contact method',
+  experience_of_interest: 'Experience of interest',
+  area_of_interest: 'Area of interest',
+  payment_pathway: 'Payment pathway',
+  guest_count: 'Number of guests',
+  companion_details: 'Companion details',
+  confidentiality_agreement: 'Confidentiality agreement requested'
 };
 
 /* fieldType as the form draws it -> the type/fieldType pair a property needs. */

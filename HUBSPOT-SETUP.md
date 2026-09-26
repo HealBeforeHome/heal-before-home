@@ -115,9 +115,23 @@ The enquiry forms ask for one name; `hubspot-forms.js` splits it at the first sp
 `firstname`, `lastname`, `company`, `website`) ship with HubSpot; everything else below is
 a custom contact property created by the script.
 
-**journey-enquiry** — `firstname`, `lastname`, `email`, `care_type` (dropdown),
-`planning_stage` (dropdown), `care_detail`, `existing_arrangements`, `coordination_needs`
-(all multi-line), `travel_dates`.
+**journey-enquiry** (*Website: journey enquiry v3*) — one form, three routes, chosen
+by `enquiry_route` (dropdown). Every route sends `enquiry_route`, `firstname`,
+`lastname`, `email`, `residence` (and `residence_other`). Then:
+
+- *General journey:* `care_type`, `planning_stage` (dropdowns), `care_detail`,
+  `existing_arrangements` (multi-line), `requested_services` (checkboxes),
+  `travel_dates`, `companion`, `companion_count`, `mobility_accessibility`,
+  `how_may_we_serve`.
+- *Executive & Private Client proposal:* `preferred_contact_method`, `phone`,
+  `jobtitle`, `company`, `experience_of_interest`, `area_of_interest`,
+  `payment_pathway` (dropdowns), `travel_dates`, `guest_count`, `companion_details`,
+  `confidentiality_agreement`.
+- *Oncology second opinion:* `preferred_contact_method`, `phone`,
+  `confidentiality_agreement` only — no package, benefit or travel questions.
+
+Fields on another route are disabled in the page and never sent, so the HubSpot form
+marks only `email` and `firstname` required; the page enforces the rest per route.
 
 **provider-enquiry** — `company`, `firstname`, `lastname`, `email`, `provider_type`
 (dropdown), `locations`, `about` (multi-line), `website`.
@@ -140,6 +154,11 @@ Multi-checkbox values are sent as one semicolon-joined string, which is the form
 submission API documents; HubSpot splits them back into separate selected values.
 
 ## Not done yet
+
+**Advisor notification for private proposals and oncology enquiries.** The brief
+expects the advisor to hear about these. Filter on the `enquiry_route` property in a
+HubSpot workflow (or set the form's notification recipients) — not something the
+script does.
 
 **Nobody is notified when an enquiry arrives.** The forms were created with an empty
 notification list, so submissions land silently. Set it per form under
