@@ -1128,8 +1128,12 @@ p.area-back{ margin-bottom:clamp(1.75rem,3vw,2.75rem); }
 .acc-trigger[aria-expanded="true"] .acc-icon::after{ transform:rotate(0deg); }
 .acc-panel{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .4s var(--ease); }
 .acc-panel > div{ overflow:hidden; visibility:hidden; transition:visibility .4s var(--ease); }
-.acc-item.is-open .acc-panel > div{ visibility:visible; }
-.acc-item.is-open .acc-panel{ grid-template-rows:1fr; }
+/* Child combinators, not descendant: accordions nest (the Complex Journey
+   Planning drawer sits inside "Explore Your Journey" on the home page), and a
+   descendant selector let an open outer item force every panel inside it open,
+   leaving the inner drawer's own button unable to close it. */
+.acc-item.is-open > .acc-panel > div{ visibility:visible; }
+.acc-item.is-open > .acc-panel{ grid-template-rows:1fr; }
 .acc-panel p,.acc-panel ul{ color:var(--ink-muted); max-width:76ch; }
 .acc-panel > div > *:first-child{ padding-top:.15rem; }
 .acc-panel > div > *:last-child{ margin-bottom:1.4rem; }

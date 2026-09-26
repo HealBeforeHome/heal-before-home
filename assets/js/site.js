@@ -491,8 +491,12 @@
      rather than through a fieldset, because collect() reads el.disabled and a
      control inside a disabled fieldset still reports false.
 
-     ?enquiry=proposal|oncology picks the route on arrival, and
-     ?experience=<slug> preselects the experience the visitor came from.
+     The buttons that lead here name the route in the fragment:
+       contact.html#proposal/<experience-slug>, #proposal, #oncology
+     A fragment, not a query string, because the clean-URL redirect
+     (contact.html -> /contact, on Cloudflare and on `npx serve`) drops the
+     query but browsers carry the fragment across it. ?enquiry=<route>&
+     experience=<slug> is still honoured for any link that uses it.
      --------------------------------------------------------- */
   var routeSelect = document.querySelector('[data-route-select]');
   if (routeSelect) {
@@ -536,20 +540,41 @@
       }
     };
 
-    var params = new URLSearchParams(window.location.search);
-    var wanted = params.get('enquiry');
-    if (wanted) {
-      Array.prototype.forEach.call(routeSelect.options, function (o) {
-        if (o.getAttribute('data-route') === wanted) routeSelect.value = o.value;
-      });
-    }
-    applyRoute(false);
+    /* Pick the route (and experience) a link asked for. Returns true when the
+       fragment named a route, so the caller can bring the form into view -
+       the fragment is not an element id, so the browser will not. */
+    var arrive = function (clearOnHide) {
+      var params = new URLSearchParams(window.location.search);
+      var fromHash = /^#(general|proposal|oncology)(?:\/([a-z0-9-]+))?$/i.exec(window.location.hash);
+      var wanted = fromHash ? fromHash[1].toLowerCase() : params.get('enquiry');
+      var slug = fromHash ? fromHash[2] : params.get('experience');
 
-    var slug = params.get('experience');
-    if (slug && routeForm) {
-      var match = routeForm.querySelector('option[data-slug="' + slug.replace(/[^a-z0-9-]/gi, '') + '"]');
-      if (match && !match.parentNode.disabled) match.parentNode.value = match.value;
-    }
+      if (wanted) {
+        Array.prototype.forEach.call(routeSelect.options, function (o) {
+          if (o.getAttribute('data-route') === wanted) routeSelect.value = o.value;
+        });
+      }
+      applyRoute(clearOnHide);
+
+      if (slug && routeForm) {
+        var match = routeForm.querySelector('option[data-slug="' + slug.replace(/[^a-z0-9-]/gi, '') + '"]');
+        if (match && !match.parentNode.disabled) match.parentNode.value = match.value;
+      }
+      return !!fromHash;
+    };
+
+    var showForm = function () {
+      var section = document.getElementById('enquiry');
+      if (section) section.scrollIntoView({ block: 'start' });
+    };
+
+    if (arrive(false)) showForm();
+
+    /* A route link followed while already on this page changes only the
+       fragment, so the page does not reload. */
+    window.addEventListener('hashchange', function () {
+      if (arrive(true)) showForm();
+    });
 
     routeSelect.addEventListener('change', function () { applyRoute(true); });
   }

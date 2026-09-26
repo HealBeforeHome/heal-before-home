@@ -178,8 +178,9 @@ Opening `index.html` straight off disk will load, but the nav links will not res
 - **The journey enquiry form needs provisioning (v3) before it will accept anything.**
   It now serves three routes from one form: a general journey, an Executive & Private
   Client proposal, and an oncology second opinion. The route is picked by the first
-  dropdown, or on arrival by `/contact?enquiry=proposal|oncology` (plus
-  `&experience=<slug>` from the homepage panels); `site.js` shows each route's fields and
+  dropdown, or on arrival by `/contact#proposal` or `/contact#oncology` (plus
+  `/<experience-slug>` from the homepage panels; a fragment, because the clean-URL
+  redirect drops a query string); `site.js` shows each route's fields and
   clears and disables the rest. The new fields need a new HubSpot form, so the GUID in
   `hubspot-forms.js` is blank until `node hubspot-provision.mjs --write` runs. Deploy
   only after that, `--inspect`, and a test submission on each route.

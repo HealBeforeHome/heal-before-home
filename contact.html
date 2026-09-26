@@ -84,8 +84,8 @@
   <!-- One form, three routes. "What would you like to discuss?" decides which
        blocks marked data-routes are shown; site.js clears and disables the rest,
        so a hidden question is neither validated nor sent. The homepage proposal
-       buttons arrive with ?enquiry=proposal&experience=<slug>, the oncology page
-       with ?enquiry=oncology. Without JavaScript every block shows. -->
+       buttons arrive with #proposal/<experience-slug>, the oncology page with
+       #oncology (see "Enquiry routes" in site.js for why a fragment). Without JavaScript every block shows. -->
   <section class="section anchor-offset" id="enquiry">
     <div class="wrap split split--40" style="align-items:start">
       <div class="split-body" data-reveal>
