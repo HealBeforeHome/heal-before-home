@@ -65,13 +65,12 @@
 <main id="main">
 
   <!-- ============ HERO ============ -->
-  <!-- PLACEHOLDER ASSET: replace with the approved Standards & Trust asset.
-       Drop it in as assets/img/hero-standards.webp and run rebuild-images.py. -->
   <section class="hero hero--page" aria-label="Standards and trust">
     <div class="hero-track" aria-hidden="true">
       <div class="hero-slide is-active">
         <picture>
-          <img src="assets/img/capiz-texture.webp" sizes="100vw" width="3600" height="252" alt="" fetchpriority="high" decoding="async">
+          <source media="(max-width:700px)" srcset="assets/img/hero-standards-760.webp">
+          <img src="assets/img/hero-standards.webp" srcset="assets/img/hero-standards-760.webp 760w, assets/img/hero-standards-1100.webp 1100w, assets/img/hero-standards.webp 1122w" sizes="100vw" width="1122" height="1402" alt="A Heal Before Home coordinator welcoming an arriving guest at the airport, a chauffeur waiting at the car" style="object-position:center 8%" fetchpriority="high" decoding="async">
         </picture>
       </div>
     </div>

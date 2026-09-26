@@ -245,6 +245,11 @@ const PROPERTY_LABELS = {
   about: 'About the organization',
   enquiry_route: 'Enquiry route',
   preferred_contact_method: 'Preferred contact method',
+  /* Deliberately NOT HubSpot's own `phone`: a form field for that property has
+     to be a "phone" field with its own validation settings, and a plain text
+     field for it fails the whole form with VALIDATION_ERROR. A text property
+     takes the number as typed; a workflow can copy it into Phone if wanted. */
+  telephone: 'Telephone',
   experience_of_interest: 'Experience of interest',
   area_of_interest: 'Area of interest',
   payment_pathway: 'Payment pathway',

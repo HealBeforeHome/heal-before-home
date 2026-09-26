@@ -191,14 +191,15 @@ Opening `index.html` straight off disk will load, but the nav links will not res
   named hotel, vehicle, spa and Canadian supplier is a *proposed* supplier until
   confirmed in writing. No prices are published; none should be until validated.
 
-- **Placeholder imagery.** Eleven slots currently render `capiz-texture.webp`. Find them
-  with `grep -rn "PLACEHOLDER ASSET" *.html`; each comment names the file to drop in.
-  They cover the Getting Started hero, the Recovery Experience hero and its home
-  preview, the Standards & Trust hero and its home preview, and the Oral &
-  Maxillofacial, Women's Health and Oncology Second Opinion page images plus their
-  three Areas of Care cards. Drop the
-  approved photo in under the filename the comment names and run `rebuild-images.py`,
-  which fixes `srcset`, `width` and `height` for you.
+- **Placeholder imagery.** Eight slots currently render `capiz-texture.webp`. Find them
+  with `grep -rn "PLACEHOLDER ASSET" *.html`. They cover the Recovery Experience and
+  Standards & Trust previews on the home page, and the Oral & Maxillofacial, Women's
+  Health and Oncology Second Opinion page images plus their three Areas of Care cards.
+  **`rebuild-images.py` cannot fill a placeholder on its own:** it only replaces a file
+  a page already points at, and these point at `capiz-texture.webp`. First change the
+  slot's `src` to the filename its comment names, then drop the photo in under that
+  name and run the script, which converts it, builds the smaller renditions and fixes
+  `srcset`, `width` and `height`.
 - **`/standards-trust` is deliberately short.** It carries only what the approved
   source page carries — the H1, one intro paragraph and Our Promise — plus the standard
   CTA band. Part 3 of the handoff describes four Our Promise items and six further

@@ -123,11 +123,11 @@ by `enquiry_route` (dropdown). Every route sends `enquiry_route`, `firstname`,
   `existing_arrangements` (multi-line), `requested_services` (checkboxes),
   `travel_dates`, `companion`, `companion_count`, `mobility_accessibility`,
   `how_may_we_serve`.
-- *Executive & Private Client proposal:* `preferred_contact_method`, `phone`,
+- *Executive & Private Client proposal:* `preferred_contact_method`, `telephone`,
   `jobtitle`, `company`, `experience_of_interest`, `area_of_interest`,
   `payment_pathway` (dropdowns), `travel_dates`, `guest_count`, `companion_details`,
   `confidentiality_agreement`.
-- *Oncology second opinion:* `preferred_contact_method`, `phone`,
+- *Oncology second opinion:* `preferred_contact_method`, `telephone`,
   `confidentiality_agreement` only — no package, benefit or travel questions.
 
 Fields on another route are disabled in the page and never sent, so the HubSpot form

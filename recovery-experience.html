@@ -65,13 +65,12 @@
 <main id="main">
 
   <!-- ============ HERO ============ -->
-  <!-- PLACEHOLDER ASSET: replace with the approved accommodation-welcome hero photo.
-       Drop it in as assets/img/hero-recovery.webp and run rebuild-images.py. -->
   <section class="hero hero--page" aria-label="The recovery experience">
     <div class="hero-track" aria-hidden="true">
       <div class="hero-slide is-active">
         <picture>
-          <img src="assets/img/capiz-texture.webp" sizes="100vw" width="3600" height="252" alt="" fetchpriority="high" decoding="async">
+          <source media="(max-width:700px)" srcset="assets/img/hero-recovery-760.webp">
+          <img src="assets/img/hero-recovery.webp" srcset="assets/img/hero-recovery-760.webp 760w, assets/img/hero-recovery-1100.webp 1100w, assets/img/hero-recovery.webp 1195w" sizes="100vw" width="1195" height="896" alt="A caregiver adjusting the pillows for a guest resting in a hotel suite" style="object-position:center 15%" fetchpriority="high" decoding="async">
         </picture>
       </div>
     </div>

@@ -65,13 +65,12 @@
 <main id="main">
 
   <!-- ============ HERO ============ -->
-  <!-- PLACEHOLDER ASSET: replace with the approved client-researching-on-laptop hero photo.
-       Drop it in as assets/img/hero-getting-started.webp and run rebuild-images.py. -->
   <section class="hero hero--page" aria-label="Getting started">
     <div class="hero-track" aria-hidden="true">
       <div class="hero-slide is-active">
         <picture>
-          <img src="assets/img/capiz-texture.webp" sizes="100vw" width="3600" height="252" alt="" fetchpriority="high" decoding="async">
+          <source media="(max-width:700px)" srcset="assets/img/hero-getting-started-760.webp">
+          <img src="assets/img/hero-getting-started.webp" srcset="assets/img/hero-getting-started-760.webp 760w, assets/img/hero-getting-started-1100.webp 1100w, assets/img/hero-getting-started.webp 1600w" sizes="100vw" width="1600" height="900" alt="A woman at home on a video call with a Heal Before Home coordinator, a harbour skyline beyond the window" fetchpriority="high" decoding="async">
         </picture>
       </div>
     </div>
