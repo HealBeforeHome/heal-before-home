@@ -272,7 +272,10 @@ p:last-child{ margin-bottom:0; }
 }
 .btn:hover{ background:var(--green-deep); border-color:var(--green-deep); transform:translateY(-1px); }
 .btn--ghost{ background:transparent; color:var(--forest); border-color:var(--line-strong); }
-.btn--ghost:hover{ background:var(--green-deep); color:var(--ivory); border-color:var(--green-deep); }
+/* The brand green, like the light and outlined variants below. --green-deep
+   read as near-black against cream, so the fill did not register as green. */
+.btn--ghost:hover,
+.btn--ghost:focus-visible{ background:var(--cta-green); color:var(--ivory); border-color:var(--cta-green); }
 .btn--light{ background:var(--ivory); color:var(--forest); border-color:var(--ivory); }
 .btn--outline-light{ background:transparent; color:var(--ivory); border-color:rgba(255,255,240,.5); }
 
@@ -410,37 +413,32 @@ p:last-child{ margin-bottom:0; }
 .nav a.btn:hover,
 .nav a.btn:focus-visible{ color:var(--ivory); }
 
-/* About dropdown. The toggle wears the link styling so it reads as one more
-   nav item; the panel opens on hover or on click (aria-expanded, set by
-   site.js), so keyboard and touch visitors get it without hover. */
-.nav-group{ position:relative; }
+/* Collection dropdowns. The label is a real link to the collection page; the
+   chevron beside it is a separate disclosure button, so the parent can open its
+   page while keyboard and touch visitors still have a way into the panel. The
+   panel opens on hover or on the chevron (aria-expanded, set by site.js). */
+.nav-group{ position:relative; display:flex; align-items:center; gap:.2rem; }
+.nav-group--current .nav-group-link{ color:var(--forest); }
+.nav-group--current .nav-group-link::after{ transform:scaleX(1); }
 .nav-group-toggle{
-  display:inline-flex; align-items:center; gap:.45rem;
-  background:none; border:0; cursor:pointer; font:inherit;
-  font-size:.72rem; font-weight:400; letter-spacing:.1em; text-transform:uppercase;
-  color:var(--nav-ink); padding:.4rem 0; position:relative; white-space:nowrap;
+  display:inline-flex; align-items:center; justify-content:center;
+  width:24px; height:28px; padding:0;
+  background:none; border:0; cursor:pointer; color:var(--nav-ink);
   transition:color .3s var(--ease);
 }
 .nav-group-toggle::before{
-  content:""; order:1; width:5px; height:5px; margin-top:-3px;
+  content:""; width:5px; height:5px; margin-top:-3px;
   border-right:1px solid currentColor; border-bottom:1px solid currentColor;
   transform:rotate(45deg); transition:transform .3s var(--ease), margin .3s var(--ease);
 }
 .nav-group-toggle[aria-expanded="true"]::before{ transform:rotate(-135deg); margin-top:3px; }
-.nav-group-toggle::after{
-  content:""; position:absolute; left:0; right:0; bottom:0; height:1px;
-  background:var(--forest); transform:scaleX(0); transform-origin:left;
-  transition:transform .35s var(--ease);
-}
 .nav-group-toggle:hover,
-.nav-group--current .nav-group-toggle{ color:var(--forest); }
-.nav-group-toggle:hover::after,
-.nav-group--current .nav-group-toggle::after{ transform:scaleX(1); }
+.nav-group:hover .nav-group-toggle{ color:var(--forest); }
 
 /* padding-top bridges the gap under the toggle, so the pointer can travel
    down into the panel without leaving .nav-group and closing it. */
 .nav-sub{
-  position:absolute; top:100%; left:50%; padding-top:.9rem; min-width:13.5rem;
+  position:absolute; top:100%; left:50%; padding-top:.9rem; min-width:16rem;
   transform:translate(-50%,-6px); opacity:0; visibility:hidden; pointer-events:none;
   transition:opacity .25s var(--ease), transform .25s var(--ease), visibility .25s;
 }
@@ -475,11 +473,56 @@ p:last-child{ margin-bottom:0; }
 .nav-toggle[aria-expanded="true"] span::before{ top:0; transform:rotate(45deg); }
 .nav-toggle[aria-expanded="true"] span::after{ top:0; transform:rotate(-45deg); }
 
-.nav-whatsapp{ display:none; }
+/* The CTA sits outside the nav on desktop, after the contact icon, which is
+   where the header order puts it; the drawer carries its own copy, since the
+   nav itself becomes the drawer. Only one of the two is ever shown. */
+.nav-cta{ display:none; }
+.header-actions{ display:flex; align-items:center; gap:clamp(.6rem,1.2vw,1rem); flex:0 0 auto; }
+.header-cta{ padding:.72rem 1.4rem; }
+
+/* WhatsApp / telephone popover. Stays in the bar at every width, so it sits
+   outside the collapsing nav. A disclosure button like the dropdowns: the
+   panel is shown by aria-expanded, which site.js sets. */
+.contact-pop{ position:relative; }
+.contact-toggle{
+  display:flex; align-items:center; justify-content:center; width:44px; height:44px;
+  background:none; border:1px solid var(--line-strong); border-radius:50%;
+  color:var(--forest); cursor:pointer;
+  transition:background .3s var(--ease), color .3s var(--ease), border-color .3s var(--ease);
+}
+.contact-toggle:hover,
+.contact-toggle[aria-expanded="true"]{ background:var(--cta-green); border-color:var(--cta-green); color:var(--ivory); }
+.contact-panel{
+  position:absolute; top:calc(100% + .7rem); right:0; min-width:15.5rem;
+  display:grid; gap:.15rem; padding:1rem 1.1rem;
+  background:var(--cream); border:1px solid var(--line); border-radius:var(--radius);
+  box-shadow:0 12px 30px rgba(30,42,37,.1);
+  opacity:0; visibility:hidden; transform:translateY(-6px);
+  transition:opacity .25s var(--ease), transform .25s var(--ease), visibility .25s;
+}
+.contact-toggle[aria-expanded="true"] + .contact-panel{ opacity:1; visibility:visible; transform:none; }
+.contact-number{
+  margin:0 0 .45rem; padding-bottom:.6rem; border-bottom:1px solid var(--line-soft);
+  font-family:var(--display); font-size:1.3rem; letter-spacing:.02em; color:var(--forest); white-space:nowrap;
+}
+.contact-panel a{
+  display:flex; align-items:baseline; justify-content:space-between; gap:1rem;
+  padding:.55rem 0; text-decoration:none; font-size:.95rem; color:var(--ink-muted);
+  transition:color .3s var(--ease);
+}
+.contact-panel a span{
+  font-size:.68rem; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--sage);
+}
+.contact-panel a:hover{ color:var(--cta-green); }
+/* Desktop shows the number itself; the tap-to-call row is for phones.
+   Keep this width in step with the nav breakpoint below. */
+@media (min-width:1181px){ .contact-panel a[href^="tel:"]{ display:none; } }
 
 /* Keep this breakpoint in step with NAV_BREAKPOINT in site.js. */
 @media (max-width:1180px){
   .nav-toggle{ display:flex; }
+  .header-cta{ display:none; }
+  .nav .nav-cta{ display:flex; }
   .nav{
     position:fixed; left:0; right:0; top:clamp(66px,7vw,84px); bottom:auto;
     flex-direction:column; align-items:stretch; gap:0;
@@ -493,31 +536,24 @@ p:last-child{ margin-bottom:0; }
   .nav a{ padding:1.05rem 0; border-bottom:1px solid var(--line-soft); font-size:.85rem; }
   .nav a::after{ display:none; }
   .nav .btn{ margin-top:1.4rem; border:1px solid var(--forest); justify-content:center; padding:1rem; }
-  /* In the drawer the About group is an accordion row rather than a floating
-     panel: display:none while shut keeps its links out of the Tab order. */
+  /* In the drawer each collection is an accordion row rather than a floating
+     panel: the label keeps its link, the chevron takes a full-height target at
+     the end of the row, and display:none while shut keeps the sub-links out of
+     the Tab order. */
+  .nav-group{ flex-wrap:wrap; gap:0; }
+  .nav-group-link{ flex:1 1 auto; }
   .nav-group-toggle{
-    display:flex; width:100%; justify-content:space-between;
-    padding:1.05rem 0; border-bottom:1px solid var(--line-soft); font-size:.85rem;
+    width:48px; height:auto; align-self:stretch;
+    border-bottom:1px solid var(--line-soft);
   }
-  .nav-group-toggle::after{ display:none; }
-  .nav-group--current .nav-group-toggle{ color:var(--nav-ink); }
   .nav-sub,
   .nav-group-toggle[aria-expanded="true"] + .nav-sub{
-    position:static; display:none; padding:0 0 0 1.1rem; min-width:0;
+    position:static; display:none; flex:1 0 100%; padding:0 0 0 1.1rem; min-width:0;
     transform:none; opacity:1; visibility:visible; pointer-events:auto; transition:none;
   }
   .nav-group-toggle[aria-expanded="true"] + .nav-sub{ display:block; }
   .nav-sub::before{ display:none; }
   .nav-sub a{ padding:.95rem 0; }
-  /* The WhatsApp row is a mobile affordance only; on desktop the header is
-     already full and the enquiry form is the intended route. */
-  .nav-whatsapp{
-    display:flex; align-items:center; justify-content:center; gap:.6rem;
-    margin-top:1.1rem; padding:.9rem 1rem; border:0;
-    font-size:.8rem; letter-spacing:.14em; text-transform:uppercase;
-    color:var(--sage); text-decoration:none;
-  }
-  .nav-whatsapp:hover,.nav-whatsapp:focus-visible{ color:var(--cta-green); }
 }
 
 /* =========================================================
@@ -1221,6 +1257,63 @@ p.area-back{ margin-bottom:clamp(1.75rem,3vw,2.75rem); }
 }
 .check:hover span{ color:var(--cta-green); }
 
+/* ---- Staged journey form ----
+   Each .form-stage is one screen; site.js adds .form--staged and marks the
+   current one. Without JS the class never arrives and every stage shows. */
+.form-stage{ display:grid; gap:1.3rem; min-width:0; }
+.form--staged .form-stage:not(.is-current){ display:none; }
+/* Staged, the progress label already names the screen, so the stage's own
+   title is kept for screen readers (aria-labelledby) but not shown twice. */
+.form--staged .form-stage > .form-step{
+  position:absolute; width:1px; height:1px; margin:-1px; padding:0; border:0;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;
+}
+.form-stage .form-note p{ margin:0 0 .6rem; }
+.form-stage .form-note p:last-child{ margin:0; }
+.form-stage .form-note .link-arrow{ font-size:.72rem; }
+.form-progress{ display:grid; gap:.6rem; }
+.form-progress-label{ margin:0; font-size:.7rem; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--sage); }
+.form-progress-track{ height:2px; background:var(--line); border-radius:2px; overflow:hidden; }
+.form-progress-track span{ display:block; height:100%; width:0; background:var(--cta-green); transition:width .4s var(--ease); }
+.form--staged .form-legend{ margin-bottom:0; }
+.form-nav{ display:flex; flex-wrap:wrap; gap:.85rem; align-items:center; margin-top:.4rem; }
+.form-nav [data-stage-next],
+.form-nav [type="submit"]{ margin-left:auto; }
+.form-decline{ padding:1.4rem 1.5rem; background:var(--cream); border-left:2px solid var(--gold); border-radius:2px; }
+.form-decline h3{ font-size:var(--fs-h4); font-family:var(--display); font-weight:400; margin-bottom:.8rem; }
+.form-decline h3:focus{ outline:none; }
+.form-decline p{ color:var(--ink-muted); }
+
+/* ---- Journey modal ----
+   The shared form, opened from any page. A native <dialog>: showModal()
+   supplies the focus trap, Escape and the inert page behind it. */
+html.modal-open{ overflow:hidden; }
+.journey-modal{
+  width:min(660px, calc(100vw - 1.5rem)); max-width:none;
+  max-height:calc(100dvh - 1.5rem); margin:auto; padding:0; border:0;
+  border-radius:var(--radius-lg); background:var(--sand); color:var(--ink);
+  box-shadow:0 30px 80px -30px rgba(13,40,27,.55);
+  overflow:auto; overscroll-behavior:contain;
+}
+.journey-modal::backdrop{
+  background:rgba(13,40,27,.42);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+}
+.journey-modal-inner{ position:relative; padding:clamp(1.5rem,4.5vw,2.75rem); }
+.journey-modal .kicker{ margin-bottom:.6rem; padding-right:3rem; }
+.journey-modal h2{ font-size:var(--fs-h3); margin-bottom:1.4rem; padding-right:3rem; }
+.journey-modal-close{
+  position:absolute; top:clamp(.75rem,2vw,1.25rem); right:clamp(.75rem,2vw,1.25rem);
+  width:44px; height:44px; display:flex; align-items:center; justify-content:center;
+  background:none; border:1px solid var(--line-strong); border-radius:50%; cursor:pointer; color:var(--forest);
+  transition:background .3s var(--ease), color .3s var(--ease);
+}
+.journey-modal-close:hover{ background:var(--cta-green); color:var(--ivory); border-color:var(--cta-green); }
+.journey-modal .field input,
+.journey-modal .field select,
+.journey-modal .field textarea{ background:var(--cream); }
+.journey-modal .form-note{ background:var(--cream); }
+
 /* Submit feedback, announced through aria-live on the element itself. */
 .form-status{
   margin:0; padding:.9rem 1.1rem; border-radius:var(--radius);
@@ -1265,12 +1358,18 @@ p.area-back{ margin-bottom:clamp(1.75rem,3vw,2.75rem); }
    ========================================================= */
 .site-footer{ background:var(--green-footer); color:rgba(255,255,240,.68); padding-block:clamp(3rem,5vw,4.5rem) 2rem; }
 .footer-top{
-  display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:clamp(2rem,4vw,3.5rem);
-  padding-bottom:clamp(2rem,4vw,3rem); border-bottom:1px solid var(--line-light);
+  display:grid; grid-template-columns:1.3fr 1fr 1fr 1fr; gap:clamp(2rem,4vw,3.5rem);
+  padding-bottom:clamp(2.5rem,5vw,3.75rem); border-bottom:1px solid var(--line-light);
 }
-@media (max-width:820px){ .footer-top{ grid-template-columns:1fr; } }
+@media (max-width:980px){ .footer-top{ grid-template-columns:1fr 1fr; } .footer-brand{ grid-column:1 / -1; } }
+@media (max-width:560px){ .footer-top{ grid-template-columns:1fr; } }
 .footer-brand img{ height:60px; width:auto; margin-bottom:1.1rem; }
-.footer-brand p{ font-size:.95rem; color:rgba(255,255,240,.66); max-width:38ch; }
+.footer-brand p{ font-size:.95rem; color:rgba(255,255,240,.66); max-width:38ch; margin-bottom:.35rem; }
+.footer-brand .footer-name{
+  font-family:var(--display); font-size:1.05rem; letter-spacing:.26em; text-transform:uppercase;
+  color:var(--ivory);
+}
+.footer-brand .footer-tagline{ font-family:var(--display); font-style:italic; font-size:1.2rem; color:rgba(255,255,240,.74); }
 .footer-col h2{
   font-family:var(--sans); font-size:.68rem; font-weight:500; letter-spacing:.2em;
   text-transform:uppercase; color:rgba(255,255,240,.5); margin-bottom:1.1rem;
@@ -1283,10 +1382,13 @@ p.area-back{ margin-bottom:clamp(1.75rem,3vw,2.75rem); }
   align-items:center; padding-top:1.75rem; font-size:.84rem; color:rgba(255,255,240,.55);
 }
 .footer-bottom p{ margin:0; max-width:none; }
+.footer-legal{ list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:.4rem 1.6rem; }
+.footer-legal a{ color:rgba(255,255,240,.7); text-decoration:none; transition:color .3s var(--ease); }
+.footer-legal a:hover{ color:var(--ivory); }
 .footer-disclaimer{
-  margin-top:1.5rem; padding-top:1.4rem; border-top:1px solid var(--line-light);
-  font-size:.82rem; line-height:1.6; color:rgba(255,255,240,.55); max-width:92ch;
+  padding-block:clamp(1.5rem,3vw,2rem); border-bottom:1px solid var(--line-light);
 }
+.footer-disclaimer p{ font-size:.84rem; line-height:1.6; color:rgba(255,255,240,.58); max-width:92ch; margin-bottom:.5rem; }
 
 /* =========================================================
    Motion
@@ -1334,6 +1436,101 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
    copy together; these put the rhythm back without touching the step itself. */
 .journey-body .acc-panel p{ margin:0 0 1.1em; }
 .journey-body .acc-panel .feature-list{ margin:0 0 1.35em; }
+
+/* The short retainer note inside the Discover step. The full terms live on
+   /getting-started#complex-journey-retainer; this only points there. */
+.journey-note{ margin-top:1.6rem; padding:1.1rem 1.3rem; background:var(--cream); border-left:2px solid var(--gold); border-radius:2px; }
+.journey-note h4{
+  font-family:var(--display); font-weight:300; letter-spacing:-.01em;
+  font-size:clamp(1.18rem,1.06rem + .42vw,1.45rem); line-height:1.18; margin:0 0 .55rem;
+}
+.journey-body .journey-note p{ margin:0 0 .9rem; }
+.journey-body .journey-note p:last-child{ margin:0; }
+
+/* ---- Collection pages (Philippines, BC) ---- */
+.hero--page .hero-sub + .hero-sub{ margin-top:1rem; }
+.hero--page .hero-tagline{ margin-bottom:1.1rem; line-height:1.3; }
+
+/* The italic strapline under a section heading ("Bespoke Journeys..."). */
+.collection-strap{
+  font-family:var(--display); font-style:italic; font-weight:300;
+  font-size:clamp(1.25rem,1.05rem + .7vw,1.7rem); line-height:1.3; color:var(--forest); margin-bottom:1.1rem;
+}
+
+/* Photo cards that each carry their own drawer. The drawer row is pushed to
+   the foot of the card (margin-top:auto below), so the closed rows line up
+   across the grid whatever the length of the copy above them. */
+.collection-card:hover{ transform:none; }
+.collection-meta{
+  font-size:.74rem !important; font-weight:500; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--sage) !important; line-height:1.55;
+}
+.collection-meta span{ margin-inline:.3em; color:var(--gold); }
+.card-drawer{ margin-top:auto; border-top:1px solid var(--line); border-bottom:0; }
+.card-drawer-head{ margin:0 !important; max-width:none; }
+.card-drawer .acc-trigger{
+  align-items:center; padding:1rem 0 .2rem;
+  font-family:var(--sans); font-size:.76rem; font-weight:500; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--forest);
+}
+.card-drawer .acc-icon{ margin-top:0; }
+.card-drawer .acc-panel > div > *:first-child{ padding-top:.9rem; }
+.card-drawer .acc-panel p{ font-size:.95rem; }
+
+/* Four numbered reasons. */
+.reason-grid{ gap:clamp(1.5rem,3vw,2.5rem); }
+.reason{ border-top:1px solid var(--line); padding-top:1.25rem; }
+.reason-num{ display:block; font-family:var(--display); font-size:1.6rem; color:var(--sage); line-height:1; margin-bottom:.9rem; }
+.reason h3{ font-size:var(--fs-h4); font-family:var(--display); font-weight:400; margin-bottom:.5rem; }
+.reason p{ font-size:.97rem; color:var(--ink-muted); margin:0; }
+
+/* 2 x 2 photo tiles carrying a place name only. */
+.dest-grid--2{ grid-template-columns:repeat(2,1fr); }
+@media (max-width:560px){ .dest-grid--2{ grid-template-columns:1fr; } }
+.dest--name .dest-label h3{ font-size:.82rem; margin:0; }
+
+/* A quiet inset block for short copy - capacity notes, benefits cards. */
+.panel{
+  background:var(--cream); border:1px solid var(--line-soft); border-radius:var(--radius-lg);
+  padding:clamp(1.25rem,2.4vw,1.9rem);
+}
+.section:not(.section--sand):not(.section--dark) .panel{ background:var(--sand); }
+.panel h3{ font-size:var(--fs-h4); font-family:var(--display); font-weight:400; margin-bottom:.55rem; }
+.panel p{ font-size:.97rem; color:var(--ink-muted); }
+.panel p strong{ color:var(--forest); font-weight:500; }
+.panel--dark{ background:rgba(255,255,240,.05) !important; border-color:var(--line-light); }
+.panel--dark p{ color:rgba(255,255,240,.78); }
+
+/* Accordion on a dark band. */
+.accordion--dark,
+.accordion--dark .acc-item{ border-color:var(--line-light); }
+.accordion--dark .acc-trigger{ color:var(--ivory); }
+.accordion--dark .acc-trigger:hover{ color:rgba(255,255,240,.75); }
+.accordion--dark .acc-icon::before,
+.accordion--dark .acc-icon::after{ background:rgba(255,255,240,.7); }
+.section--dark .acc-panel p{ color:rgba(255,255,240,.8); }
+
+/* The destination brief inside its drawer. */
+.brief h4{
+  font-family:var(--display); font-weight:400; font-size:var(--fs-h4); letter-spacing:-.005em;
+  margin:1.8rem 0 .6rem; color:var(--forest);
+}
+.brief h4:first-child{ margin-top:.4rem; }
+.acc-panel h4{ margin-top:1.5rem; }
+/* A link-styled button (the drawer's own close control). */
+.link-arrow--button{ background:none; border-top:0; border-left:0; border-right:0; cursor:pointer; padding-inline:0; font-family:var(--sans); }
+
+/* Four photo cards in one row only on wide screens; they are text-heavy. */
+@media (max-width:1180px){ .grid--4-wide{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:620px){ .grid--4-wide{ grid-template-columns:1fr; } }
+
+/* A small tracked label that opens a run of content inside a section - "What
+   We Coordinate", "Five Distinct Destination Tracks". */
+.section-subhead{
+  font-family:var(--sans); font-size:.74rem; font-weight:600; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--sage); margin:0 0 1.25rem;
+}
+.section--dark .section-subhead{ color:rgba(255,255,240,.6); }
 
 /* ---- Executive & Private Client experience panels ----
    Full-width editorial panels, deliberately not the small .card: each carries a
@@ -1496,4 +1693,29 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
   .valuebar-item h2,
   .dest-label h3,
   .footer-col h2{ font-size:.75rem; letter-spacing:.16em; }
+}
+
+/* Insights article byline (see _templates/insight-article.html). */
+.article-meta{ font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--sage); margin-top:1.25rem; }
+
+/* Insights cards (landing page and home). The title carries the link; the
+   image and arrow repeat it for the pointer only. */
+.insight-grid .card-body h2.insight-title,
+.insight-grid .card-body h3{
+  font-family:var(--display); font-weight:400; font-size:clamp(1.3rem,1.1rem + .7vw,1.7rem);
+  line-height:1.2; letter-spacing:-.005em; margin-bottom:.7rem;
+}
+.insight-grid .card-body h2 a,
+.insight-grid .card-body h3 a{ text-decoration:none; color:var(--forest); transition:color .3s var(--ease); }
+.insight-grid .card-body h2 a:hover,
+.insight-grid .card-body h3 a:hover{ color:var(--sage); }
+.insight-grid .card-body .link-arrow{ margin-top:auto; align-self:flex-start; }
+
+/* Article pages. */
+.article-head h1{ font-size:clamp(2rem,1.3rem + 2.6vw,3.4rem); max-width:22ch; }
+.article-body h2{ font-size:clamp(1.45rem,1.2rem + 1vw,2rem); margin-top:clamp(2rem,4vw,2.75rem); }
+.article-body p{ font-size:clamp(1.02rem,.98rem + .2vw,1.12rem); }
+.article-body .article-note{
+  margin-top:clamp(2.25rem,4vw,3rem); padding-top:1.25rem; border-top:1px solid var(--line);
+  font-size:.86rem; color:var(--sage);
 }

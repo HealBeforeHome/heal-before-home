@@ -142,6 +142,32 @@
   }
 
   /* ---------------------------------------------------------
+     WhatsApp / telephone popover in the header. A disclosure like the
+     dropdowns: the button's aria-expanded shows the panel through CSS.
+     Escape and a click anywhere else shut it.
+     --------------------------------------------------------- */
+  var contactBtn = document.querySelector('.contact-toggle');
+  if (contactBtn) {
+    var contactPop = contactBtn.closest('.contact-pop');
+    var setContact = function (open) { contactBtn.setAttribute('aria-expanded', String(open)); };
+    contactBtn.addEventListener('click', function () {
+      setContact(contactBtn.getAttribute('aria-expanded') !== 'true');
+    });
+    document.addEventListener('click', function (e) {
+      if (!contactPop.contains(e.target)) setContact(false);
+    });
+    contactPop.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || contactBtn.getAttribute('aria-expanded') !== 'true') return;
+      e.stopPropagation();
+      setContact(false);
+      contactBtn.focus();
+    });
+    contactPop.addEventListener('focusout', function (e) {
+      if (e.relatedTarget && !contactPop.contains(e.relatedTarget)) setContact(false);
+    });
+  }
+
+  /* ---------------------------------------------------------
      Hero carousel
      Headline and CTAs stay fixed; only the imagery rotates.
      --------------------------------------------------------- */
@@ -377,10 +403,26 @@
     });
   });
 
+  /* A close control at the foot of a long drawer (the destination brief):
+     data-accordion-close names the panel. Shutting it would leave the reader
+     stranded far below the collapsed row, so bring the row back into view. */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-accordion-close]'), function (btn) {
+    btn.addEventListener('click', function () {
+      var panel = document.getElementById(btn.getAttribute('data-accordion-close'));
+      var item = panel && panel.closest('.acc-item');
+      var trigger = item && item.querySelector('.acc-trigger');
+      if (!trigger) return;
+      item.classList.remove('is-open');
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.focus({ preventScroll: true });
+      trigger.scrollIntoView({ block: 'center' });
+    });
+  });
+
   /* ---------------------------------------------------------
-     Deep links to an accordion. The area-of-care pages link at the Complex
-     Journey Planning drawer on the home page, so a hash naming an .acc-item
-     (or a block containing one) opens it rather than landing on a shut row.
+     Deep links to an accordion. A hash naming an .acc-item (/#journey, which
+     the old /the-experience URL redirects to) or something inside one opens
+     it rather than landing on a shut row.
      --------------------------------------------------------- */
   function openItem(item) {
     if (!item || item.classList.contains('is-open')) return;
@@ -395,7 +437,14 @@
     var target;
     try { target = document.getElementById(decodeURIComponent(hash.slice(1))); } catch (e) { return; }
     if (!target) return;
-    var item = target.classList.contains('acc-item') ? target : target.querySelector('.acc-item');
+    /* The hash may name the item itself, a block wrapping one, or something
+       inside one - the retainer note sits within the home page's journey
+       drawer, and old links still point at it. */
+    /* Only a hash that names a drawer, or something inside one, opens it. A
+       hash naming a section that merely contains drawers (#private-collections,
+       #destination-sanctuaries, #corporate-benefits, #complex-journey-retainer)
+       lands on the section with every drawer still shut, as the brief asks. */
+    var item = target.classList.contains('acc-item') ? target : target.closest('.acc-item');
     if (!item) return;
     /* Open the ancestors first. Since the home page put the journey steps behind
        their own drawer, the Complex Journey Planning item is nested one level
@@ -406,7 +455,7 @@
     for (var i = 0; i < chain.length; i++) openItem(chain[i]);
     /* The outer panel animates its height, so the browser's own scroll ran
        against a collapsed box. Re-aim once the panel has settled. */
-    if (chain.length > 1 && typeof target.scrollIntoView === 'function') {
+    if ((chain.length > 1 || item.contains(target) && target !== item) && typeof target.scrollIntoView === 'function') {
       setTimeout(function () { target.scrollIntoView({ block: 'start' }); }, 420);
     }
   }
@@ -454,34 +503,39 @@
      Conditional form fields. A control carrying data-controls="<id>" and
      data-show-value="<value>" reveals that block only while it holds that
      value. Hiding also clears the block, so hubspot-forms.js never posts an
-     answer to a question the guest can no longer see.
+     answer to a question the guest can no longer see. Takes a root so the
+     journey form can be wired again after the modal loads it.
      --------------------------------------------------------- */
-  Array.prototype.forEach.call(document.querySelectorAll('[data-controls]'), function (control) {
-    var target = document.getElementById(control.getAttribute('data-controls'));
-    if (!target) return;
-    var want = control.getAttribute('data-show-value');
+  function initConditionals(root) {
+    Array.prototype.forEach.call(root.querySelectorAll('[data-controls]'), function (control) {
+      if (control.__hbhControls) return;
+      control.__hbhControls = true;
+      var target = document.getElementById(control.getAttribute('data-controls'));
+      if (!target) return;
+      var want = control.getAttribute('data-show-value');
 
-    function sync(clearOnHide) {
-      var show = control.value === want;
-      if (!show && clearOnHide) {
-        Array.prototype.forEach.call(target.querySelectorAll('input, select, textarea'), function (f) {
-          if (f.type === 'checkbox' || f.type === 'radio') f.checked = false;
-          else f.value = '';
-        });
+      function sync(clearOnHide) {
+        var show = control.value === want;
+        if (!show && clearOnHide) {
+          Array.prototype.forEach.call(target.querySelectorAll('input, select, textarea'), function (f) {
+            if (f.type === 'checkbox' || f.type === 'radio') f.checked = false;
+            else f.value = '';
+          });
+        }
+        target.hidden = !show;
       }
-      target.hidden = !show;
-    }
 
-    control.addEventListener('change', function () { sync(true); });
-    /* On load the browser may have restored a previous selection. */
-    sync(false);
-  });
+      control.addEventListener('change', function () { sync(true); });
+      /* On load the browser may have restored a previous selection. */
+      sync(false);
+    });
+  }
+  initConditionals(document);
 
   /* ---------------------------------------------------------
-     Enquiry routes. The contact form serves three enquiries - a general
-     journey, an Executive & Private Client proposal and an oncology second
-     opinion - from one HubSpot form. The <select data-route-select> picks the
-     route from each option's data-route; every element carrying
+     The Begin Your Journey form. One form serves every collection:
+     "Which collection are you exploring?" (the <select data-route-select>)
+     picks the route from each option's data-route, and every element carrying
      data-routes="<route> <route>" shows only on the routes it names.
 
      A hidden block has its controls cleared and DISABLED, not just hidden:
@@ -491,28 +545,45 @@
      rather than through a fieldset, because collect() reads el.disabled and a
      control inside a disabled fieldset still reports false.
 
-     The buttons that lead here name the route in the fragment:
-       contact.html#proposal/<experience-slug>, #proposal, #oncology
-     A fragment, not a query string, because the clean-URL redirect
-     (contact.html -> /contact, on Cloudflare and on `npx serve`) drops the
-     query but browsers carry the fragment across it. ?enquiry=<route>&
-     experience=<slug> is still honoured for any link that uses it.
+     On top of that sits a stepper: each [data-stage] is one screen, shown two
+     or three questions at a time with Back / Continue. Route-hidden stages
+     drop out of the sequence, so the count follows the collection chosen.
+     The stepper hides stages with a class, never with `hidden`, which belongs
+     to the routes.
+
+     Links name the collection in the fragment - contact.html#bc/corporate -
+     not a query string, because the clean-URL redirect (contact.html ->
+     /contact) drops the query but browsers carry the fragment across it.
      --------------------------------------------------------- */
-  var routeSelect = document.querySelector('[data-route-select]');
-  if (routeSelect) {
-    var routeForm = routeSelect.form;
-    var routeBlocks = document.querySelectorAll('[data-routes]');
-    var submitBtn = routeForm && routeForm.querySelector('[type="submit"]');
+  var ROUTE_HASH = /^#(philippines|bc|unsure|oncology)(?:\/([a-z0-9-]+))?$/i;
+
+  function initJourneyForm(form) {
+    if (!form) return null;
+    if (form.__hbhJourney) return form.__hbhJourney;
+    var routeSelect = form.querySelector('[data-route-select]');
+    if (!routeSelect) return null;
+
+    var submitBtn = form.querySelector('[type="submit"]');
     var submitDefault = submitBtn ? submitBtn.textContent : '';
+
+    /* Routes offered only when a link asks for them (the oncology page). They
+       stay in the markup so hubspot-provision.mjs sees the option. */
+    var optional = {};
+    Array.prototype.forEach.call(routeSelect.querySelectorAll('option[data-optional-route]'), function (o) {
+      optional[o.getAttribute('data-route')] = o;
+      if (routeSelect.value !== o.value) o.parentNode.removeChild(o);
+    });
 
     var routeOf = function () {
       var opt = routeSelect.options[routeSelect.selectedIndex];
-      return (opt && opt.getAttribute('data-route')) || 'general';
+      return (opt && opt.getAttribute('data-route')) || 'none';
     };
 
     var applyRoute = function (clearOnHide) {
       var route = routeOf();
-      Array.prototype.forEach.call(routeBlocks, function (block) {
+      /* The whole document, not just the form: on /contact the column beside
+         the form changes with the route too. */
+      Array.prototype.forEach.call(document.querySelectorAll('[data-routes]'), function (block) {
         var show = (' ' + block.getAttribute('data-routes') + ' ').indexOf(' ' + route + ' ') !== -1;
         block.hidden = !show;
         var controls = block.matches('input, select, textarea') ? [block] : block.querySelectorAll('input, select, textarea');
@@ -533,50 +604,249 @@
         }
       });
       if (submitBtn) submitBtn.textContent = submitBtn.getAttribute('data-text-' + route) || submitDefault;
-      if (routeForm) {
-        var success = routeForm.getAttribute('data-success-' + route);
-        if (success) routeForm.setAttribute('data-success', success);
-        else routeForm.removeAttribute('data-success');
+      var success = form.getAttribute('data-success-' + route);
+      if (success) form.setAttribute('data-success', success);
+      else form.removeAttribute('data-success');
+    };
+
+    /* ---- stepper ---- */
+    var stages = Array.prototype.slice.call(form.querySelectorAll('[data-stage]:not([data-stage="decline"])'));
+    var decline = form.querySelector('[data-stage="decline"]');
+    var residence = form.querySelector('[name="residence"]');
+    var backBtn = form.querySelector('[data-stage-back]');
+    var nextBtn = form.querySelector('[data-stage-next]');
+    var progress = form.querySelector('[data-stage-progress]');
+    var progressLabel = progress && progress.querySelector('.form-progress-label');
+    var progressBar = progress && progress.querySelector('.form-progress-track span');
+    var current = 0;
+    var declined = false;
+
+    form.classList.add('form--staged');
+    if (progress) progress.hidden = false;
+
+    var live = function () { return stages.filter(function (s) { return !s.hidden; }); };
+
+    var render = function (moveFocus) {
+      var list = live();
+      if (current > list.length - 1) current = list.length - 1;
+      if (current < 0) current = 0;
+      var stage = list[current];
+      var last = current === list.length - 1;
+      stages.forEach(function (s) { s.classList.toggle('is-current', s === stage && !declined); });
+      if (decline) decline.hidden = !declined;
+      if (backBtn) backBtn.hidden = current === 0 && !declined;
+      if (nextBtn) nextBtn.hidden = last || declined;
+      if (submitBtn) submitBtn.hidden = !last || declined;
+      if (progressLabel) {
+        var title = stage && stage.querySelector('.form-step');
+        progressLabel.textContent = declined ? '' :
+          'Step ' + (current + 1) + ' of ' + list.length + (title ? ' · ' + title.textContent : '');
+      }
+      if (progressBar) progressBar.style.width = declined ? '100%' : ((current + 1) / list.length * 100) + '%';
+      if (moveFocus) {
+        var target = declined ? decline.querySelector('h3') :
+          stage.querySelector('input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled])');
+        if (target) {
+          if (declined) target.setAttribute('tabindex', '-1');
+          target.focus({ preventScroll: true });
+          var box = form.closest('.journey-modal') || form;
+          if (box === form && form.getBoundingClientRect().top < 0) form.scrollIntoView({ block: 'start' });
+        }
       }
     };
 
-    /* Pick the route (and experience) a link asked for. Returns true when the
-       fragment named a route, so the caller can bring the form into view -
-       the fragment is not an element id, so the browser will not. */
-    var arrive = function (clearOnHide) {
-      var params = new URLSearchParams(window.location.search);
-      var fromHash = /^#(general|proposal|oncology)(?:\/([a-z0-9-]+))?$/i.exec(window.location.hash);
-      var wanted = fromHash ? fromHash[1].toLowerCase() : params.get('enquiry');
-      var slug = fromHash ? fromHash[2] : params.get('experience');
+    /* Checks only the current screen; the submit handler in hubspot-forms.js
+       checks the whole form again at the end. */
+    var stageValid = function (stage) {
+      var els = stage.querySelectorAll('input, select, textarea');
+      for (var i = 0; i < els.length; i++) {
+        var el = els[i];
+        if (el.willValidate && !el.checkValidity()) {
+          el.focus();
+          if (el.reportValidity) el.reportValidity();
+          return false;
+        }
+      }
+      return true;
+    };
 
-      if (wanted) {
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function () {
+        var stage = live()[current];
+        if (!stage || !stageValid(stage)) return;
+        /* Philippines residents cannot continue a Philippines enquiry. */
+        if (stage.getAttribute('data-stage') === 'residence' && residence &&
+            residence.value === 'Philippines' && routeOf() === 'philippines') {
+          declined = true;
+          render(true);
+          return;
+        }
+        current++;
+        render(true);
+      });
+    }
+    if (backBtn) {
+      backBtn.addEventListener('click', function () {
+        if (declined) declined = false;
+        else current--;
+        render(true);
+      });
+    }
+
+    /* Enter in a text field would submit the whole form from any screen. On
+       every screen but the last it means Continue. */
+    form.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' || !e.target.matches('input') || e.target.type === 'checkbox') return;
+      if (nextBtn && !nextBtn.hidden) {
+        e.preventDefault();
+        nextBtn.click();
+      }
+    });
+
+    routeSelect.addEventListener('change', function () {
+      applyRoute(true);
+      render(false);
+    });
+
+    /* Pick the collection (and option) a link asked for. Returns true when the
+       fragment named one. */
+    var arrive = function (hash, clearOnHide) {
+      var m = ROUTE_HASH.exec(hash || '');
+      if (m) {
+        var wanted = m[1].toLowerCase();
+        if (optional[wanted] && !optional[wanted].parentNode) routeSelect.appendChild(optional[wanted]);
         Array.prototype.forEach.call(routeSelect.options, function (o) {
           if (o.getAttribute('data-route') === wanted) routeSelect.value = o.value;
         });
       }
       applyRoute(clearOnHide);
-
-      if (slug && routeForm) {
-        var match = routeForm.querySelector('option[data-slug="' + slug.replace(/[^a-z0-9-]/gi, '') + '"]');
+      if (m && m[2]) {
+        var match = form.querySelector('option[data-slug="' + m[2].replace(/[^a-z0-9-]/gi, '') + '"]');
         if (match && !match.parentNode.disabled) match.parentNode.value = match.value;
       }
-      return !!fromHash;
+      return !!m;
     };
 
+    var reset = function () {
+      current = 0;
+      declined = false;
+      render(false);
+    };
+
+    applyRoute(false);
+    render(false);
+
+    form.__hbhJourney = { arrive: arrive, reset: reset, render: render };
+    return form.__hbhJourney;
+  }
+
+  /* On /contact the form is on the page itself. */
+  var pageForm = document.getElementById('journey-enquiry');
+  if (pageForm) {
+    var pageJourney = initJourneyForm(pageForm);
     var showForm = function () {
       var section = document.getElementById('enquiry');
       if (section) section.scrollIntoView({ block: 'start' });
     };
+    if (pageJourney) {
+      if (pageJourney.arrive(window.location.hash, false)) showForm();
+      /* A journey link followed while already on this page changes only the
+         fragment, so the page does not reload. */
+      window.addEventListener('hashchange', function () {
+        if (pageJourney.arrive(window.location.hash, true)) {
+          pageJourney.reset();
+          showForm();
+        }
+      });
+    }
+  }
 
-    if (arrive(false)) showForm();
+  /* ---------------------------------------------------------
+     Every other page opens the same form in a modal. The markup is not
+     duplicated into each page: on the first click it is fetched from
+     /contact, so there is still exactly one form to maintain, and the link
+     itself still goes to /contact if anything here fails (or without JS).
+     --------------------------------------------------------- */
+  var modal = null;
+  var modalForm = null;
+  var modalLoad = null;
 
-    /* A route link followed while already on this page changes only the
-       fragment, so the page does not reload. */
-    window.addEventListener('hashchange', function () {
-      if (arrive(true)) showForm();
+  function buildModal() {
+    var d = document.createElement('dialog');
+    d.className = 'journey-modal';
+    d.setAttribute('aria-labelledby', 'journey-modal-title');
+    d.innerHTML =
+      '<div class="journey-modal-inner">' +
+        '<button class="journey-modal-close" type="button" aria-label="Close">' +
+          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg>' +
+        '</button>' +
+        '<span class="kicker">Heal Before Home</span>' +
+        '<h2 id="journey-modal-title">Begin Your Journey</h2>' +
+        '<div class="journey-modal-body"></div>' +
+      '</div>';
+    document.body.appendChild(d);
+    d.querySelector('.journey-modal-close').addEventListener('click', function () { d.close(); });
+    /* A click on the blurred backdrop lands on the dialog element itself. */
+    d.addEventListener('click', function (e) { if (e.target === d) d.close(); });
+    d.addEventListener('close', function () { document.documentElement.classList.remove('modal-open'); });
+    return d;
+  }
+
+  function loadModalForm() {
+    if (modalLoad) return modalLoad;
+    modalLoad = fetch('contact.html', { credentials: 'same-origin' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.text();
+      })
+      .then(function (html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var wrap = doc.getElementById('journey-form');
+        if (!wrap) throw new Error('journey form not found');
+        wrap = document.importNode(wrap, true);
+        modal.querySelector('.journey-modal-body').appendChild(wrap);
+        modalForm = wrap.querySelector('form');
+        initConditionals(wrap);
+        var journey = initJourneyForm(modalForm);
+        if (!journey) throw new Error('journey form did not initialise');
+        if (window.HBHForms) window.HBHForms.wire(modalForm);
+        return journey;
+      });
+    modalLoad.catch(function () { modalLoad = null; });
+    return modalLoad;
+  }
+
+  function openJourney(link) {
+    var href = link.getAttribute('href') || '';
+    var hash = href.indexOf('#') === -1 ? '' : href.slice(href.indexOf('#'));
+    if (!modal) modal = buildModal();
+    loadModalForm().then(function (journey) {
+      /* A submitted form stays on its thank-you; otherwise start from the top
+         with whatever the link preselects. */
+      if (!modalForm.hidden) {
+        journey.arrive(hash, true);
+        journey.reset();
+      }
+      if (!modal.open) {
+        document.documentElement.classList.add('modal-open');
+        modal.showModal();
+      }
+      var first = modalForm.hidden ? null : modalForm.querySelector('.form-stage.is-current input, .form-stage.is-current select');
+      if (first) first.focus();
+    }).catch(function (err) {
+      if (window.console) console.warn('Journey form: falling back to the contact page.', err);
+      window.location.href = link.href;
     });
+  }
 
-    routeSelect.addEventListener('change', function () { applyRoute(true); });
+  if (!pageForm && typeof HTMLDialogElement === 'function' && window.fetch && window.DOMParser) {
+    document.addEventListener('click', function (e) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var link = e.target.closest && e.target.closest('a.btn--journey, a[data-journey]');
+      if (!link || !/^contact\.html(#|$)/.test(link.getAttribute('href') || '')) return;
+      e.preventDefault();
+      openJourney(link);
+    });
   }
 
   /* ---------------------------------------------------------

@@ -28,6 +28,10 @@ use `https://www.healbeforehome.com`.
 | URL | File |
 | --- | --- |
 | `/` | `index.html` |
+| `/philippines-medical-travel` | `philippines-medical-travel.html` (collection page; header dropdown) |
+| `/bc-executive-collection` | `bc-executive-collection.html` (collection page with the Vancouver Pilot; header dropdown) |
+| `/insights` | `insights.html` (landing page; articles from `_templates/insight-article.html`) |
+| `/planning-medical-wellness-journey-philippines`, `/executive-recovery-more-than-a-wellness-benefit` | the two launch Insights articles |
 | `/getting-started` | `getting-started.html` |
 | `/areas-of-care` | `areas-of-care.html` |
 | `/recovery-experience` | `recovery-experience.html` |
@@ -40,15 +44,14 @@ use `https://www.healbeforehome.com`.
 | `/meet-the-founder` | `meet-the-founder.html` |
 | `/community-initiative-interest` | `community-initiative-interest.html` |
 | `/oncology-second-opinion` | `oncology-second-opinion.html` (linked from Areas of Care) |
-| `/corporate-offerings` | `corporate-offerings.html` (Canadian itineraries; About menu and footer) |
-| `/dental-care`, `/oral-maxillofacial-surgery`, `/hair-restoration`, `/fertility-reproductive-care`, `/women-s-health-healthy-aging`, `/aesthetic-reconstructive-health`, `/confidence-transition-coaching`, `/longevity-wellness`, `/executive-health`, `/interventional-radiology` | the ten area-of-care detail pages |
+| `/dental-care`, `/oral-maxillofacial-surgery`, `/hair-restoration`, `/fertility-reproductive-care`, `/women-s-health-healthy-aging`, `/aesthetic-reconstructive-health`, `/confidence-transition-coaching`, `/longevity-wellness`, `/executive-health`, `/interventional-radiology`, `/vision-care` | the eleven area-of-care detail pages |
 | `/terms-of-use`, `/privacy-policy`, `/medical-service-disclaimer` | legal pages |
 | `/thank-you` | form confirmation (noindex) |
 | `/404` | not found |
 
 URLs match the old Framer site exactly, so existing links and search rankings carry over.
-Pages that no longer exist (`/how-it-works`, `/the-experience`, and seven of the old
-area-of-care URLs) 301 to their new homes — see `_redirects`, which Cloudflare reads.
+Pages that no longer exist (`/how-it-works`, `/the-experience`, `/corporate-offerings`,
+and six of the old area-of-care URLs) 301 to their new homes — see `_redirects`, which Cloudflare reads.
 `/community-initiative-interest` is **not** among them: that page is live and carries a
 working form.
 
@@ -61,7 +64,7 @@ site's own, so the fields look and behave like everything else on the page.
 
 | Form | Page | `id` |
 | --- | --- | --- |
-| Journey enquiry | `/contact` | `journey-enquiry` |
+| Journey enquiry | `/contact`, and a modal on every other page | `journey-enquiry` |
 | Provider enquiry | `/for-providers` | `provider-enquiry` |
 | Newsletter | `/` and `/contact` | `newsletter-form` |
 | Community interest | `/community-initiative-interest` | `community-form` |
@@ -99,8 +102,10 @@ every command, the field list per form, troubleshooting, and the traps already h
 
 ```
 index.html … contact.html      one file per page, self-contained markup
+_archive/                      originals of content the Sept 2026 brief retired; never deployed
+_templates/                    the Insights article template; never deployed
 assets/css/site.css            the whole design system in one stylesheet
-assets/js/site.js              carousel, mobile nav, accordions, scroll reveal
+assets/js/site.js              carousel, nav, accordions, scroll reveal, journey form stepper + modal
 assets/js/hubspot-forms.js     form submissions to HubSpot
 assets/img/*.webp              optimized imagery (multiple widths per image)
 assets/img/logo*.png           transparent logo, dark and light
@@ -132,17 +137,43 @@ If you change a colour, re-measure the pairs the comments name.
 
 Spacing, type sizes and section rhythm are all `clamp()`-based, so the layout scales
 continuously rather than jumping at breakpoints. Grids collapse at 980px and 620px;
-the navigation becomes a drawer at 1400px. That breakpoint is high because the nav
-carries nine items plus the CTA, which needs roughly 1150px of bar to sit on one line
-— `.site-header .wrap.header-inner` is allowed to run wider than the 1220px body
-measure for the same reason. **The 1400 in `site.css` and the 1400 in `site.js` must
-stay in sync.**
+the navigation becomes a drawer at 1180px. The bar — logo, four nav items, the contact
+icon and the CTA — needs about 1140px to sit on one line, and
+`.site-header .wrap.header-inner` is allowed to run wider than the 1220px body measure
+for that reason. **The 1180 in `site.css` and `NAV_BREAKPOINT` in `site.js` must stay in
+sync.**
 
 ### Editing content
 
 Everything is plain HTML — open the page and edit the text. Repeated chrome (header,
 footer, legal disclaimer) is duplicated in each file, so a change to the nav or footer
 needs to be made in every page. `grep` for the string you're changing to find them all.
+
+### The Begin Your Journey form
+
+There is one form, in `contact.html` (`#journey-form`). On `/contact` it sits in the page;
+on every other page, clicking a `.btn--journey` or `[data-journey]` link to
+`contact.html…` fetches `/contact` once and shows that same form in a modal. If the
+fetch fails, or without JavaScript, the link simply goes to `/contact`. So edit the form
+in `contact.html` only.
+
+A link preselects the collection in its fragment: `contact.html#philippines`, `#bc`,
+`#bc/individual`, `#bc/corporate`, `#unsure`, `#oncology`. Each `[data-stage]` is one screen of
+the stepper; `data-routes` decides which screens a collection uses. The Philippines
+residence rule (residence Philippines + Philippines collection → no enquiry) lives in
+the stepper in `site.js`.
+
+### Publishing an Insights article
+
+1. Copy `_templates/insight-article.html` to the repo root as `<slug>.html` and replace
+   every `{{FIELD}}` (title, category, featured image, excerpt, author, dates, SEO title,
+   meta description, body).
+2. Add its card to `insights.html` (the commented card there is the pattern), newest
+   first, and add the URL to `sitemap.xml`.
+3. The home page shows exactly two article cards (the brief). To feature a newer
+   article there, swap one of the two cards in the INSIGHTS section of `index.html`.
+
+Never publish an article before its complete approved body has been supplied.
 
 ### Replacing images
 
@@ -175,35 +206,36 @@ Opening `index.html` straight off disk will load, but the nav links will not res
 
 ## Known follow-ups
 
-- **The journey enquiry form needs provisioning (v3) before it will accept anything.**
-  It now serves three routes from one form: a general journey, an Executive & Private
-  Client proposal, and an oncology second opinion. The route is picked by the first
-  dropdown, or on arrival by `/contact#proposal` or `/contact#oncology` (plus
-  `/<experience-slug>` from the homepage panels; a fragment, because the clean-URL
-  redirect drops a query string); `site.js` shows each route's fields and
-  clears and disables the rest. The new fields need a new HubSpot form, so the GUID in
-  `hubspot-forms.js` is blank until `node hubspot-provision.mjs --write` runs. Deploy
-  only after that, `--inspect`, and a test submission on each route.
-- **Corporate Offerings CTA is a dead link.** "Design a Bespoke Corporate Itinerary"
-  points at `#` until Agnes's scheduling URL is supplied — grep for `TODO` in
-  `corporate-offerings.html`.
-- **Executive & Private Client copy carries operational promises.** The 20-client cap
-  (homepage and the proposal route) must come down if it stops being true, and every
-  named hotel, vehicle, spa and Canadian supplier is a *proposed* supplier until
-  confirmed in writing. No prices are published; none should be until validated.
+- **Enquiry notifications and the guest confirmation email** are not set up. The journey
+  form is provisioned and live in HubSpot (*Website: journey enquiry 2026*,
+  `5890a799-…`, tested on all four routes 26 Sep 2026), but nobody is emailed when an
+  enquiry arrives and the guest gets no confirmation. Both are HubSpot settings — see
+  the end of HUBSPOT-SETUP.md. Four test contacts (`hello+test-…@healbeforehome.com`)
+  can be deleted.
+- **Confirmation email.** The brief's post-submission confirmation email is a HubSpot
+  follow-up email to set up there; the site sends nothing itself.
+- **Vision Care copy** came from the live Framer page, which repeats Dental Care text
+  below its first question. Only the vision-specific parts are used.
+- **Drafted copy for approval:** the three Private Executive Experience drawers on
+  `/bc-executive-collection`, the HSA/LSA drawer (adapted from the old home-page
+  benefits text for Canada), and the replacement for the JCI line on
+  `/medical-travel-philippines`.
 
-- **Placeholder imagery.** Eight slots currently render `capiz-texture.webp`. Find them
-  with `grep -rn "PLACEHOLDER ASSET" *.html`. They cover the Recovery Experience and
-  Standards & Trust previews on the home page, and the Oral & Maxillofacial, Women's
-  Health and Oncology Second Opinion page images plus their three Areas of Care cards.
+- **Placeholder imagery.** Every photograph the September 2026 brief asks for that does
+  not exist yet renders `capiz-texture.webp`. Find them with
+  `grep -rn "PLACEHOLDER ASSET" *.html`; each comment describes the photo wanted and
+  names its target file. The two Insights articles also use the site default
+  `og-image.jpg` for link previews until their photos are in; then point `og:image`,
+  `twitter:image` and the JSON-LD `image` at the real photo.
   **`rebuild-images.py` cannot fill a placeholder on its own:** it only replaces a file
   a page already points at, and these point at `capiz-texture.webp`. First change the
   slot's `src` to the filename its comment names, then drop the photo in under that
   name and run the script, which converts it, builds the smaller renditions and fixes
   `srcset`, `width` and `height`.
 - **`/standards-trust` is deliberately short.** It carries only what the approved
-  source page carries — the H1, one intro paragraph and Our Promise — plus the standard
-  CTA band. Part 3 of the handoff describes four Our Promise items and six further
+  source page carries — the H1, one intro paragraph and Our Promise — plus the
+  Personalized Wellness & Digital Boundaries section the September 2026 brief added,
+  and the standard CTA band. Part 3 of the handoff describes four Our Promise items and six further
   sections (Our Role, Provider Navigation, Our Partner Standards, Privacy & Discretion,
   Clinical Boundaries, Continuity Across Borders); none of that copy exists in the
   approved source, so none of it is on the page. Add those sections only when the copy
@@ -216,9 +248,6 @@ Opening `index.html` straight off disk will load, but the nav links will not res
 - **Batangas copy** on `/medical-travel-philippines` was rewritten. The original site
   repeated the Tagaytay paragraph there by mistake; the replacement is short and neutral
   and should be reviewed or replaced with Agnes's own words.
-- **Contact details.** The site has no phone number, email address or postal address
-  anywhere — enquiries run through the forms only. Worth adding if that is intentional
-  only for now.
 - **The Manila photograph** is only 1080px on its longest side — the highest resolution
   the Framer CDN serves for that asset. It is slightly soft as a full-bleed hero on large
   displays and is the first image worth re-shooting or re-sourcing.

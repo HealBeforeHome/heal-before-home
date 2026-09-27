@@ -115,20 +115,26 @@ The enquiry forms ask for one name; `hubspot-forms.js` splits it at the first sp
 `firstname`, `lastname`, `company`, `website`) ship with HubSpot; everything else below is
 a custom contact property created by the script.
 
-**journey-enquiry** (*Website: journey enquiry v3*) — one form, three routes, chosen
-by `enquiry_route` (dropdown). Every route sends `enquiry_route`, `firstname`,
-`lastname`, `email`, `residence` (and `residence_other`). Then:
+**journey-enquiry** (*Website: journey enquiry 2026*) — the one shared, staged form behind
+every Begin Your Journey button, on `/contact` and in the modal on every other page. The
+route is chosen by `collection` (dropdown: Philippines Medical Travel, BC Executive
+Collection, Not Sure Yet, and Oncology second opinion when arriving from the oncology
+page). Every route sends `firstname`, `lastname`, `email`, `telephone`, `residence` (and
+`residence_other`), `collection`, `consent_role` and `consent_contact`. Then:
 
-- *General journey:* `care_type`, `planning_stage` (dropdowns), `care_detail`,
-  `existing_arrangements` (multi-line), `requested_services` (checkboxes),
-  `travel_dates`, `companion`, `companion_count`, `mobility_accessibility`,
-  `how_may_we_serve`.
-- *Executive & Private Client proposal:* `preferred_contact_method`, `telephone`,
-  `jobtitle`, `company`, `experience_of_interest`, `area_of_interest`,
-  `payment_pathway` (dropdowns), `travel_dates`, `guest_count`, `companion_details`,
-  `confidentiality_agreement`.
-- *Oncology second opinion:* `preferred_contact_method`, `telephone`,
-  `confidentiality_agreement` only — no package, benefit or travel questions.
+- *Philippines Medical Travel:* `ph_areas` (checkboxes), `ph_timeline` (dropdown),
+  `ph_arrangements` (checkboxes). A guest whose `residence` is Philippines is stopped
+  before these questions and cannot submit a Philippines enquiry.
+- *BC Executive Collection:* `bc_participation`, `on_behalf_of_organization`,
+  `benefits_arrangement`, `companion_preference` (dropdowns), `company` and `jobtitle`
+  (only when enquiring for an organization), `bc_services` (checkboxes).
+- *Not sure yet:* `exploring_detail` (multi-line).
+- *Oncology second opinion:* `preferred_contact_method`, `confidentiality_agreement`.
+
+**Provisioned 26 September 2026** (`5890a799-9aca-4362-b89f-f30b3b9d47d4`): `--write`
+created it, `--repair` added *New Zealand* to the existing `residence` property, and
+`--inspect` plus one test submission per route came back clean. To rebuild it from
+scratch, blank its GUID in `hubspot-forms.js`, change `hsName`, and repeat those steps.
 
 Fields on another route are disabled in the page and never sent, so the HubSpot form
 marks only `email` and `firstname` required; the page enforces the rest per route.
@@ -155,10 +161,15 @@ submission API documents; HubSpot splits them back into separate selected values
 
 ## Not done yet
 
-**Advisor notification for private proposals and oncology enquiries.** The brief
-expects the advisor to hear about these. Filter on the `enquiry_route` property in a
-HubSpot workflow (or set the form's notification recipients) — not something the
-script does.
+**The confirmation email to the guest.** The September 2026 brief asks for the
+previously approved confirmation email to go out only after a successful submission.
+The site does not send one: set it up in HubSpot as the 2026 form's follow-up email (or a
+workflow triggered by a submission to it). Do not promise an advisor or a response time in
+it unless those processes are running.
+
+**Advisor notification by collection.** Filter on the `collection` property in a
+HubSpot workflow (or set the form's notification recipients) to route Philippines, BC
+and oncology enquiries — not something the script does.
 
 **Nobody is notified when an enquiry arrives.** The forms were created with an empty
 notification list, so submissions land silently. Set it per form under
@@ -171,4 +182,4 @@ subscription type's numeric id under **Settings → Marketing → Email → Subs
 set `subscriptionId` in the `newsletter-form` entry of `hubspot-forms.js`.
 
 **Test contacts** from setup are still in the CRM (`vencent.u@gmail.com`,
-`legacy1126ad@gmail.com`).
+`legacy1126ad@gmail.com`, and the four `hello+test-…@healbeforehome.com` journey tests).

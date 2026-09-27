@@ -33,15 +33,17 @@
       success: 'Thank you. Your interest has been received, and our team will be in touch as opportunities take shape.'
     },
     'journey-enquiry': {
-      /* Set by `node hubspot-provision.mjs --write` after the v3 form is created.
-         v2 (564001be-be00-4cbe-b214-e87a4b5d69aa) lacks the enquiry-route fields
-         and would reject every proposal or oncology submission, so it is not
-         left in place here. */
-      guid: 'aabcaefc-2d81-4bfc-94a9-b3d3e25e84d1',
+      /* Set by `node hubspot-provision.mjs --write` after "Website: journey enquiry
+         2026" is created.
+         It is the single staged form for both collections (September 2026 brief);
+         v3 (aabcaefc-2d81-4bfc-94a9-b3d3e25e84d1) lacks its fields and would
+         reject them, so it is not left in place here. */
+      guid: '5890a799-9aca-4362-b89f-f30b3b9d47d4',
       consent:
-        'By submitting this form, you agree that Heal Before Home may use the information ' +
-        'provided to respond to your enquiry and communicate with you about your journey.',
-      success: 'Thank you. Your enquiry has been received, and our team will be in touch shortly.'
+        'I understand HBH’s non-clinical coordination role. I have read the Privacy Policy ' +
+        'and consent to HBH contacting me about this enquiry.',
+      /* No response time: the brief rules out promising one until it is operational. */
+      success: 'Thank you. Your enquiry has been received, and our team will be in touch.'
     },
     'provider-enquiry': {
       guid: '8a7b23bb-ef40-440e-adcb-64efe1930b14',
@@ -316,8 +318,18 @@
     });
   }
 
+  function wireOnce(form) {
+    var config = form && FORMS[form.id];
+    if (!config || form.__hbhWired) return;
+    form.__hbhWired = true;
+    wire(form, config);
+  }
+
   Object.keys(FORMS).forEach(function (id) {
-    var form = document.getElementById(id);
-    if (form) wire(form, FORMS[id]);
+    wireOnce(document.getElementById(id));
   });
+
+  /* The journey form is also loaded into a modal on every other page (see
+     site.js), after this file has run, so site.js wires it through here. */
+  window.HBHForms = { wire: wireOnce };
 })();

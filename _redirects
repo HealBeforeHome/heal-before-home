@@ -10,10 +10,13 @@
 /our-story                           /our-story-between-two-worlds      301
 /why-the-philippines                 /medical-travel-philippines        301
 
-/vision-care                         /areas-of-care                             301
 /fetility-reproductive-care          /fertility-reproductive-care               301
 /orthopedic-care                     /areas-of-care                             301
 /cardiology-advanced-heart-care      /areas-of-care                             301
 /preventive-care-diagnostics         /areas-of-care                             301
 /healthy-aging-geriatric-care        /areas-of-care                             301
 /private-nursing-caregiver-support   /areas-of-care                             301
+
+# Retired September 2026: the Canadian frameworks are replaced by the BC
+# Executive Collection page. The original is in _archive/ (not deployed).
+/corporate-offerings                 /bc-executive-collection           301

@@ -62,12 +62,13 @@ const TRAPS = new Set(['bot-field', 'hbh-leave-blank']);
 
 /* Which form lives where, and the key it uses in the FORMS table of the script. */
 const FORMS = [
-  /* Rebuilt for the enquiry routes (general journey, Executive & Private
-     Client proposal, oncology second opinion) and their new fields. A new field
-     cannot be added to an existing HubSpot form, so this is deliberately a new
-     name: `--write` creates it and pastes the new GUID into hubspot-forms.js.
-     v2 (564001be-...) is left in HubSpot, unused. */
-  { key: 'journey-enquiry',  file: 'contact.html',       hsName: 'Website: journey enquiry v3' },
+  /* Rebuilt for the September 2026 brief: one staged form for both
+     collections (Philippines Medical Travel, BC Executive Collection, not sure
+     yet) plus the oncology second-opinion route. A new field cannot be added to
+     an existing HubSpot form, so this is deliberately a new name: `--write`
+     creates it and pastes the new GUID into hubspot-forms.js. v2 and v3 are
+     left in HubSpot, unused. */
+  { key: 'journey-enquiry',  file: 'contact.html',       hsName: 'Website: journey enquiry 2026' },
   { key: 'provider-enquiry', file: 'for-providers.html', hsName: 'Website: provider enquiry' },
   { key: 'newsletter-form',  file: 'index.html',         hsName: 'Website: newsletter'       },
   /* The original "HBH Community Initiative Interest" was built in HubSpot's v4
@@ -255,7 +256,20 @@ const PROPERTY_LABELS = {
   payment_pathway: 'Payment pathway',
   guest_count: 'Number of guests',
   companion_details: 'Companion details',
-  confidentiality_agreement: 'Confidentiality agreement requested'
+  confidentiality_agreement: 'Confidentiality agreement requested',
+  residence: 'Country of ordinary residence',
+  collection: 'Collection of interest',
+  ph_areas: 'Philippines: areas of interest',
+  ph_timeline: 'Philippines: preferred timeline',
+  ph_arrangements: 'Philippines: optional arrangements',
+  bc_participation: 'BC: participation',
+  on_behalf_of_organization: 'Enquiring for an organization',
+  benefits_arrangement: 'Benefits arrangement',
+  bc_services: 'BC: services of interest',
+  companion_preference: 'Companion preference',
+  exploring_detail: 'What they are exploring',
+  consent_role: 'Acknowledged non-clinical role',
+  consent_contact: 'Consented to contact'
 };
 
 /* fieldType as the form draws it -> the type/fieldType pair a property needs. */

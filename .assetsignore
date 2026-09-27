@@ -14,3 +14,5 @@ hubspot-provision.mjs
 README.md
 HUBSPOT-SETUP.md
 wrangler.jsonc
+_archive
+_templates
