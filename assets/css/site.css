@@ -1172,8 +1172,12 @@ p.area-back{ margin-bottom:clamp(1.75rem,3vw,2.75rem); }
 .form-group{ display:grid; gap:1.3rem; }
 .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:1.3rem; }
 @media (max-width:620px){ .form-row{ grid-template-columns:1fr; } }
-/* Clipped rather than pushed off-canvas: a -9999px offset can create horizontal
-   overflow, which body{overflow-x:hidden} would then silently swallow. */
+/* Honeypot decoys. Clipped rather than pushed off-canvas: a -9999px offset can
+   create horizontal overflow, which body{overflow-x:hidden} would then silently
+   swallow. The inputs carry NO label text on purpose: text in the markup shows
+   up in reader modes, text extraction and search snippets, where CSS never
+   applies. Bots key on the field names, not the labels. aria-hidden and
+   tabindex="-1" keep them out of the accessibility tree and the tab order. */
 .hp{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
 
 .section--sand .form-panel{ background:var(--cream); }
