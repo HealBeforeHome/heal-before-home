@@ -48,6 +48,7 @@ DROP_IN_EXTS = ('.jpg', '.jpeg', '.png', '.tif', '.tiff', '.bmp', '.avif')
 
 
 HERO_MAX = 1600
+HERO_MIN_H = 900   # panoramas keep at least this much height, source allowing
 
 
 def html_pages():
@@ -135,8 +136,12 @@ def adopt_drop_ins():
                 new = _im.convert('RGB')
 
         if base in heroes:
-            # Keep the photographer's framing; CSS does the final crop.
-            aspect, width = src_size[0] / src_size[1], min(src_size[0], HERO_MAX)
+            # Keep the photographer's framing; CSS does the final crop. A
+            # panorama is capped by height instead of width: at 1600 wide a
+            # 2.75:1 banner is under 600px tall, and a hero that is taller
+            # than that on screen would be upscaled to cover it.
+            aspect = src_size[0] / src_size[1]
+            width = min(src_size[0], max(HERO_MAX, round(HERO_MIN_H * aspect)))
         elif os.path.exists(target):
             with Image.open(target) as old:
                 aspect, width = old.size[0] / old.size[1], old.size[0]
