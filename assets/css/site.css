@@ -830,6 +830,12 @@ p:last-child{ margin-bottom:0; }
 .hero--page .hero-content{ padding-block:clamp(3rem,6vw,4.75rem); }
 .hero--page h1{ font-size:var(--fs-h1); max-width:20ch; }
 .hero--page .hero-sub{ margin-bottom:0; }
+/* The two collection heroes carry more copy than the other interior heroes, and
+   at 20ch / 52ch it stacked into a narrow column with the right half of the
+   photograph empty. Opened toward the home hero's proportions, not all the way:
+   the type here stays at the interior size. */
+.hero--wide h1{ max-width:24ch; }
+.hero--wide .hero-sub{ max-width:62ch; }
 
 @media (min-width:1024px){
   /* The home hero was running past the fold: measured at 1440x740 the CTA row
@@ -888,6 +894,17 @@ p:last-child{ margin-bottom:0; }
   text-transform:uppercase; color:rgba(255,255,240,.62); margin-bottom:.8rem;
 }
 .valuebar-item p{ font-size:.97rem; line-height:1.6; color:rgba(255,255,240,.85); margin:0; }
+/* One Point of Coordination on the home page: a single item across the bar,
+   with the journey sequence as its closing line. */
+.valuebar-grid--single{ grid-template-columns:1fr; }
+.valuebar-grid--single .valuebar-item{ padding-inline:0; }
+.valuebar-grid--single .valuebar-item p{ max-width:78ch; }
+.valuebar-grid--single .valuebar-item p + p{ margin-top:.9rem; }
+.valuebar-grid--single .valuebar-item .valuebar-flow{
+  margin-top:1.25rem; font-size:.78rem; font-weight:600; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--ivory);
+}
+.valuebar-flow span{ margin-inline:.45em; opacity:.7; }
 @media (max-width:860px){
   .valuebar-grid{ grid-template-columns:1fr; }
   .valuebar-item{ border-left:0; border-top:1px solid var(--line-light); padding-left:0; padding-block:1.5rem; }
