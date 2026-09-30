@@ -266,6 +266,9 @@ p:last-child{ margin-bottom:0; }
   display:inline-flex; align-items:center; justify-content:center; gap:.6rem;
   padding:.95rem 1.9rem;
   font-size:.82rem; font-weight:500; letter-spacing:.15em; text-transform:uppercase;
+  /* justify-content centres the box, not the lines inside it: a label that
+     wraps (full-width buttons on a phone) set its lines flush left. */
+  text-align:center;
   text-decoration:none; border:1px solid var(--cta-green); background:var(--cta-green); color:var(--ivory);
   border-radius:var(--radius); cursor:pointer;
   transition:background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease), transform .35s var(--ease);
@@ -921,6 +924,11 @@ p:last-child{ margin-bottom:0; }
 @media (max-width:900px){
   .split,.split--40,.split--60{ grid-template-columns:1fr; gap:2.25rem; }
   .split--media-right .split-media{ order:0; }
+  /* Stacked, a media-right split leads with its text. Where the next section
+     opens on a photo (the BC teaser on the home page, before Why British
+     Columbia) that put two photographs back to back; this lifts the photo
+     above the text so the pair alternates like every other split. */
+  .split--media-top .split-media{ order:-1; }
 }
 .split-body > *:last-child{ margin-bottom:0; }
 
