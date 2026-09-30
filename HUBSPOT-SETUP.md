@@ -3,12 +3,20 @@
 All four forms are connected to HubSpot portal **343416288** and verified end to end.
 This is the reference for keeping them that way.
 
-| Form | Page | `id` | HubSpot form |
-| --- | --- | --- | --- |
-| Journey enquiry | `/contact` | `journey-enquiry` | Website: journey enquiry |
-| Provider enquiry | `/for-providers` | `provider-enquiry` | Website: provider enquiry |
-| Newsletter | `/` and `/contact` | `newsletter-form` | Website: newsletter |
-| Community interest | `/community-initiative-interest` | `community-form` | Website: community interest |
+| Form | Page | `id` | HubSpot form | Form ID (GUID) |
+| --- | --- | --- | --- | --- |
+| Journey enquiry | `/contact`, and the modal on every other page | `journey-enquiry` | Website: journey enquiry 2026 | `5890a799-9aca-4362-b89f-f30b3b9d47d4` |
+| Provider enquiry | `/for-providers` | `provider-enquiry` | Website: provider enquiry | `8a7b23bb-ef40-440e-adcb-64efe1930b14` |
+| Newsletter | the footer of every page | `newsletter-form` | Website: newsletter | `b9f3af16-f3f1-4e18-8e7e-42f201f3a1e3` |
+| Community interest | `/community-initiative-interest` | `community-form` | Website: community interest | `6923309e-5ff5-4333-aa2b-b94b62b72240` |
+
+> **Never switch HubSpot's CAPTCHA on for these forms.** On 29 September 2026 it was
+> enabled on all four, and every submission from the site failed from that moment
+> (`FORM_HAS_RECAPTCHA_ENABLED`). `--inspect` found it; `--repair` turned it off on
+> 30 September. HubSpot's CAPTCHA only works on forms HubSpot renders itself, and
+> these are the site's own markup. The honeypot and timing guard in
+> `hubspot-forms.js` are the spam protection. If spam ever becomes a real problem,
+> the route is Cloudflare Turnstile verified by a Worker, not the HubSpot switch.
 
 ## How it works
 

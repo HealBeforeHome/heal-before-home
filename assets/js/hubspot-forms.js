@@ -10,7 +10,11 @@
  *      Forms section of README.md for the list each form needs),
  *   2. turn the form's CAPTCHA ("SPAM prevention") switch OFF - HubSpot refuses
  *      API submissions for a form that has it on, answering with
- *      FORM_HAS_RECAPTCHA_ENABLED. The honeypot in the markup guards it instead,
+ *      FORM_HAS_RECAPTCHA_ENABLED. The honeypot in the markup guards it instead.
+ *      Switching it on in HubSpot stops every form on the site: that is exactly
+ *      what happened on 29 September 2026, when CAPTCHA was enabled on all four
+ *      forms and every submission failed until `hubspot-provision.mjs --repair`
+ *      turned it off again on 30 September,
  *   3. paste the form's GUID into FORMS below, keyed by the form's id attribute.
  *
  * The GUID is the last path segment of the form's editor URL:
@@ -61,7 +65,7 @@
          visitor up to (Settings > Marketing > Email > Subscription types). With
          it set, the submission records an explicit opt-in to that subscription;
          left null, only consent to process is recorded. */
-      subscriptionId: null,
+      subscriptionId: 3060772435,
       success: 'Thank you. You are on the list.'
     }
   };
@@ -437,8 +441,10 @@
 
       /* Whether HubSpot requires the consent block depends on how the form is
          configured, which the API will not tell us up front - so send the plain
-         payload and add consent only if it complains about it. */
-      post(form, config, false)
+         payload and add consent only if it complains about it. A form that
+         signs the visitor up to a subscription always sends it: HubSpot accepts
+         that submission without consent too, and the opt-in would be lost. */
+      post(form, config, !!config.subscriptionId)
         .then(function (r) {
           if (!r.ok && mentionsConsent(r.data)) return post(form, config, true);
           return r;
