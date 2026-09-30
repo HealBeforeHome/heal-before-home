@@ -1712,6 +1712,79 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
   .footer-col h2{ font-size:.75rem; letter-spacing:.16em; }
 }
 
+/* ---- swipe rows ----
+   A phone stacks every grid into one column, which turned the longer runs - six
+   photo cards, four lists of questions - into several screens of scrolling
+   before the next section. A grid carrying .swipe-row scrolls sideways here
+   instead: one card at a time, snapping, with the next one peeking in at the
+   edge so it reads as a row to swipe. Nothing is hidden; site.js adds the
+   position dots. Opt-in per grid, and nothing here fires above 620px. */
+.swipe-dots{ display:none; }
+@media (max-width:620px){
+  /* Every selector repeats .swipe-row alongside the grid class it overrides,
+     so it outranks the single-column rules above (.dest-grid, .grid--4-wide,
+     the .grid--areas spans) without depending on where they sit. */
+  .swipe-row,
+  .grid.swipe-row,
+  .dest-grid.swipe-row{
+    display:grid; grid-auto-flow:column; grid-template-columns:none;
+    grid-auto-columns:84%; gap:.85rem;
+    overflow-x:auto; overscroll-behavior-x:contain;
+    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    /* Runs to the screen edges, so the peek is the next card rather than a
+       card cut off by the gutter. The padding puts the first card back on the
+       text column; scroll-padding keeps the snap point there too. */
+    margin-inline:calc(var(--gutter) * -1);
+    padding-inline:var(--gutter);
+    scroll-padding-inline:var(--gutter);
+  }
+  .swipe-row::-webkit-scrollbar{ display:none; }
+  .swipe-row > *{ scroll-snap-align:start; min-width:0; grid-column:auto; }
+  /* A focused row is scrolled with the arrow keys; the ring sits inside the
+     row, since outside it would be clipped by the page edge. */
+  .swipe-row:focus-visible{ outline-offset:-2px; }
+  /* Cards with a drawer grow when it opens; start alignment keeps the other
+     cards in the row at their own height instead of stretching to match. */
+  .collection-grid.swipe-row{ align-items:start; }
+  /* The lift means nothing on touch, and on a card half off the edge it
+     reads as a glitch. */
+  .swipe-row .card:hover{ transform:none; box-shadow:none; }
+
+  /* The scroll reveal waits for each item to meet the viewport. A card waiting
+     off to the side would be blank where it peeks in, so inside a row they are
+     simply shown. */
+  html.js .swipe-row > [data-reveal]{ opacity:1; transform:none; }
+
+  /* Plain list groups and the numbered reasons have no box of their own; as
+     separate cards to swipe they need one. The same surfaces as .panel. */
+  .swipe-row > div:not([class]),
+  .swipe-row > .reason{
+    background:var(--cream); border:1px solid var(--line-soft); border-radius:var(--radius-lg);
+    padding:clamp(1.25rem,2.4vw,1.9rem);
+  }
+  .section:not(.section--sand):not(.section--dark) .swipe-row > div:not([class]),
+  .section:not(.section--sand):not(.section--dark) .swipe-row > .reason{ background:var(--sand); }
+  .section--dark .swipe-row > div:not([class]),
+  .section--dark .swipe-row > .reason{ background:rgba(255,255,240,.05); border-color:var(--line-light); }
+
+  /* Position dots: the hero's bar dots, on a light ground. The button is the
+     44px target; the 2px bar is painted into its content box. */
+  /* --sage-soft is the lightest ink that clears 3:1 on cream and sand; the
+     current dot is green and wider, so it reads by shape as well as colour.
+     background-color only, never the shorthand: it would reset the clip and
+     fill the whole 44px target. */
+  .swipe-dots{ display:flex; justify-content:center; align-items:center; gap:.45rem; margin-top:.35rem; }
+  .swipe-dots button{
+    width:18px; height:44px; padding-block:21px; padding-inline:0; border:0; cursor:pointer;
+    background-color:var(--sage-soft); background-clip:content-box;
+    transition:background-color .3s var(--ease), width .3s var(--ease);
+  }
+  .swipe-dots button[aria-pressed="true"]{ width:34px; background-color:var(--cta-green); }
+  .section--dark .swipe-dots button{ background-color:rgba(255,255,240,.4); }
+  .section--dark .swipe-dots button[aria-pressed="true"]{ background-color:var(--ivory); }
+}
+
 /* Insights article byline (see _templates/insight-article.html). */
 .article-meta{ font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--sage); margin-top:1.25rem; }
 

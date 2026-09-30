@@ -500,6 +500,80 @@
   });
 
   /* ---------------------------------------------------------
+     Swipe rows. On a phone a .swipe-row grid scrolls sideways instead of
+     stacking (the layout is all in site.css); this adds the position dots
+     under it. The dots are built at every width but CSS only shows them at
+     the phone breakpoint, and the row only becomes a focusable region there,
+     so a desktop grid gains no stray tab stop.
+     --------------------------------------------------------- */
+  var SWIPE_QUERY = window.matchMedia('(max-width:620px)'); // keep in step with site.css
+
+  /* The row's name: the nearest heading before it, else the section's h2. */
+  function swipeLabel(row) {
+    var node = row.previousElementSibling;
+    while (node) {
+      var h = /^H[23]$/.test(node.tagName) ? node : node.querySelector('h2, h3');
+      if (h) return h.textContent.trim();
+      node = node.previousElementSibling;
+    }
+    var section = row.closest('section');
+    var h2 = section && section.querySelector('h2');
+    return h2 ? h2.textContent.trim() : 'Items';
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.swipe-row'), function (row) {
+    var items = Array.prototype.slice.call(row.children);
+    if (items.length < 2) return;
+    var label = swipeLabel(row) + ', ' + items.length + ' items';
+
+    var dots = document.createElement('div');
+    dots.className = 'swipe-dots';
+    dots.setAttribute('role', 'group');
+    dots.setAttribute('aria-label', 'Choose item in ' + label);
+    var buttons = items.map(function (item, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Show item ' + (i + 1) + ' of ' + items.length);
+      b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        var pad = parseFloat(getComputedStyle(row).paddingLeft) || 0;
+        var left = row.scrollLeft + item.getBoundingClientRect().left - row.getBoundingClientRect().left - pad;
+        row.scrollTo({ left: left, behavior: reduceMotion ? 'auto' : 'smooth' });
+      });
+      dots.appendChild(b);
+      return b;
+    });
+    row.parentNode.insertBefore(dots, row.nextSibling);
+
+    var setActive = function (index) {
+      buttons.forEach(function (b, i) { b.setAttribute('aria-pressed', String(i === index)); });
+    };
+    if ('IntersectionObserver' in window) {
+      var seen = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) setActive(items.indexOf(entry.target));
+        });
+      }, { root: row, threshold: 0.6 });
+      items.forEach(function (item) { seen.observe(item); });
+    }
+
+    var sync = function () {
+      if (SWIPE_QUERY.matches) {
+        row.setAttribute('role', 'region');
+        row.setAttribute('aria-label', label);
+        row.setAttribute('tabindex', '0');
+      } else {
+        row.removeAttribute('role');
+        row.removeAttribute('aria-label');
+        row.removeAttribute('tabindex');
+      }
+    };
+    sync();
+    if (SWIPE_QUERY.addEventListener) SWIPE_QUERY.addEventListener('change', sync);
+    else if (SWIPE_QUERY.addListener) SWIPE_QUERY.addListener(sync);
+  });
+
+  /* ---------------------------------------------------------
      Conditional form fields. A control carrying data-controls="<id>" and
      data-show-value="<value>" reveals that block only while it holds that
      value. Hiding also clears the block, so hubspot-forms.js never posts an
