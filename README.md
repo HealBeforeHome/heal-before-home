@@ -29,8 +29,8 @@ use `https://www.healbeforehome.com`.
 | --- | --- |
 | `/` | `index.html` |
 | `/philippines-medical-travel` | `philippines-medical-travel.html` (collection page; header dropdown) |
-| `/bc-executive-collection` | `bc-executive-collection.html` (collection page with the Vancouver Pilot; header dropdown) |
-| `/insights` | `insights.html` (landing page; articles from `_templates/insight-article.html`) |
+| `/bc-executive-collection` | `bc-executive-collection.html` (**hidden** since the 30 Sept 2026 brief: unlinked, `noindex`, out of the sitemap) |
+| `/insights` | `insights.html` (**hidden** since the 30 Sept 2026 brief: unlinked and out of the sitemap; articles from `_templates/insight-article.html`) |
 | `/planning-medical-wellness-journey-philippines`, `/executive-recovery-more-than-a-wellness-benefit` | the two launch Insights articles |
 | `/getting-started` | `getting-started.html` |
 | `/areas-of-care` | `areas-of-care.html` |
@@ -44,7 +44,8 @@ use `https://www.healbeforehome.com`.
 | `/meet-the-founder` | `meet-the-founder.html` |
 | `/community-initiative-interest` | `community-initiative-interest.html` |
 | `/oncology-second-opinion` | `oncology-second-opinion.html` (linked from Areas of Care) |
-| `/dental-care`, `/oral-maxillofacial-surgery`, `/hair-restoration`, `/fertility-reproductive-care`, `/women-s-health-healthy-aging`, `/aesthetic-reconstructive-health`, `/confidence-transition-coaching`, `/longevity-wellness`, `/executive-health`, `/interventional-radiology`, `/vision-care` | the eleven area-of-care detail pages |
+| `/dental-care`, `/hair-restoration`, `/fertility-reproductive-care`, `/women-s-health-healthy-aging`, `/aesthetic-reconstructive-health`, `/confidence-transition-coaching`, `/orthopedic-care`, `/stem-cell-hyperbaric-oxygen-therapy`, `/vision-care` | the area-of-care detail pages on `/areas-of-care` |
+| `/oral-maxillofacial-surgery`, `/longevity-wellness`, `/executive-health`, `/interventional-radiology` | **hidden** since the 30 Sept 2026 brief: still published, but unlinked and out of the sitemap. Their Areas of Care cards are in `_archive/areas-of-care-cards-2026-09-30.html`; Oral & Maxillofacial now lives as a subsection of `/dental-care` |
 | `/terms-of-use`, `/privacy-policy`, `/medical-service-disclaimer` | legal pages |
 | `/thank-you` | form confirmation (noindex) |
 | `/404` | not found |
@@ -66,7 +67,7 @@ site's own, so the fields look and behave like everything else on the page.
 | --- | --- | --- |
 | Journey enquiry | `/contact`, and a modal on every other page | `journey-enquiry` |
 | Provider enquiry | `/for-providers` | `provider-enquiry` |
-| Newsletter | `/` and `/contact` | `newsletter-form` |
+| Newsletter | the footer of every page | `newsletter-form` |
 | Community interest | `/community-initiative-interest` | `community-form` |
 
 Each form's GUID and its consent and success wording live in the `FORMS` table at the top
@@ -205,6 +206,19 @@ npx serve .
 Opening `index.html` straight off disk will load, but the nav links will not resolve.
 
 ## Known follow-ups
+
+- **30 September 2026 brief.** BC Executive Collection, Insights, and four areas of
+  care are hidden, not deleted: see the pages table. The home sections that
+  went are in `_archive/home-sections-2026-09-30.html`. The Journey form's BC
+  option is commented out in `contact.html`, and `bc` is out of `ROUTE_HASH` in
+  `site.js`; restore both together. Nav is now Philippines Medical Travel | Our
+  Story | FAQ | contact icon, with The Signature Experience second in the
+  Philippines dropdown.
+- **Photos to approve.** `signature-villa.webp` (home teaser), `recovery-nutrition.webp`,
+  `recovery-companion.webp` and `spec-orthopedics.webp` are generated images. The
+  client asked for an *authentic* photo of an existing villa HBH can coordinate for
+  the home teaser; swap one in when available (drop it in as `signature-villa.jpg`
+  and run `rebuild-images.py`).
 
 - **Enquiry notifications and the guest confirmation email** are not set up. The journey
   form is provisioned and live in HubSpot (*Website: journey enquiry 2026*,

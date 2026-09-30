@@ -629,7 +629,11 @@
      not a query string, because the clean-URL redirect (contact.html ->
      /contact) drops the query but browsers carry the fragment across it.
      --------------------------------------------------------- */
-  var ROUTE_HASH = /^#(philippines|bc|unsure|oncology)(?:\/([a-z0-9-]+))?$/i;
+  /* bc is left out while the BC Executive Collection is hidden (30 September
+     2026 brief): its option is commented out in contact.html, so a leftover
+     #bc link now opens the form with no collection chosen. Add it back with
+     the option. */
+  var ROUTE_HASH = /^#(philippines|unsure|oncology)(?:\/([a-z0-9-]+))?$/i;
 
   function initJourneyForm(form) {
     if (!form) return null;

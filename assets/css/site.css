@@ -1032,6 +1032,13 @@ p:last-child{ margin-bottom:0; }
 }
 .card-body p{ font-size:.97rem; color:var(--ink-muted); margin-bottom:1rem; }
 .card-body p:last-child{ margin-bottom:0; }
+/* A card's one-line subheading ("Because some journeys are better shared."):
+   the italic of .collection-strap at card scale. Two classes deep so it
+   outranks .card-body p above. */
+.card-body .card-strap{
+  font-family:var(--display); font-style:italic; font-weight:400;
+  font-size:1.15rem; line-height:1.35; color:var(--forest); margin-bottom:.8rem;
+}
 .card-body .link-arrow{ margin-top:auto; align-self:flex-start; }
 .card--link{ text-decoration:none; color:inherit; }
 /* The whole card is the link, so the arrow inside it has to answer to the
@@ -1039,9 +1046,11 @@ p:last-child{ margin-bottom:0; }
 .card--link:hover .link-arrow{ color:var(--forest); border-color:var(--forest); }
 .card--link:hover .link-arrow::after{ transform:translateX(4px); }
 
-/* Seven cards in a three-column grid leave one alone on the last row. Giving the
-   first and last cards a double span fills every cell instead. Scoped to this one
-   grid: .grid--3 itself is shared by a dozen other sections. */
+/* Ten cards (30 September 2026): eight regular plus a double-span first and
+   last card fill every cell at three columns (4 rows of 3) and at two (a full
+   first row, four rows of two, a full last row). Scoped to this one grid:
+   .grid--3 itself is shared by a dozen other sections. If the card count
+   changes, recount - an odd total leaves a gap. */
 .grid--areas > .card--wide{ grid-column:span 2; }
 
 /* A double-width card laid out as a square would just be a stretched tile, so these
@@ -1059,13 +1068,6 @@ p:last-child{ margin-bottom:0; }
    wide card tears the text block apart and leaves a void in the middle. Let it sit
    with the copy so title, description and arrow centre together as one group. */
 .card--wide .card-body .link-arrow{ margin-top:1.25rem; }
-
-/* At two columns the first card spanning the full width still divides the remaining
-   six into three clean rows; spanning the last one as well would reopen a gap. */
-@media (max-width:980px){
-  .grid--areas > .card--wide:last-child{ grid-column:auto; flex-direction:column; }
-  .grid--areas > .card--wide:last-child .media{ flex:none; aspect-ratio:1/1; }
-}
 
 /* Single column: no spans, every card back to the vertical layout. */
 @media (max-width:620px){
@@ -1421,6 +1423,21 @@ html.modal-open{ overflow:hidden; }
   padding-block:clamp(1.5rem,3vw,2rem); border-bottom:1px solid var(--line-light);
 }
 .footer-disclaimer p{ font-size:.84rem; line-height:1.6; color:rgba(255,255,240,.58); max-width:92ch; margin-bottom:.5rem; }
+/* Newsletter sign-up, on every page (30 Sept 2026 brief: discoverable in the
+   footer). Uses the default light-on-dark .newsletter; the label style matches
+   the column headings above it. */
+.footer-newsletter{
+  display:grid; grid-template-columns:1fr 1fr; gap:clamp(1.25rem,4vw,3.5rem); align-items:start;
+  padding-block:clamp(2rem,4vw,3rem); border-bottom:1px solid var(--line-light);
+}
+@media (max-width:860px){ .footer-newsletter{ grid-template-columns:1fr; } }
+.footer-newsletter h2{
+  font-family:var(--sans); font-size:.68rem; font-weight:500; letter-spacing:.2em;
+  text-transform:uppercase; color:rgba(255,255,240,.5); margin-bottom:.9rem;
+}
+.footer-newsletter p{ font-size:.95rem; color:rgba(255,255,240,.66); max-width:52ch; margin:0; }
+.footer-newsletter .footer-newsletter-note{ font-size:.82rem; line-height:1.55; color:rgba(255,255,240,.58); margin-top:.9rem; }
+.footer-newsletter-note a{ color:rgba(255,255,240,.8); }
 
 /* =========================================================
    Motion
