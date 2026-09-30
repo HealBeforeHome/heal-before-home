@@ -1224,6 +1224,13 @@ p.area-back{ margin-bottom:clamp(1.75rem,3vw,2.75rem); }
    secondary cue; the ring is what carries it. */
 .field input:focus,.field select:focus,.field textarea:focus{ border-color:var(--sage); background:#fff; }
 .field-hint{ font-size:.85rem; color:var(--sage); line-height:1.5; }
+/* A field's own error, written under it by hubspot-forms.js. The same red as
+   .form-status.is-error: #7a3522 is 7.4:1 on cream and 6.5:1 on sand. The
+   border tint is the second cue; the text is what carries the meaning. */
+.field-error{ margin:0; font-size:.85rem; line-height:1.5; color:#7a3522; }
+.field input[aria-invalid="true"],
+.field select[aria-invalid="true"],
+.field textarea[aria-invalid="true"]{ border-color:#96422c; }
 .form-note{
   font-size:.86rem; color:var(--ink-muted); line-height:1.55;
   background:var(--sand); border-left:2px solid var(--mist); padding:.9rem 1.1rem; border-radius:2px;

@@ -155,15 +155,15 @@
             <p class="form-step" id="stage-contact">Contact details</p>
             <div class="field">
               <label for="c-name">Full name <span class="req" aria-hidden="true">*</span></label>
-              <input id="c-name" name="name" type="text" required autocomplete="name">
+              <input id="c-name" name="name" type="text" required autocomplete="name" maxlength="100">
             </div>
             <div class="field">
               <label for="c-email">Email address <span class="req" aria-hidden="true">*</span></label>
-              <input id="c-email" name="email" type="email" required autocomplete="email">
+              <input id="c-email" name="email" type="email" required autocomplete="email" maxlength="254">
             </div>
             <div class="field">
               <label for="c-phone">Direct phone number, including country code <span class="req" aria-hidden="true">*</span></label>
-              <input id="c-phone" name="telephone" type="tel" required autocomplete="tel" aria-describedby="c-phone-hint">
+              <input id="c-phone" name="telephone" type="tel" required autocomplete="tel" aria-describedby="c-phone-hint" maxlength="25" inputmode="tel">
               <p class="field-hint" id="c-phone-hint">For example, +1 604 555 0123.</p>
             </div>
           </div>
@@ -186,7 +186,7 @@
             </div>
             <div class="field" id="c-residence-other" hidden>
               <label for="c-residence-other-input">Please tell us your country of ordinary residence</label>
-              <input id="c-residence-other-input" name="residence_other" type="text" autocomplete="country-name">
+              <input id="c-residence-other-input" name="residence_other" type="text" autocomplete="country-name" maxlength="100">
             </div>
             <div class="field">
               <label for="c-collection">Which collection are you exploring? <span class="req" aria-hidden="true">*</span></label>
@@ -280,11 +280,11 @@
             <div class="form-row" id="c-org-fields" hidden>
               <div class="field">
                 <label for="c-org">Organization name</label>
-                <input id="c-org" name="company" type="text" autocomplete="organization">
+                <input id="c-org" name="company" type="text" autocomplete="organization" maxlength="100">
               </div>
               <div class="field">
                 <label for="c-role">Your position / role</label>
-                <input id="c-role" name="jobtitle" type="text" autocomplete="organization-title">
+                <input id="c-role" name="jobtitle" type="text" autocomplete="organization-title" maxlength="100">
               </div>
             </div>
           </div>
@@ -335,7 +335,7 @@
             <p class="form-step" id="stage-unsure">What you are exploring</p>
             <div class="field">
               <label for="c-exploring">Tell us briefly what you are exploring</label>
-              <textarea id="c-exploring" name="exploring_detail" style="min-height:110px"></textarea>
+              <textarea id="c-exploring" name="exploring_detail" style="min-height:110px" maxlength="3000"></textarea>
             </div>
           </div>
 

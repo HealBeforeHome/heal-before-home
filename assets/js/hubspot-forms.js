@@ -221,6 +221,146 @@
     return name + (/[?.!]$/.test(name) ? ' ' : ': ') + message;
   }
 
+  /* ---------------------------------------------------------------------
+     Format checks. The browser's own are too loose to keep a CRM clean:
+     type="email" takes "jane@gmail", type="tel" takes anything at all. These
+     rules are applied through setCustomValidity, so every existing check
+     picks them up unchanged - firstInvalid() below, and the staged form's
+     per-screen "Next" in site.js, which calls checkValidity() itself.
+     Which rule a field gets is read off its own markup (type, autocomplete),
+     so a new field of a known kind is covered with no config here.
+     --------------------------------------------------------------------- */
+  var EMAIL_RE = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)*\.[A-Za-z]{2,}$/;
+  /* Built from strings: a browser without Unicode property escapes would
+     reject a regex literal at parse time and take every form down with it.
+     The fallback covers Latin letters with their accents. */
+  var NAME_RE, LETTER_RE;
+  try {
+    NAME_RE = new RegExp("^[\\p{L}\\p{M}][\\p{L}\\p{M} .'’-]*$", 'u');
+    LETTER_RE = new RegExp('\\p{L}', 'gu');
+  } catch (e) {
+    NAME_RE = /^[A-Za-zÀ-ɏ][A-Za-zÀ-ɏ .'’-]*$/;
+    LETTER_RE = /[A-Za-zÀ-ɏ]/g;
+  }
+  var NAME_FIELDS = ['name', 'given-name', 'family-name'];
+
+  function kindOf(el) {
+    if (el.type === 'email') return 'email';
+    if (el.type === 'tel') return 'phone';
+    if (el.type === 'url') return 'url';
+    if (NAME_FIELDS.indexOf(el.getAttribute('autocomplete')) !== -1) return 'name';
+    return null;
+  }
+
+  /* The message for a malformed value, or '' when it is fine. An empty field
+     is always fine here - whether it may be empty is `required`'s job. */
+  function formatError(el) {
+    var value = String(el.value || '').trim();
+    if (!value) return '';
+    switch (kindOf(el)) {
+      case 'email':
+        return EMAIL_RE.test(value) ? '' : 'Please enter a valid email address, like name@example.com.';
+      case 'phone':
+        if (value.charAt(0) !== '+') return 'Please include your country code, starting with +, e.g. +1 604 555 0123.';
+        if (!/^\+[\d\s().-]+$/.test(value)) return 'Please use numbers only, with spaces or dashes if you like.';
+        var digits = value.replace(/\D/g, '').length;
+        /* 15 is the international (E.164) ceiling, country code included; 8
+           is about the shortest real number with its country code. */
+        if (digits < 8) return 'That number looks too short. Please include the country code and full number.';
+        if (digits > 15) return 'That number looks too long. Please check it and try again.';
+        return '';
+      case 'name':
+        /* Letters in any script, so accents and non-Latin names pass. */
+        if (!NAME_RE.test(value)) return 'Please use letters only; spaces, hyphens and apostrophes are fine.';
+        if ((value.match(LETTER_RE) || []).length < 2) return 'Please enter your name in full.';
+        return '';
+      case 'url':
+        var host = value.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '').split(/[/?#:]/)[0];
+        return /^[^\s.]+(\.[^\s.]+)*\.[A-Za-z]{2,}$/.test(host) ? '' : 'Please enter a full website address, like example.com.';
+    }
+    return '';
+  }
+
+  /* The inline message under a field. Created on first use and linked through
+     aria-describedby alongside any hint the field already carries. Only for
+     controls inside a .field: the newsletter has no room for one, and its
+     message goes to the status line instead, as before. */
+  function errorSlot(el, create) {
+    var field = el.closest('.field');
+    if (!field || !el.id) return null;
+    var id = el.id + '-error';
+    var slot = document.getElementById(id);
+    if (slot || !create) return slot;
+    slot = document.createElement('p');
+    slot.className = 'field-error';
+    slot.id = id;
+    slot.hidden = true;
+    field.appendChild(slot);
+    var described = el.getAttribute('aria-describedby');
+    el.setAttribute('aria-describedby', described ? described + ' ' + id : id);
+    return slot;
+  }
+
+  function showError(el, message) {
+    var slot = errorSlot(el, !!message);
+    if (message) el.setAttribute('aria-invalid', 'true');
+    else el.removeAttribute('aria-invalid');
+    if (!slot) return;
+    slot.textContent = message;
+    slot.hidden = !message;
+  }
+
+  function check(el) {
+    el.setCustomValidity(formatError(el));
+  }
+
+  function guardFormats(form) {
+    var fields = Array.prototype.filter.call(form.elements, function (el) {
+      return el.name && TRAPS.indexOf(el.name) === -1 && kindOf(el);
+    });
+
+    fields.forEach(function (el) {
+      check(el);
+
+      el.addEventListener('input', function () {
+        /* Phone: characters a number can never hold do not go in at all -
+           typed or pasted. A leading 00 is the international prefix, so it
+           becomes the + the rule asks for. */
+        if (el.type === 'tel') {
+          var cleaned = el.value.replace(/[^\d\s()+.-]/g, '').replace(/^\s*00/, '+');
+          if (cleaned !== el.value) el.value = cleaned;
+        }
+        /* Validity is kept current on every keystroke so a check fired from
+           anywhere sees the right answer; the visible message only updates
+           once one is already showing, so nobody is scolded mid-word. */
+        check(el);
+        if (el.getAttribute('aria-invalid') === 'true') {
+          showError(el, el.checkValidity() ? '' : el.validationMessage);
+        }
+      });
+
+      el.addEventListener('blur', function () {
+        if (el.type === 'url') normalizeUrls(form);
+        check(el);
+        if (String(el.value || '').trim()) showError(el, el.validationMessage);
+      });
+    });
+
+    /* checkValidity() fires `invalid` on each failing control - from the
+       submit handler here and from the staged form's "Next" in site.js - so
+       one listener shows the message wherever the check came from. Covers
+       required-but-empty controls as well as malformed ones. */
+    form.addEventListener('invalid', function (e) {
+      showError(e.target, e.target.validationMessage);
+    }, true);
+    form.addEventListener('change', function (e) {
+      var el = e.target;
+      if (el.getAttribute && el.getAttribute('aria-invalid') === 'true' && !kindOf(el)) {
+        showError(el, el.checkValidity() ? '' : el.validationMessage);
+      }
+    });
+  }
+
   function mentionsConsent(data) {
     var text = JSON.stringify(data || {}).toLowerCase();
     return text.indexOf('consent') !== -1 || text.indexOf('legal') !== -1;
@@ -237,6 +377,8 @@
     /* Whatever classes the markup gave the status element are kept - the
        newsletter's sits on a dark band and carries a modifier for it. */
     var statusClasses = status ? status.className : '';
+
+    guardFormats(form);
 
     /* A form serving several enquiry routes (see "Enquiry routes" in site.js)
        carries the thank-you for the current route in data-success. */
@@ -272,6 +414,9 @@
       /* The forms carry novalidate so that the browser's own bubble does not
          pre-empt this handler; the same checks still run, just from here. */
       normalizeUrls(form);
+      Array.prototype.forEach.call(form.elements, function (el) {
+        if (el.setCustomValidity && kindOf(el)) check(el);
+      });
       var bad = firstInvalid(form);
       if (bad) {
         say(describe(form, bad), 'error');

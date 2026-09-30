@@ -214,16 +214,16 @@
 
           <div class="field">
             <label for="p-org">Organization name <span class="req" aria-hidden="true">*</span></label>
-            <input id="p-org" name="company" type="text" required autocomplete="organization">
+            <input id="p-org" name="company" type="text" required autocomplete="organization" maxlength="100">
           </div>
           <div class="form-row">
             <div class="field">
               <label for="p-name">Contact name <span class="req" aria-hidden="true">*</span></label>
-              <input id="p-name" name="name" type="text" required autocomplete="name">
+              <input id="p-name" name="name" type="text" required autocomplete="name" maxlength="100">
             </div>
             <div class="field">
               <label for="p-email">Email address <span class="req" aria-hidden="true">*</span></label>
-              <input id="p-email" name="email" type="email" required autocomplete="email">
+              <input id="p-email" name="email" type="email" required autocomplete="email" maxlength="254">
             </div>
           </div>
           <div class="field">
@@ -248,15 +248,15 @@
           </div>
           <div class="field">
             <label for="p-location">Location(s) served</label>
-            <input id="p-location" name="locations" type="text" placeholder="Manila, Cebu, Tagaytay, Batangas, Palawan…">
+            <input id="p-location" name="locations" type="text" placeholder="Manila, Cebu, Tagaytay, Batangas, Palawan…" maxlength="200">
           </div>
           <div class="field">
             <label for="p-about">Tell us about your organization</label>
-            <textarea id="p-about" name="about" placeholder="Services, accreditations, experience with international patients, and what you are looking for in a partnership."></textarea>
+            <textarea id="p-about" name="about" placeholder="Services, accreditations, experience with international patients, and what you are looking for in a partnership." maxlength="3000"></textarea>
           </div>
           <div class="field">
             <label for="p-site">Website</label>
-            <input id="p-site" name="website" type="url" placeholder="https://" autocomplete="url">
+            <input id="p-site" name="website" type="url" placeholder="https://" autocomplete="url" maxlength="200">
           </div>
           <p class="form-note">Please do not submit patient records, clinical documentation or any personal health information through this form.</p>
           <p class="field-hint">By submitting this form, you agree that Heal Before Home may use the information provided to respond to your enquiry and communicate with you about a possible partnership.</p>
