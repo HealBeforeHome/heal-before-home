@@ -21,3 +21,10 @@
 # launch - so this now lands on the home page. The original is in git history
 # (_archive/corporate-offerings.html at commit 0e3cf89).
 /corporate-offerings                 /                                  301
+
+# Insights articles archived 1 October 2026 while Insights is hidden; the files
+# are in _archive/insights/ (not deployed). 302, not 301: browsers cache a 301
+# indefinitely, which would fight these URLs coming back. Delete these lines
+# when the articles are restored.
+/planning-medical-wellness-journey-philippines       /     302
+/executive-recovery-more-than-a-wellness-benefit     /     302

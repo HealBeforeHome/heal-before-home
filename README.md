@@ -32,7 +32,7 @@ use `https://www.healbeforehome.com`.
 | `/philippines-medical-travel` | `philippines-medical-travel.html` (collection page; header dropdown) |
 | `/bc-executive-collection` | `bc-executive-collection.html` (**hidden** since the 30 Sept 2026 brief: unlinked, `noindex`, out of the sitemap) |
 | `/insights` | `insights.html` (**hidden** since the 30 Sept 2026 brief: unlinked and out of the sitemap; articles from `_templates/insight-article.html`) |
-| `/planning-medical-wellness-journey-philippines`, `/executive-recovery-more-than-a-wellness-benefit` | the two launch Insights articles. Linked only from `/insights`. **Inconsistent:** the planning article is still in `sitemap.xml` and indexable, while the executive-recovery one is `noindex` and out of the sitemap — see Known follow-ups |
+| `/planning-medical-wellness-journey-philippines`, `/executive-recovery-more-than-a-wellness-benefit` | the two launch Insights articles. **Archived** 1 Oct 2026 while Insights is hidden: the files are in `_archive/insights/` (not deployed), the URLs 302 to the home page (`_redirects`), and neither is in the sitemap. The cards on the hidden `/insights` page still point at them. See *Restoring an archived page* |
 | `/getting-started` | `getting-started.html` |
 | `/areas-of-care` | `areas-of-care.html` |
 | `/recovery-experience` | `recovery-experience.html` |
@@ -109,6 +109,7 @@ every command, the field list per form, troubleshooting, and the traps already h
 ```
 index.html … contact.html      one file per page, self-contained markup
 _templates/                    the Insights article template; never deployed
+_archive/                      paused pages kept for restoring (the Insights articles); never deployed
 assets/css/site.css            the whole design system in one stylesheet
 assets/js/site.js              carousel, nav, accordions, scroll reveal, journey form stepper + modal
 assets/js/hubspot-forms.js     form submissions: Turnstile token, then /api/submit
@@ -180,6 +181,9 @@ the stepper in `site.js`.
    it returns, the home page's two-card INSIGHTS section is in git history
    (`_archive/home-insights-section.html`, see *Restoring retired content*).
 
+Insights is currently paused: both launch articles are in `_archive/insights/`. To
+bring them back, follow *Restoring an archived page*.
+
 Never publish an article before its complete approved body has been supplied.
 
 ### Replacing images
@@ -245,17 +249,30 @@ resolve.
 " https://www.healbeforehome.com$p; done
   ```
 
+## Restoring an archived page
+
+`_archive/` is in `.assetsignore`, so anything in it is kept in the repo but never
+served. It currently holds the two Insights articles (archived 1 October 2026). To
+publish one again:
+
+1. `git mv _archive/insights/<slug>.html <slug>.html` (back to the repo root).
+2. Delete its `302` line from `_redirects`.
+3. Add its URL back to `sitemap.xml`. Remove `noindex` from the page if it should
+   be indexed: `executive-recovery-more-than-a-wellness-benefit.html` carries one,
+   the planning article does not.
+4. Make sure something links to it (the `/insights` page, once that is unhidden).
+
 ## Restoring retired content
 
-`_archive/` held the originals of everything the September 2026 brief retired (old
+Until 1 October 2026, `_archive/` also held the originals of everything the September 2026 brief retired (old
 home-page sections, the Areas of Care cards for the four hidden specialties, the old
 Getting Started, Why the Philippines and Corporate Offerings pages, the home Insights
-section). It was removed on 1 October 2026 together with the two images only it used
+section). Those files were removed on 1 October 2026 together with the two images only it used
 (`banca*.webp` and `preview-vancouver*.webp`). Everything is still in git:
 
 ```
 git show 0e3cf89:_archive/home-sections-2026-09-30.html
-git checkout 0e3cf89 -- _archive/          # bring the whole folder back
+git checkout 0e3cf89 -- _archive/          # bring those files back alongside _archive/insights/
 git checkout 0e3cf89 -- assets/img/banca.webp assets/img/banca-900.webp
 ```
 
@@ -269,10 +286,6 @@ git checkout 0e3cf89 -- assets/img/banca.webp assets/img/banca-900.webp
   `site.js`; restore both together. Nav is now Philippines Medical Travel | Our
   Story | FAQ | contact icon, with The Signature Experience second in the
   Philippines dropdown.
-- **Insights indexing is inconsistent.** Insights is hidden, but
-  `/planning-medical-wellness-journey-philippines` is still in `sitemap.xml` and has no
-  `noindex`, while its sister article has both treatments. Decide which is intended and
-  make the two match.
 - **Photos to approve.** `signature-villa.webp` (home teaser), `recovery-companion.webp`
   and `spec-orthopedics.webp` are generated images. `recovery-nutrition.webp` was
   replaced with the bulalo photo on 30 September 2026; confirm whether that one is
@@ -299,7 +312,7 @@ git checkout 0e3cf89 -- assets/img/banca.webp assets/img/banca-900.webp
 - **Placeholder imagery.** Every photograph the September 2026 brief asks for that does
   not exist yet renders `capiz-texture.webp`. Find them with
   `grep -rn "PLACEHOLDER ASSET" *.html`; each comment describes the photo wanted and
-  names its target file. The two Insights articles also use the site default
+  names its target file. The two (archived) Insights articles also use the site default
   `og-image.jpg` for link previews until their photos are in; then point `og:image`,
   `twitter:image` and the JSON-LD `image` at the real photo.
   **`rebuild-images.py` cannot fill a placeholder on its own:** it only replaces a file

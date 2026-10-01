@@ -20,6 +20,8 @@ README.md
 HUBSPOT-SETUP.md
 wrangler.jsonc
 _templates
+# Retired or paused pages, kept for restoring; never served.
+_archive
 # The Worker source and its local secrets (wrangler dev reads .dev.vars).
 worker
 .dev.vars
