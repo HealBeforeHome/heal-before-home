@@ -101,7 +101,10 @@
      a tenth of that, while leaving no realistic way for a person to trip it.
      Measured from wiring, so a page left open is never penalised. */
   var MIN_SUBMIT_MS = 1500;
-  var ERROR = 'Something went wrong sending this. Please try again, or reach us through the contact page.';
+  /* An email address, not the contact page: that page's form takes this same
+     route, so whatever stopped this one (often a blocker refusing Turnstile)
+     would stop it too. */
+  var ERROR = 'Something went wrong sending this. Please try again, or email us at hello@healbeforehome.com.';
 
   function warn(message, detail) {
     if (window.console) console.warn('HubSpot: ' + message, detail === undefined ? '' : detail);
@@ -177,6 +180,12 @@
         execution: 'execute',
         appearance: 'interaction-only',
         retry: 'never',
+        /* The widget sits below the submit button, which in the journey modal
+           or a long page can be off-screen - leaving only "Sending…" while
+           Cloudflare waits for a click nobody knows to make. */
+        'before-interactive-callback': function () {
+          slot.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        },
         callback: function (token) { settle(true, token); },
         'error-callback': function (code) {
           settle(false, new Error('Turnstile error ' + code));

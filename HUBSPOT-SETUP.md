@@ -239,10 +239,11 @@ it unless those processes are running.
 HubSpot workflow (or set the form's notification recipients) to route Philippines, BC
 and oncology enquiries — not something the script does.
 
-**Nobody is notified when an enquiry arrives.** The forms were created with an empty
-notification list, so submissions land silently. Set it per form under
+**Enquiry notifications.** The script creates forms with an empty notification
+list; since then, all four forms have been set to notify one HubSpot user (id
+94986492, checked 1 October 2026). Change or add recipients per form under
 **Marketing → Forms →** the form **→ Options →** *Send form notification emails to*.
-Worth doing before the site takes real traffic.
+A form recreated by the script starts with no recipients again.
 
 **Test contacts** from setup are still in the CRM: two from team members' personal
 addresses and the four `hello+test-…@healbeforehome.com` journey tests. Delete them
