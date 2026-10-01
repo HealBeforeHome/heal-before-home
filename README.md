@@ -313,10 +313,11 @@ git checkout 0e3cf89 -- assets/img/banca.webp assets/img/banca-900.webp
   `site.js`; restore both together. Nav is now Philippines Medical Travel | Our
   Story | FAQ | contact icon, with The Signature Experience second in the
   Philippines dropdown.
-- **Photos to approve.** `signature-villa.webp` (home teaser), `recovery-companion.webp`
-  and `spec-orthopedics.webp` are generated images. `recovery-nutrition.webp` was
-  replaced with the bulalo photo on 30 September 2026; confirm whether that one is
-  authentic or generated and update this note. The
+- **Photos to approve.** `signature-villa.webp` (home teaser) and
+  `recovery-companion.webp` are generated images. `spec-orthopedics.webp` (a knee with
+  an illustrated bone overlay) and `recovery-nutrition.webp` (bulalo) were replaced on
+  1 October 2026 with images the client supplied; the orthopedics one is an
+  illustration by design. The
   client asked for an *authentic* photo of an existing villa HBH can coordinate for
   the home teaser; swap one in when available (drop it in as `signature-villa.jpg`
   and run `rebuild-images.py`).
