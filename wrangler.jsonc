@@ -2,6 +2,19 @@
   // Static site: no Worker script, just the folder.
   "name": "heal-before-home",
   "compatibility_date": "2026-09-16",
+
+  // The public address. HubSpot silently discards form submissions from the
+  // *.workers.dev preview address (see HUBSPOT-SETUP.md), so the forms only
+  // work here. The bare domain is attached too so it never dead-ends; a
+  // Cloudflare Redirect Rule on the zone ("Redirect from root to WWW") sends it
+  // on to www, which every canonical URL uses. Deploying this needs the
+  // healbeforehome.com zone active in this Cloudflare account and no other DNS
+  // record on either name (the old Framer records were deleted at the move).
+  "routes": [
+    { "pattern": "www.healbeforehome.com", "custom_domain": true },
+    { "pattern": "healbeforehome.com", "custom_domain": true }
+  ],
+
   "assets": {
     "directory": ".",
 

@@ -102,6 +102,22 @@ updated to match. Note that a *new* field on an *existing* form needs the form r
 
 ## Things that have already caught us
 
+**HubSpot silently discards submissions from `*.workers.dev`.** Every form answers
+200 "Thank you." and the site shows its thank-you, but a submission whose page is on
+the Cloudflare preview address (`heal-before-home.sweet-fog-edc7.workers.dev`) never
+becomes a contact or a submission. Found 30 September 2026: the same payload to the
+same form from `localhost` or `www.healbeforehome.com` became a contact within
+seconds; from `workers.dev`, never. So **test the live forms only on the real
+domain** (or locally), never on the preview address, and do not treat a thank-you
+as proof: confirm with
+
+```
+node hubspot-provision.mjs --find someone+test@example.com
+```
+
+which looks the address up as a contact. `--check` reads HubSpot's submission list,
+which a discarded submission never reaches either.
+
 **A v4 form cannot be repaired, only replaced.** The original community form was built in
 HubSpot's newer editor and connected to the old Framer site. Its CAPTCHA could not be
 turned off over the API, so it had never accepted a single submission. It was recreated

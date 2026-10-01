@@ -17,6 +17,7 @@
  *     node hubspot-provision.mjs --write      create it, then paste the GUIDs
  *     node hubspot-provision.mjs --check      list what HubSpot has received
  *     node hubspot-provision.mjs --inspect    compare each form to what its page sends
+ *     node hubspot-provision.mjs --find <email>   did a submission become a contact?
  *     node hubspot-provision.mjs --repair     turn off CAPTCHA, add missing dropdown values
  *                                             to both the properties and the forms
  *     node hubspot-provision.mjs --repair --prune   ...and DELETE dropdown values the
@@ -46,6 +47,7 @@ const DRY = process.argv.includes('--dry-run');
 const WRITE = process.argv.includes('--write');
 const CHECK = process.argv.includes('--check');
 const INSPECT = process.argv.includes('--inspect');
+const FIND = process.argv.includes('--find') ? process.argv[process.argv.indexOf('--find') + 1] : null;
 const REPAIR = process.argv.includes('--repair');
 const PRUNE = process.argv.includes('--prune');
 
@@ -628,6 +630,39 @@ async function repairFormOptions(guid, def, sends) {
     : `  could not update form options: ${JSON.stringify(upd.data)}`);
 }
 
+/* Did a test submission actually become a contact? The only reliable answer.
+   HubSpot answers every well-formed submission with 200 and screens it
+   afterwards, so the browser's "thank you" proves nothing, and a submission
+   it discards never reaches the list --check reads either. On 30 September
+   2026 every submission whose pageUri was on *.workers.dev was accepted and
+   silently dropped, while the same payload from localhost or
+   www.healbeforehome.com became a contact within seconds. The v1 endpoint
+   because this token's scopes reach it and not the v3 contacts API. */
+async function findContact(email) {
+  if (!email || email.indexOf('@') === -1) {
+    console.error('Usage: node hubspot-provision.mjs --find someone@example.com');
+    process.exit(1);
+  }
+  const res = await hs('GET', `/contacts/v1/contact/email/${encodeURIComponent(email)}/profile`);
+  if (res.status === 404) {
+    console.log(`${email}: NO CONTACT. Either HubSpot has not processed it yet (normally seconds) or it discarded the submission.`);
+    return;
+  }
+  if (!res.ok) {
+    console.log(`could not look up ${email}: ${JSON.stringify(res.data)}`);
+    return;
+  }
+  const d = res.data;
+  const when = (ms) => new Date(Number(ms)).toLocaleString('en-CA', {
+    year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
+  });
+  console.log(`${email}: contact exists, created ${when(d.properties.createdate.value)}`);
+  const names = Object.fromEntries(configuredForms().map((f) => [f.guid, f.key]));
+  for (const sub of d['form-submissions'] || []) {
+    console.log(`  ${when(sub.timestamp)}  ${names[sub['form-id']] || sub['form-id']}  ${sub['page-url'] || ''}`);
+  }
+}
+
 async function checkSubmissions() {
   for (const f of configuredForms()) {
     console.log(`\n${f.key}`);
@@ -702,6 +737,7 @@ async function main() {
   }
 
   /* Read-only: report what HubSpot has actually received, and stop. */
+  if (FIND) return findContact(FIND);
   if (CHECK) return checkSubmissions();
   if (INSPECT) return inspectForms();
   if (REPAIR) return repair();
