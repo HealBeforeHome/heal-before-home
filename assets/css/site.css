@@ -482,6 +482,15 @@ p:last-child{ margin-bottom:0; }
 .nav-cta{ display:none; }
 .header-actions{ display:flex; align-items:center; gap:clamp(.6rem,1.2vw,1rem); flex:0 0 auto; }
 .header-cta{ padding:.72rem 1.4rem; }
+/* Full bar (above the drawer breakpoint): the links sit at the right, next to
+   the contact icon and CTA, and one gap spaces every item evenly - between the
+   links, from the last link to the icon, and from the icon to the CTA. */
+@media (min-width:1181px){
+  .header-inner{ --nav-gap:clamp(1.4rem,2.2vw,2.4rem); }
+  .nav{ margin-left:auto; gap:var(--nav-gap); }
+  .header-inner,
+  .header-actions{ gap:var(--nav-gap); }
+}
 
 /* WhatsApp / telephone popover. Stays in the bar at every width, so it sits
    outside the collapsing nav. A disclosure button like the dropdowns: the
