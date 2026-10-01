@@ -410,6 +410,10 @@
         return trap && trap.value;
       });
       if (tripped || Date.now() - wiredAt < MIN_SUBMIT_MS) {
+        /* Said in the console because this path is otherwise invisible: the
+           visitor sees the thank-you and nothing reaches HubSpot. */
+        warn('"' + form.id + '" not sent - treated as automated (' +
+          (tripped ? 'a hidden decoy field was filled' : 'sent within ' + MIN_SUBMIT_MS + 'ms of the page loading') + ')');
         form.hidden = true;
         say(successText(), 'ok');
         return;

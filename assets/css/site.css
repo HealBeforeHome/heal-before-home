@@ -1248,7 +1248,12 @@ p.area-back{ margin-bottom:clamp(1.75rem,3vw,2.75rem); }
    up in reader modes, text extraction and search snippets, where CSS never
    applies. Bots key on the field names, not the labels. aria-hidden and
    tabindex="-1" keep them out of the accessibility tree and the tab order. */
-.hp{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
+/* Honeypot decoys (see TRAPS in hubspot-forms.js). display:none, not the
+   visually-hidden pattern: browsers and password managers autofill fields that
+   are merely clipped, and a decoy filled by autofill makes a real sign-up look
+   like a bot and silently discards it - which happened on 30 September 2026.
+   Bots read the markup, not the CSS, so this costs the trap nothing. */
+.hp{ display:none !important; }
 
 .section--sand .form-panel{ background:var(--cream); }
 .form-panel{
