@@ -25,6 +25,7 @@
 
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Heal Before Home">
+<meta property="og:locale" content="en_CA">
 <meta property="og:url" content="https://www.healbeforehome.com/{{SLUG}}">
 <meta property="og:title" content="{{SEO_TITLE}}">
 <meta property="og:description" content="{{META_DESCRIPTION}}">
@@ -53,7 +54,9 @@
   "image": "https://www.healbeforehome.com/assets/img/{{FEATURED_IMAGE}}",
   "author": { "@type": "Person", "name": "{{AUTHOR}}" },
   "datePublished": "{{PUBLICATION_DATE_ISO}}",
-  "publisher": { "@type": "Organization", "name": "Heal Before Home", "logo": { "@type": "ImageObject", "url": "https://www.healbeforehome.com/assets/img/logo@2x.png" } },
+  "dateModified": "{{PUBLICATION_DATE_ISO}}",
+  "inLanguage": "en-CA",
+  "publisher": { "@type": "Organization", "@id": "https://www.healbeforehome.com/#organization", "name": "Heal Before Home", "url": "https://www.healbeforehome.com/", "logo": { "@type": "ImageObject", "url": "https://www.healbeforehome.com/assets/img/logo@2x.png" } },
   "mainEntityOfPage": "https://www.healbeforehome.com/{{SLUG}}"
 }
 </script>
@@ -63,34 +66,34 @@
 
 <header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="index.html" aria-label="Heal Before Home, home">
+    <a class="brand" href="/" aria-label="Heal Before Home, home">
       <img src="assets/img/logo.png" srcset="assets/img/logo.png 180w, assets/img/logo@2x.png 360w" sizes="60px" width="180" height="179" alt="Heal Before Home monogram">
       <span class="brand-name">Heal<br>Before Home</span>
     </a>
     <nav class="nav" id="primary-nav" aria-label="Primary">
       <div class="nav-group">
-        <a class="nav-group-link" href="philippines-medical-travel.html">Philippines Medical Travel</a>
+        <a class="nav-group-link" href="philippines-medical-travel">Philippines Medical Travel</a>
         <button class="nav-group-toggle" type="button" aria-expanded="false" aria-controls="nav-philippines"><span class="sr-only">More Philippines Medical Travel pages</span></button>
         <div class="nav-sub" id="nav-philippines">
-          <a href="philippines-medical-travel.html#philippines-areas-of-care">Areas of Care</a>
-          <a href="philippines-medical-travel.html#private-collections">Curated Private Collections</a>
-          <a href="philippines-medical-travel.html#premium-extensions">Premium Villa Extensions</a>
-          <a href="philippines-medical-travel.html#destination-sanctuaries">Destination Sanctuaries</a>
-          <a href="getting-started.html#complex-journey-retainer">Complex Journey Retainer</a>
+          <a href="philippines-medical-travel#philippines-areas-of-care">Areas of Care</a>
+          <a href="philippines-medical-travel#private-collections">Curated Private Collections</a>
+          <a href="philippines-medical-travel#premium-extensions">Premium Villa Extensions</a>
+          <a href="philippines-medical-travel#destination-sanctuaries">Destination Sanctuaries</a>
+          <a href="getting-started#complex-journey-retainer">Complex Journey Retainer</a>
         </div>
       </div>
       <div class="nav-group">
-        <a class="nav-group-link" href="bc-executive-collection.html">BC Executive Collection</a>
+        <a class="nav-group-link" href="bc-executive-collection">BC Executive Collection</a>
         <button class="nav-group-toggle" type="button" aria-expanded="false" aria-controls="nav-bc"><span class="sr-only">More BC Executive Collection pages</span></button>
         <div class="nav-sub" id="nav-bc">
-          <a href="bc-executive-collection.html#vancouver-pilot">Explore the Vancouver Pilot</a>
-          <a href="bc-executive-collection.html#corporate-benefits">Corporate Allowances &mdash; HSA / LSA Guide</a>
-          <a href="contact.html#bc/corporate" data-journey>Request a Corporate Pilot Proposal</a>
+          <a href="bc-executive-collection#vancouver-pilot">Explore the Vancouver Pilot</a>
+          <a href="bc-executive-collection#corporate-benefits">Corporate Allowances &mdash; HSA / LSA Guide</a>
+          <a href="contact#bc/corporate" data-journey>Request a Corporate Pilot Proposal</a>
         </div>
       </div>
-      <a href="our-story-between-two-worlds.html">Our Story</a>
-      <a href="insights.html" aria-current="page">Insights</a>
-      <a class="btn btn--journey nav-cta" href="contact.html">Begin Your Journey</a>
+      <a href="our-story-between-two-worlds">Our Story</a>
+      <a href="insights" aria-current="page">Insights</a>
+      <a class="btn btn--journey nav-cta" href="contact">Begin Your Journey</a>
     </nav>
     <div class="header-actions">
       <div class="contact-pop">
@@ -101,7 +104,7 @@
           <a href="tel:+17783200067"><span>Telephone</span>Call HBH</a>
         </div>
       </div>
-      <a class="btn btn--journey header-cta" href="contact.html">Begin Your Journey</a>
+      <a class="btn btn--journey header-cta" href="contact">Begin Your Journey</a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Toggle navigation"><span></span></button>
     </div>
   </div>
@@ -112,7 +115,7 @@
   <article class="article">
     <header class="section section--tight article-head">
       <div class="wrap wrap--narrow">
-        <p class="area-back"><a class="link-arrow link-arrow--back" href="insights.html">All Insights</a></p>
+        <p class="area-back"><a class="link-arrow link-arrow--back" href="insights">All Insights</a></p>
         <span class="kicker">{{CATEGORY}}</span>
         <h1>{{TITLE}}</h1>
         <p class="lead">{{EXCERPT}}</p>
@@ -139,7 +142,7 @@
         <p>Tell us what you are exploring, and we will help you understand the available coordination options.</p>
       </div>
       <div class="btn-row">
-        <a class="btn btn--light btn--journey" href="contact.html">Begin Your Journey</a>
+        <a class="btn btn--light btn--journey" href="contact">Begin Your Journey</a>
       </div>
     </div>
   </section>
@@ -157,20 +160,20 @@
       <div class="footer-col">
         <h2>About HBH</h2>
         <ul>
-          <li><a href="our-story-between-two-worlds.html">Our Story</a></li>
-          <li><a href="standards-trust.html">Standards &amp; Trust</a></li>
-          <li><a href="getting-started.html">Getting Started</a></li>
-          <li><a href="for-providers.html">For Providers</a></li>
-          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="our-story-between-two-worlds">Our Story</a></li>
+          <li><a href="standards-trust">Standards &amp; Trust</a></li>
+          <li><a href="getting-started">Getting Started</a></li>
+          <li><a href="for-providers">For Providers</a></li>
+          <li><a href="faq">FAQ</a></li>
         </ul>
       </div>
       <div class="footer-col">
         <h2>Guest Resources</h2>
         <ul>
-          <li><a href="areas-of-care.html">Areas of Care</a></li>
-          <li><a href="recovery-experience.html">Recovery Experience</a></li>
-          <li><a href="medical-travel-philippines.html">Why the Philippines</a></li>
-          <li><a href="contact.html">Contact</a></li>
+          <li><a href="areas-of-care">Areas of Care</a></li>
+          <li><a href="recovery-experience">Recovery Experience</a></li>
+          <li><a href="medical-travel-philippines">Why the Philippines</a></li>
+          <li><a href="contact">Contact</a></li>
         </ul>
       </div>
       <div class="footer-col">
@@ -178,6 +181,9 @@
         <ul>
           <li><a href="mailto:hello@healbeforehome.com">hello@healbeforehome.com</a></li>
           <li><a href="https://wa.me/17783200067" target="_blank" rel="noopener">WhatsApp</a></li>
+          <li><a href="https://www.instagram.com/healbeforehome" target="_blank" rel="noopener">Instagram</a></li>
+          <li><a href="https://www.facebook.com/profile.php?id=61591911984056" target="_blank" rel="noopener">Facebook</a></li>
+          <li><a href="https://www.linkedin.com/in/healbeforehome/" target="_blank" rel="noopener">LinkedIn</a></li>
           <li><a href="tel:+17783200067">Telephone &middot; +1&nbsp;778&nbsp;320&nbsp;0067</a></li>
         </ul>
       </div>
@@ -188,9 +194,9 @@
     </div>
     <div class="footer-bottom">
       <ul class="footer-legal">
-        <li><a href="privacy-policy.html">Privacy Policy</a></li>
-        <li><a href="terms-of-use.html">Terms &amp; Conditions</a></li>
-        <li><a href="medical-service-disclaimer.html">Medical Disclaimer</a></li>
+        <li><a href="privacy-policy">Privacy Policy</a></li>
+        <li><a href="terms-of-use">Terms &amp; Conditions</a></li>
+        <li><a href="medical-service-disclaimer">Medical Disclaimer</a></li>
       </ul>
       <p>&copy; <span data-year>2026</span> Heal Before Home. All rights reserved.</p>
     </div>

@@ -31,7 +31,7 @@ use `https://www.healbeforehome.com`.
 | `/` | `index.html` |
 | `/philippines-medical-travel` | `philippines-medical-travel.html` (collection page; header dropdown) |
 | `/bc-executive-collection` | `bc-executive-collection.html` (**hidden** since the 30 Sept 2026 brief: unlinked, `noindex`, out of the sitemap) |
-| `/insights` | `insights.html` (**hidden** since the 30 Sept 2026 brief: unlinked and out of the sitemap; articles from `_templates/insight-article.html`) |
+| `/insights` | `insights.html` (**hidden** since the 30 Sept 2026 brief: unlinked, `noindex`, out of the sitemap; articles from `_templates/insight-article.html`) |
 | `/planning-medical-wellness-journey-philippines`, `/executive-recovery-more-than-a-wellness-benefit` | the two launch Insights articles. **Archived** 1 Oct 2026 while Insights is hidden: the files are in `_archive/insights/` (not deployed), the URLs 302 to the home page (`_redirects`), and neither is in the sitemap. The cards on the hidden `/insights` page still point at them. See *Restoring an archived page* |
 | `/getting-started` | `getting-started.html` |
 | `/areas-of-care` | `areas-of-care.html` |
@@ -46,7 +46,7 @@ use `https://www.healbeforehome.com`.
 | `/community-initiative-interest` | `community-initiative-interest.html` |
 | `/oncology-second-opinion` | `oncology-second-opinion.html` (linked from Areas of Care) |
 | `/dental-care`, `/hair-restoration`, `/fertility-reproductive-care`, `/women-s-health-healthy-aging`, `/aesthetic-reconstructive-health`, `/confidence-transition-coaching`, `/orthopedic-care`, `/stem-cell-hyperbaric-oxygen-therapy`, `/vision-care` | the area-of-care detail pages on `/areas-of-care` |
-| `/oral-maxillofacial-surgery`, `/longevity-wellness`, `/executive-health`, `/interventional-radiology` | **hidden** since the 30 Sept 2026 brief: still published, but unlinked and out of the sitemap. Their Areas of Care cards were kept in `_archive/areas-of-care-cards-2026-09-30.html`, now in git history only (see *Restoring retired content*); Oral & Maxillofacial now lives as a subsection of `/dental-care` |
+| `/oral-maxillofacial-surgery`, `/longevity-wellness`, `/executive-health`, `/interventional-radiology` | **hidden** since the 30 Sept 2026 brief: still published, but unlinked, `noindex` and out of the sitemap. Their Areas of Care cards were kept in `_archive/areas-of-care-cards-2026-09-30.html`, now in git history only (see *Restoring retired content*); Oral & Maxillofacial now lives as a subsection of `/dental-care` |
 | `/terms-of-use`, `/privacy-policy`, `/medical-service-disclaimer` | legal pages |
 | `/thank-you` | form confirmation (noindex) |
 | `/404` | not found |
@@ -121,6 +121,7 @@ _source-images/                drop-in originals, kept for re-cropping; never de
 rebuild-images.py              crops/converts/resizes a dropped-in photo, fixes the markup
 hubspot-provision.mjs          HubSpot admin tool: create, check, inspect and repair the forms
 robots.txt, sitemap.xml        search
+llms.txt                       plain-language site summary for AI assistants (see *Search and AI visibility*)
 wrangler.jsonc                 the Cloudflare deploy config
 _headers                       security headers and the cache policy
 _redirects                     301s from the old Framer URLs
@@ -156,15 +157,19 @@ Everything is plain HTML — open the page and edit the text. Repeated chrome (h
 footer, legal disclaimer) is duplicated in each file, so a change to the nav or footer
 needs to be made in every page. `grep` for the string you're changing to find them all.
 
+Internal links use the clean URL: `href="contact"`, `href="faq#x"`, and `href="/"` for
+the home page. Never `contact.html`: Cloudflare answers every `.html` URL with a 307 to
+the clean one, so a `.html` link costs each visitor and crawler a redirect.
+
 ### The Begin Your Journey form
 
 There is one form, in `contact.html` (`#journey-form`). On `/contact` it sits in the page;
 on every other page, clicking a `.btn--journey` or `[data-journey]` link to
-`contact.html…` fetches `/contact` once and shows that same form in a modal. If the
+`contact…` fetches `/contact` once and shows that same form in a modal. If the
 fetch fails, or without JavaScript, the link simply goes to `/contact`. So edit the form
 in `contact.html` only.
 
-A link preselects the collection in its fragment: `contact.html#philippines`, `#bc`,
+A link preselects the collection in its fragment: `contact#philippines`, `#bc`,
 `#bc/individual`, `#bc/corporate`, `#unsure`, `#oncology`. Each `[data-stage]` is one screen of
 the stepper; `data-routes` decides which screens a collection uses. The Philippines
 residence rule (residence Philippines + Philippines collection → no enquiry) lives in
@@ -174,9 +179,10 @@ the stepper in `site.js`.
 
 1. Copy `_templates/insight-article.html` to the repo root as `<slug>.html` and replace
    every `{{FIELD}}` (title, category, featured image, excerpt, author, dates, SEO title,
-   meta description, body).
+   meta description, body). Keep the meta description to about 150 characters.
 2. Add its card to `insights.html` (the commented card there is the pattern), newest
-   first, and add the URL to `sitemap.xml`.
+   first, add the URL to `sitemap.xml` with today's `<lastmod>`, and add a line for it
+   to `llms.txt`.
 3. While Insights is hidden (30 Sept 2026 brief) nothing else links to articles. When
    it returns, the home page's two-card INSIGHTS section is in git history
    (`_archive/home-insights-section.html`, see *Restoring retired content*).
@@ -204,6 +210,27 @@ frames those — so their original framing is kept.
 
 Only `alt` is left to you. Aspect ratios in use: 16:9 (heroes), 4:3 (feature cards),
 3:2 (destinations), 1:1 (specialty tiles), 4:5 (portraits), 21:9 (full-width bands).
+
+## Search and AI visibility
+
+- **Structured data.** Every indexable page ends its `<head>` with one JSON-LD
+  `@graph`: the Organization (`#organization`), the WebSite, the founder's Person, the
+  page itself, and a BreadcrumbList. Care pages add a `Service`. `/faq` is a `FAQPage`
+  whose answers are copied from the visible accordion, so **when you edit an FAQ answer,
+  edit the JSON-LD copy too** (Google penalizes FAQ markup that differs from the page).
+  Organization details (phone, email, region) are repeated in every page, so `grep` for
+  them to change them all, along with the social links in the Organization's `sameAs`
+  and the footer's *Connect With Us* list. `noindex` pages carry no JSON-LD.
+  Check changes with https://search.google.com/test/rich-results and
+  https://validator.schema.org.
+- **Titles and descriptions.** Keep titles under about 65 characters and meta
+  descriptions to about 150–160, or Google truncates them.
+- **Sitemap.** List only indexable pages. Bump a page's `<lastmod>` when its content
+  changes meaningfully.
+- **Hidden pages** get `<meta name="robots" content="noindex, follow">`, come out of
+  the sitemap and `llms.txt`, and lose their JSON-LD. Reverse all four when unhiding.
+- **`llms.txt`** is a plain-language summary of the site for AI assistants. Keep it
+  ASCII (Cloudflare serves `.txt` without a charset) and in step with the sitemap.
 
 ## Local preview
 
@@ -257,7 +284,7 @@ publish one again:
 
 1. `git mv _archive/insights/<slug>.html <slug>.html` (back to the repo root).
 2. Delete its `302` line from `_redirects`.
-3. Add its URL back to `sitemap.xml`. Remove `noindex` from the page if it should
+3. Add its URL back to `sitemap.xml` (with a `<lastmod>`) and to `llms.txt`. Remove `noindex` from the page if it should
    be indexed: `executive-recovery-more-than-a-wellness-benefit.html` carries one,
    the planning article does not.
 4. Make sure something links to it (the `/insights` page, once that is unhidden).

@@ -625,9 +625,10 @@
      The stepper hides stages with a class, never with `hidden`, which belongs
      to the routes.
 
-     Links name the collection in the fragment - contact.html#bc/corporate -
-     not a query string, because the clean-URL redirect (contact.html ->
-     /contact) drops the query but browsers carry the fragment across it.
+     Links name the collection in the fragment - contact#bc/corporate - not a
+     query string. Links use the clean URL, but an old contact.html link
+     still works: the clean-URL redirect (contact.html -> /contact) drops the
+     query but browsers carry the fragment across it.
      --------------------------------------------------------- */
   /* bc is left out while the BC Executive Collection is hidden (30 September
      2026 brief): its option is commented out in contact.html, so a leftover
@@ -872,7 +873,7 @@
 
   function loadModalForm() {
     if (modalLoad) return modalLoad;
-    modalLoad = fetch('contact.html', { credentials: 'same-origin' })
+    modalLoad = fetch('contact', { credentials: 'same-origin' })
       .then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.text();
@@ -921,7 +922,7 @@
     document.addEventListener('click', function (e) {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       var link = e.target.closest && e.target.closest('a.btn--journey, a[data-journey]');
-      if (!link || !/^contact\.html(#|$)/.test(link.getAttribute('href') || '')) return;
+      if (!link || !/^contact(\.html)?(#|$)/.test(link.getAttribute('href') || '')) return;
       e.preventDefault();
       openJourney(link);
     });

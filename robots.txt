@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
 
+# A plain-language summary of the site for AI assistants: https://www.healbeforehome.com/llms.txt
+
 Sitemap: https://www.healbeforehome.com/sitemap.xml
