@@ -1,7 +1,8 @@
 # Heal Before Home — static site
 
 A hand-built static rebuild of healbeforehome.com. No build step, no framework, no
-dependencies. Everything in this folder is what gets deployed.
+dependencies. Everything in this folder that `.assetsignore` does not name is what gets
+deployed; the one piece of server code is the form endpoint in `worker/`.
 
 ## Deploying
 
@@ -31,7 +32,7 @@ use `https://www.healbeforehome.com`.
 | `/philippines-medical-travel` | `philippines-medical-travel.html` (collection page; header dropdown) |
 | `/bc-executive-collection` | `bc-executive-collection.html` (**hidden** since the 30 Sept 2026 brief: unlinked, `noindex`, out of the sitemap) |
 | `/insights` | `insights.html` (**hidden** since the 30 Sept 2026 brief: unlinked and out of the sitemap; articles from `_templates/insight-article.html`) |
-| `/planning-medical-wellness-journey-philippines`, `/executive-recovery-more-than-a-wellness-benefit` | the two launch Insights articles |
+| `/planning-medical-wellness-journey-philippines`, `/executive-recovery-more-than-a-wellness-benefit` | the two launch Insights articles. Linked only from `/insights`. **Inconsistent:** the planning article is still in `sitemap.xml` and indexable, while the executive-recovery one is `noindex` and out of the sitemap — see Known follow-ups |
 | `/getting-started` | `getting-started.html` |
 | `/areas-of-care` | `areas-of-care.html` |
 | `/recovery-experience` | `recovery-experience.html` |
@@ -45,7 +46,7 @@ use `https://www.healbeforehome.com`.
 | `/community-initiative-interest` | `community-initiative-interest.html` |
 | `/oncology-second-opinion` | `oncology-second-opinion.html` (linked from Areas of Care) |
 | `/dental-care`, `/hair-restoration`, `/fertility-reproductive-care`, `/women-s-health-healthy-aging`, `/aesthetic-reconstructive-health`, `/confidence-transition-coaching`, `/orthopedic-care`, `/stem-cell-hyperbaric-oxygen-therapy`, `/vision-care` | the area-of-care detail pages on `/areas-of-care` |
-| `/oral-maxillofacial-surgery`, `/longevity-wellness`, `/executive-health`, `/interventional-radiology` | **hidden** since the 30 Sept 2026 brief: still published, but unlinked and out of the sitemap. Their Areas of Care cards are in `_archive/areas-of-care-cards-2026-09-30.html`; Oral & Maxillofacial now lives as a subsection of `/dental-care` |
+| `/oral-maxillofacial-surgery`, `/longevity-wellness`, `/executive-health`, `/interventional-radiology` | **hidden** since the 30 Sept 2026 brief: still published, but unlinked and out of the sitemap. Their Areas of Care cards were kept in `_archive/areas-of-care-cards-2026-09-30.html`, now in git history only (see *Restoring retired content*); Oral & Maxillofacial now lives as a subsection of `/dental-care` |
 | `/terms-of-use`, `/privacy-policy`, `/medical-service-disclaimer` | legal pages |
 | `/thank-you` | form confirmation (noindex) |
 | `/404` | not found |
@@ -107,18 +108,17 @@ every command, the field list per form, troubleshooting, and the traps already h
 
 ```
 index.html … contact.html      one file per page, self-contained markup
-_archive/                      originals of content the Sept 2026 brief retired; never deployed
 _templates/                    the Insights article template; never deployed
 assets/css/site.css            the whole design system in one stylesheet
 assets/js/site.js              carousel, nav, accordions, scroll reveal, journey form stepper + modal
 assets/js/hubspot-forms.js     form submissions: Turnstile token, then /api/submit
-worker/index.js                /api/submit: verifies Turnstile, forwards to HubSpot; never deployed as a file
+worker/index.js                /api/submit: verifies Turnstile, forwards to HubSpot; runs as the Worker, never served as a file
 assets/img/*.webp              optimized imagery (multiple widths per image)
 assets/img/logo*.png           transparent logo, dark and light
 assets/fonts/*.woff2           the two typefaces, self-hosted
 _source-images/                drop-in originals, kept for re-cropping; never deployed
 rebuild-images.py              crops/converts/resizes a dropped-in photo, fixes the markup
-hubspot-provision.mjs          one-off: creates the HubSpot properties and forms
+hubspot-provision.mjs          HubSpot admin tool: create, check, inspect and repair the forms
 robots.txt, sitemap.xml        search
 wrangler.jsonc                 the Cloudflare deploy config
 _headers                       security headers and the cache policy
@@ -176,8 +176,9 @@ the stepper in `site.js`.
    meta description, body).
 2. Add its card to `insights.html` (the commented card there is the pattern), newest
    first, and add the URL to `sitemap.xml`.
-3. The home page shows exactly two article cards (the brief). To feature a newer
-   article there, swap one of the two cards in the INSIGHTS section of `index.html`.
+3. While Insights is hidden (30 Sept 2026 brief) nothing else links to articles. When
+   it returns, the home page's two-card INSIGHTS section is in git history
+   (`_archive/home-insights-section.html`, see *Restoring retired content*).
 
 Never publish an article before its complete approved body has been supplied.
 
@@ -202,37 +203,92 @@ Only `alt` is left to you. Aspect ratios in use: 16:9 (heroes), 4:3 (feature car
 
 ## Local preview
 
-Clean URLs need a server that maps `/contact` to `contact.html`. The simplest option:
+Run the real thing — static assets, clean URLs, `_headers`, `_redirects` and the
+`/api/submit` Worker — with:
 
 ```
-npx serve .
+npx wrangler dev
 ```
 
-Opening `index.html` straight off disk will load, but the nav links will not resolve.
+For the forms to submit, create `.dev.vars` in the repo root holding Cloudflare's
+always-pass Turnstile test secret (see *Turnstile* in HUBSPOT-SETUP.md). It is ignored
+by git and never uploaded. Note that a local submission is real: it reaches HubSpot.
+
+For layout work only, `npx serve .` is enough, but forms will fail there (no
+`/api/submit`). Opening `index.html` straight off disk loads, but nav links will not
+resolve.
+
+## Security model
+
+- **What is public.** Wrangler uploads the repo root *from disk* (not from git) and
+  does not read `.gitignore`. Only `.assetsignore` keeps files private. It covers
+  `.git`, docs, tooling, `worker/`, `_source-images/`, `_templates/`, `.dev.vars`,
+  `.env*`, `*.key`, `*.pem` and editor/OS files. Add any new working file there
+  **before** deploying.
+- **Secrets.** There are two, and neither is ever in a file here:
+  `TURNSTILE_SECRET` is a Worker secret (`npx wrangler secret put`), and
+  `HUBSPOT_TOKEN` lives only in the shell running `hubspot-provision.mjs`. The
+  Turnstile site key and HubSpot form GUIDs in the JS are public by design.
+- **The form endpoint.** `/api/submit` accepts only the four form ids it lists,
+  verifies a single-use Turnstile token bound to that form and hostname, and caps the
+  body at 64 KB. It fails closed: no secret, a bad token or an unreachable upstream all
+  refuse the submission.
+- **Headers.** `_headers` sets a strict CSP (first-party only, plus Turnstile),
+  HSTS, `X-Frame-Options: DENY` and more. The CSP allows the one inline `<script>`
+  by hash, so editing that snippet in any page breaks the site until the hash is
+  recomputed (the command is in `_headers`).
+- **After each deploy**, spot-check that private files 404 on the live site:
+
+  ```
+  for p in /README.md /.git/config /worker/index.js /wrangler.jsonc /.env; do
+    curl -s -o /dev/null -w "%{http_code} $p
+" https://www.healbeforehome.com$p; done
+  ```
+
+## Restoring retired content
+
+`_archive/` held the originals of everything the September 2026 brief retired (old
+home-page sections, the Areas of Care cards for the four hidden specialties, the old
+Getting Started, Why the Philippines and Corporate Offerings pages, the home Insights
+section). It was removed on 1 October 2026 together with the two images only it used
+(`banca*.webp` and `preview-vancouver*.webp`). Everything is still in git:
+
+```
+git show 0e3cf89:_archive/home-sections-2026-09-30.html
+git checkout 0e3cf89 -- _archive/          # bring the whole folder back
+git checkout 0e3cf89 -- assets/img/banca.webp assets/img/banca-900.webp
+```
 
 ## Known follow-ups
 
 - **30 September 2026 brief.** BC Executive Collection, Insights, and four areas of
   care are hidden, not deleted: see the pages table. The home sections that
-  went are in `_archive/home-sections-2026-09-30.html`. The Journey form's BC
+  went are in git history (`_archive/home-sections-2026-09-30.html`, see *Restoring
+  retired content*). The Journey form's BC
   option is commented out in `contact.html`, and `bc` is out of `ROUTE_HASH` in
   `site.js`; restore both together. Nav is now Philippines Medical Travel | Our
   Story | FAQ | contact icon, with The Signature Experience second in the
   Philippines dropdown.
-- **Photos to approve.** `signature-villa.webp` (home teaser), `recovery-nutrition.webp`,
-  `recovery-companion.webp` and `spec-orthopedics.webp` are generated images. The
+- **Insights indexing is inconsistent.** Insights is hidden, but
+  `/planning-medical-wellness-journey-philippines` is still in `sitemap.xml` and has no
+  `noindex`, while its sister article has both treatments. Decide which is intended and
+  make the two match.
+- **Photos to approve.** `signature-villa.webp` (home teaser), `recovery-companion.webp`
+  and `spec-orthopedics.webp` are generated images. `recovery-nutrition.webp` was
+  replaced with the bulalo photo on 30 September 2026; confirm whether that one is
+  authentic or generated and update this note. The
   client asked for an *authentic* photo of an existing villa HBH can coordinate for
   the home teaser; swap one in when available (drop it in as `signature-villa.jpg`
   and run `rebuild-images.py`).
 
-- **Enquiry notifications and the guest confirmation email** are not set up. The journey
+- **Enquiry notifications and the guest confirmation email** are not set up. The
+  brief's post-submission confirmation email is a HubSpot follow-up email; the site
+  sends nothing itself. The journey
   form is provisioned and live in HubSpot (*Website: journey enquiry 2026*,
   `5890a799-…`, tested on all four routes 26 Sep 2026), but nobody is emailed when an
   enquiry arrives and the guest gets no confirmation. Both are HubSpot settings — see
   the end of HUBSPOT-SETUP.md. Four test contacts (`hello+test-…@healbeforehome.com`)
   can be deleted.
-- **Confirmation email.** The brief's post-submission confirmation email is a HubSpot
-  follow-up email to set up there; the site sends nothing itself.
 - **Vision Care copy** came from the live Framer page, which repeats Dental Care text
   below its first question. Only the vision-specific parts are used.
 - **Drafted copy for approval:** the three Private Executive Experience drawers on

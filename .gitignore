@@ -21,3 +21,10 @@ desktop.ini
 # wrangler dev secrets (TURNSTILE_SECRET). Never commit.
 .dev.vars
 .dev.vars.*
+
+# Tooling and editor state
+node_modules/
+.vscode/
+.idea/
+.claude/
+*.log

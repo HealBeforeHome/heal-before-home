@@ -18,6 +18,6 @@
 
 # Retired September 2026: the Canadian frameworks were replaced by the BC
 # Executive Collection page, which the 30 September 2026 brief hides for
-# launch - so this now lands on the home page. The original is in _archive/
-# (not deployed).
+# launch - so this now lands on the home page. The original is in git history
+# (_archive/corporate-offerings.html at commit 0e3cf89).
 /corporate-offerings                 /                                  301

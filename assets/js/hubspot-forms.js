@@ -8,11 +8,11 @@
  * Each submission carries a Cloudflare Turnstile token and goes to the site's
  * own /api/submit (worker/index.js), which verifies the token and only then
  * forwards the payload to HubSpot. The widget is invisible unless Cloudflare
- * wants a click, in which case it appears just above the submit button.
+ * wants a click, in which case it appears just below the submit button.
  *
  * To wire a form up:
  *   1. build the form in HubSpot with matching field internal names (see the
- *      Forms section of README.md for the list each form needs),
+ *      "Reference" section of HUBSPOT-SETUP.md for the list each form needs),
  *   2. turn the form's CAPTCHA ("SPAM prevention") switch OFF - HubSpot refuses
  *      API submissions for a form that has it on, answering with
  *      FORM_HAS_RECAPTCHA_ENABLED. Turnstile guards it instead. Switching it on

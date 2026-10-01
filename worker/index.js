@@ -92,7 +92,15 @@ async function submit(request, env) {
   }
 
   const ip = request.headers.get('CF-Connecting-IP');
-  const outcome = await verify(input.token, ip, env.TURNSTILE_SECRET);
+  /* A network failure or a non-JSON reply from siteverify would otherwise
+     throw out of the Worker as a bare 500. Still refused, just said plainly. */
+  let outcome;
+  try {
+    outcome = await verify(input.token, ip, env.TURNSTILE_SECRET);
+  } catch (e) {
+    console.error('Turnstile siteverify failed for "' + input.form + '":', String(e));
+    return json(502, { error: 'verify' });
+  }
   /* action is set to the form id when the widget renders, so a token earned on
      the newsletter cannot be spent on the provider form. Cloudflare's test keys
      (used under `wrangler dev`) answer hostname example.com and no action, and
@@ -116,12 +124,18 @@ async function submit(request, env) {
   const body = input.body;
   body.context = Object.assign({}, body.context, ip ? { ipAddress: ip } : {});
 
-  const res = await fetch(HUBSPOT + guid, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  const text = await res.text();
+  let res, text;
+  try {
+    res = await fetch(HUBSPOT + guid, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    text = await res.text();
+  } catch (e) {
+    console.error('HubSpot unreachable for "' + input.form + '":', String(e));
+    return json(502, { error: 'upstream' });
+  }
   if (!res.ok) console.warn('HubSpot ' + res.status + ' for "' + input.form + '": ' + text);
   return new Response(text || '{}', {
     status: res.status,

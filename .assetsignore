@@ -3,20 +3,38 @@
 # The assets directory is the repo root, so without this file wrangler ships the
 # git database and the working files along with the site. Cloudflare's _redirects
 # has no 404 action, so exclusion — not a redirect — is what keeps them private.
+#
+# Wrangler uploads what is on DISK, not what is in git, and it does not read
+# .gitignore. A file that is gitignored but sitting in this folder is still
+# published unless it is named here - hence the secrets and OS/editor entries.
 .git
 .gitignore
 .assetsignore
 .wrangler
 __pycache__
+*.pyc
 _source-images
 rebuild-images.py
 hubspot-provision.mjs
 README.md
 HUBSPOT-SETUP.md
 wrangler.jsonc
-_archive
 _templates
 # The Worker source and its local secrets (wrangler dev reads .dev.vars).
 worker
 .dev.vars
 .dev.vars.*
+# Secrets that must never be served, should one ever be dropped here.
+.env
+.env.*
+*.key
+*.pem
+# Tooling, editor and OS files.
+node_modules
+.vscode
+.idea
+.claude
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini

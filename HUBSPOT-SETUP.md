@@ -102,9 +102,10 @@ Scopes needed: `crm.schemas.contacts.write`, `crm.schemas.contacts.read`, `forms
 Re-running is safe: an existing property is left alone, and a form whose name already
 exists is skipped rather than duplicated.
 
-**Keep the token out of this repo.** The repo root *is* the deploy directory, so a `.env`
-here would be downloadable from the live site. Set it in the shell, where it lives only
-for that window. The site itself needs no token.
+**Keep the token out of this repo.** The repo root *is* the deploy directory. `.env`
+and the usual key-file patterns are in `.assetsignore` as a safety net, but any other
+file holding the token would be downloadable from the live site. Set it in the shell,
+where it lives only for that window. The site itself needs no token.
 
 ## Day to day
 
@@ -136,6 +137,8 @@ updated to match. Note that a *new* field on an *existing* form needs the form r
 | `/api/submit` answers 403 `{"error":"turnstile"}` | Token rejected: wrong secret, a hostname not on the widget, or a reused/expired token | `npx wrangler tail` prints Cloudflare's error codes |
 | `/api/submit` answers 500 `{"error":"config"}` | `TURNSTILE_SECRET` not set on the Worker | `npx wrangler secret put TURNSTILE_SECRET` |
 | `/api/submit` answers 400 `{"error":"form"}` | Form id missing from `FORMS` in `worker/index.js` | Add it there and redeploy |
+| `/api/submit` answers 502 `{"error":"verify"}` | The Worker could not reach Cloudflare's siteverify, or got a non-JSON reply | Transient; `npx wrangler tail` shows the cause. Persistent → check Cloudflare status |
+| `/api/submit` answers 502 `{"error":"upstream"}` | The Worker could not reach HubSpot | Transient; `npx wrangler tail` shows the cause. Persistent → check HubSpot status |
 | `verification unavailable` in the console | The Turnstile script did not load — usually a blocker or network filter | Nothing site-side; the visitor sees the usual error with the contact-page fallback |
 | Thank-you appears but no contact | Nothing — it worked. The message only shows on a 200 | Check the record itself to confirm the fields mapped |
 
@@ -205,7 +208,9 @@ marks only `email` and `firstname` required; the page enforces the rest per rout
 **provider-enquiry** — `company`, `firstname`, `lastname`, `email`, `provider_type`
 (dropdown), `locations`, `about` (multi-line), `website`.
 
-**newsletter-form** — `email`.
+**newsletter-form** — `email`. Sent with consent to process **and** an explicit opt-in
+to subscription type `3060772435` (`subscriptionId` in `hubspot-forms.js`), so it
+evidences marketing consent.
 
 **community-form** — `firstname`, `lastname`, `email`,
 `strong_how_would_you_describe_your_role_or_area_of_contribution___strong_` (dropdown),
@@ -239,10 +244,6 @@ notification list, so submissions land silently. Set it per form under
 **Marketing → Forms →** the form **→ Options →** *Send form notification emails to*.
 Worth doing before the site takes real traffic.
 
-**The newsletter records consent to process, not a subscription opt-in.** Fine for
-replying to someone; not enough to evidence opt-in for marketing email. To fix, find the
-subscription type's numeric id under **Settings → Marketing → Email → Subscriptions** and
-set `subscriptionId` in the `newsletter-form` entry of `hubspot-forms.js`.
-
-**Test contacts** from setup are still in the CRM (`vencent.u@gmail.com`,
-`legacy1126ad@gmail.com`, and the four `hello+test-…@healbeforehome.com` journey tests).
+**Test contacts** from setup are still in the CRM: two from team members' personal
+addresses and the four `hello+test-…@healbeforehome.com` journey tests. Delete them
+before reporting on real enquiries.

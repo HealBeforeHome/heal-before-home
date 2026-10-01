@@ -43,7 +43,7 @@
 #     values into the URL if hubspot-forms.js ever failed to load.
 #
 # The script-src hash covers the one inline <script> in every page (identical on
-# all 22). EDIT THAT SNIPPET AND THE SITE BREAKS until this hash is recomputed -
+# all of them). EDIT THAT SNIPPET AND THE SITE BREAKS until this hash is recomputed -
 # CSP would block the very failsafe that reveals the content. To recompute:
 #   python -c "import re,hashlib,base64;s=re.search(rb'<script>(.*?)</script>',open('index.html','rb').read(),re.S).group(1);print('sha256-'+base64.b64encode(hashlib.sha256(s).digest()).decode())"
 /*
