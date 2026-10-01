@@ -59,8 +59,10 @@ working form.
 ## Forms
 
 All four forms submit to **HubSpot** (portal `343416288`) through the public Forms
-submission API. Nothing is posted to the host: `assets/js/hubspot-forms.js` intercepts the
-submit, sends JSON to HubSpot and shows a status message in place. The markup stays the
+submission API, behind **Cloudflare Turnstile**. `assets/js/hubspot-forms.js` intercepts the
+submit, gets a Turnstile token, and sends JSON to the site's own `/api/submit`
+(`worker/index.js`), which verifies the token and forwards the submission to HubSpot; the
+page then shows a status message in place. The markup stays the
 site's own, so the fields look and behave like everything else on the page.
 
 | Form | Page | `id` |
@@ -71,8 +73,9 @@ site's own, so the fields look and behave like everything else on the page.
 | Community interest | `/community-initiative-interest` | `community-form` |
 
 Each form's GUID and its consent and success wording live in the `FORMS` table at the top
-of `assets/js/hubspot-forms.js`. That table is the only thing to edit when a form is added
-or replaced.
+of `assets/js/hubspot-forms.js`. The GUID also goes in `FORMS` in `worker/index.js`, which
+refuses any form it does not list. The Worker needs the `TURNSTILE_SECRET` secret and the
+page the matching site key; see *Turnstile* in HUBSPOT-SETUP.md.
 
 **Everything else is handled by `hubspot-provision.mjs`** — it creates the HubSpot
 properties and forms, checks what has been received, and diagnoses a form that stops
@@ -95,8 +98,9 @@ every command, the field list per form, troubleshooting, and the traps already h
 - Forms carry `novalidate` so a failed check does not discard typed answers. The script
   runs the same validity check itself, names the offending field in the message, and adds
   a missing `https://` to URL fields rather than rejecting a bare domain.
-- Nothing is posted to the host. The whole form path is the site's own markup plus
-  `hubspot-forms.js`, so it behaves identically wherever this is deployed.
+- The one server-side piece is `worker/index.js`, and it runs only for `/api/*`; every
+  page and asset is still served as a static file. It is in `.assetsignore`, as is
+  `.dev.vars` (the local Turnstile test secret for `wrangler dev`).
 - **No one is emailed when an enquiry arrives.** See the end of HUBSPOT-SETUP.md.
 
 ## Structure
@@ -107,7 +111,8 @@ _archive/                      originals of content the Sept 2026 brief retired;
 _templates/                    the Insights article template; never deployed
 assets/css/site.css            the whole design system in one stylesheet
 assets/js/site.js              carousel, nav, accordions, scroll reveal, journey form stepper + modal
-assets/js/hubspot-forms.js     form submissions to HubSpot
+assets/js/hubspot-forms.js     form submissions: Turnstile token, then /api/submit
+worker/index.js                /api/submit: verifies Turnstile, forwards to HubSpot; never deployed as a file
 assets/img/*.webp              optimized imagery (multiple widths per image)
 assets/img/logo*.png           transparent logo, dark and light
 assets/fonts/*.woff2           the two typefaces, self-hosted
@@ -129,9 +134,9 @@ form panels, inset notes), forest `#1e2a25` (ink), sage `#5a6a60`, ivory `#fffff
 The original site's third cream `#f7f4ed` was dropped — it sat only 3 points off the
 page ground and read as no separation at all. Type is Cormorant (display) over Alegreya
 Sans (body) — the same pairing the Framer site used, but **self-hosted** from
-`assets/fonts/` rather than fetched from Google Fonts, so the site loads no third-party
-resources at all. Keep it that way: the Content-Security-Policy in `_headers` allows no
-external origin except the HubSpot form endpoint.
+`assets/fonts/` rather than fetched from Google Fonts. Keep it that way: the only
+third-party resource is Cloudflare Turnstile (script and challenge frame), and the
+Content-Security-Policy in `_headers` allows no other external origin.
 
 The contrast ratios in the comments throughout `site.css` are measured, not estimated.
 If you change a colour, re-measure the pairs the comments name.

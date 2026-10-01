@@ -14,15 +14,49 @@ This is the reference for keeping them that way.
 > enabled on all four, and every submission from the site failed from that moment
 > (`FORM_HAS_RECAPTCHA_ENABLED`). `--inspect` found it; `--repair` turned it off on
 > 30 September. HubSpot's CAPTCHA only works on forms HubSpot renders itself, and
-> these are the site's own markup. The honeypot and timing guard in
-> `hubspot-forms.js` are the spam protection. If spam ever becomes a real problem,
-> the route is Cloudflare Turnstile verified by a Worker, not the HubSpot switch.
+> these are the site's own markup. Spam protection is Cloudflare Turnstile, checked by
+> the site's Worker (below), with the honeypot and timing guard in `hubspot-forms.js`
+> as a first layer.
 
 ## How it works
 
 The site never renders HubSpot's markup. [`assets/js/hubspot-forms.js`](assets/js/hubspot-forms.js)
-takes the values from the site's own fields and POSTs them to HubSpot's public Forms
-submission API, which needs no credentials and is designed to be called from a browser.
+takes the values from the site's own fields, gets a Cloudflare Turnstile token, and
+POSTs both to the site's own `/api/submit`. That is [`worker/index.js`](worker/index.js):
+it verifies the token with Cloudflare and only then forwards the values to HubSpot's
+public Forms submission API, passing HubSpot's answer straight back to the page.
+
+The Worker keeps its own `FORMS` table of form id → GUID and refuses any form not in
+it, so a new or replaced form's GUID goes in **both** files. `--write` fills unset
+entries in both; a redeploy is then needed for the Worker to accept it.
+
+## Turnstile
+
+The widget is invisible to most visitors (`appearance: 'interaction-only'`): Cloudflare
+decides on submit, and only asks for a click — shown just below the submit button —
+when it is unsure. Each submission spends one token, issued for that form's id
+(`action`), and the Worker rejects a token from another form or another hostname.
+
+Setup, once:
+
+1. Cloudflare dashboard → **Turnstile → Add widget**, mode *Managed*, hostnames
+   `www.healbeforehome.com` and `healbeforehome.com`.
+2. Paste the **site key** (public) into `TURNSTILE_SITEKEY` in `hubspot-forms.js`.
+3. Set the **secret key** on the Worker — never in a file here:
+
+   ```
+   npx wrangler secret put TURNSTILE_SECRET
+   ```
+
+Locally (`npx wrangler dev`), the page swaps in Cloudflare's always-pass test site key.
+Pair it with the test secret in a `.dev.vars` file at the repo root, which git and the
+asset upload both ignore:
+
+```
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+```
+
+The Worker's own logs (`npx wrangler tail`) show every refusal with Cloudflare's reason.
 The form in HubSpot exists only as a *schema*: HubSpot validates the submission against
 it and rejects anything that does not match.
 
@@ -34,8 +68,8 @@ Three consequences, because nearly every failure traces back to one of them:
   the thank-you message — all unused. Only internal names, field types and dropdown
   *values* matter.
 - **CAPTCHA must be off.** HubSpot refuses every API submission to a form with spam
-  prevention on, answering `FORM_HAS_RECAPTCHA_ENABLED`. The honeypot field in the markup
-  guards the forms instead.
+  prevention on, answering `FORM_HAS_RECAPTCHA_ENABLED`. Turnstile guards the forms
+  instead.
 
 ## The provisioning script
 
@@ -98,6 +132,11 @@ updated to match. Note that a *new* field on an *existing* form needs the form r
 | `MISSING_SCOPES` | The private app lacks `forms` | Add the scope on the app's Auth tab |
 | `The client is not allowlisted to perform an operation to v4 forms` | The form was built in HubSpot's newer forms editor. The API can read it but never modify it | Recreate the form through the script and repoint the GUID |
 | `no form GUID set for "…"` | Placeholder still in `FORMS` | `--write` |
+| `no Turnstile site key set` | Placeholder still in `TURNSTILE_SITEKEY` | Paste the site key (see Turnstile above) |
+| `/api/submit` answers 403 `{"error":"turnstile"}` | Token rejected: wrong secret, a hostname not on the widget, or a reused/expired token | `npx wrangler tail` prints Cloudflare's error codes |
+| `/api/submit` answers 500 `{"error":"config"}` | `TURNSTILE_SECRET` not set on the Worker | `npx wrangler secret put TURNSTILE_SECRET` |
+| `/api/submit` answers 400 `{"error":"form"}` | Form id missing from `FORMS` in `worker/index.js` | Add it there and redeploy |
+| `verification unavailable` in the console | The Turnstile script did not load — usually a blocker or network filter | Nothing site-side; the visitor sees the usual error with the contact-page fallback |
 | Thank-you appears but no contact | Nothing — it worked. The message only shows on a 200 | Check the record itself to confirm the fields mapped |
 
 ## Things that have already caught us

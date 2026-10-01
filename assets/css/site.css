@@ -1366,6 +1366,14 @@ html.modal-open{ overflow:hidden; }
 .form + .form-status{ margin-top:1.5rem; }
 .newsletter + .form-status{ margin-top:1rem; max-width:520px; }
 
+/* Turnstile, appended to each form by hubspot-forms.js. It is invisible unless
+   Cloudflare wants a click, so the slot cancels the gap its own row would add,
+   and the spacing goes on the widget itself, which only takes up room when it
+   shows. In the newsletter it takes a line of its own below the field. */
+.form > .turnstile-slot{ margin-top:-1.3rem; }
+.newsletter > .turnstile-slot{ flex:1 1 100%; margin-top:-.75rem; }
+.turnstile-slot > iframe{ margin-top:1rem; }
+
 /* Same element on the dark contact band. */
 .form-status--onDark.is-ok,
 .form-status--onDark.is-error{ background:rgba(255,255,240,.09); color:rgba(255,255,240,.88); }

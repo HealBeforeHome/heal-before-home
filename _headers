@@ -31,8 +31,10 @@
 # would break any subdomain still served over HTTP, the second is effectively
 # irreversible. Add includeSubDomains once every subdomain is confirmed HTTPS.
 #
-# CSP: everything is first-party except the HubSpot form POST, so the policy is
-# tight. Two deliberate concessions:
+# CSP: everything is first-party except Cloudflare Turnstile (its script and the
+# challenge iframe, both on challenges.cloudflare.com), so the policy is tight.
+# Form submissions go to the site's own /api/submit, which forwards to HubSpot
+# server-side, so connect-src is 'self' alone. Two deliberate concessions:
 #   - style-src needs 'unsafe-inline' for the ~200 inline style="" attributes and
 #     site.js's el.style.setProperty for --reveal-delay.
 #   - form-action 'none' is intentional. No form here submits natively; every one
@@ -51,4 +53,4 @@
   Strict-Transport-Security: max-age=31536000
   Cross-Origin-Opener-Policy: same-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), display-capture=(), autoplay=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-67F3+sihOvmHhP28srzYcny0qh3HqnWxeWkNMAhKNgY='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.hsforms.com; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-67F3+sihOvmHhP28srzYcny0qh3HqnWxeWkNMAhKNgY=' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src https://challenges.cloudflare.com; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; upgrade-insecure-requests

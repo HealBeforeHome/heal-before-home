@@ -1,6 +1,10 @@
 {
-  // Static site: no Worker script, just the folder.
+  // Static site plus one Worker route: worker/index.js checks the Turnstile
+  // token on a form submission and forwards it to HubSpot. Everything else is
+  // served straight from the folder without invoking the Worker (see
+  // run_worker_first below). Needs the TURNSTILE_SECRET secret.
   "name": "heal-before-home",
+  "main": "worker/index.js",
   "compatibility_date": "2026-09-16",
 
   // The public address. HubSpot silently discards form submissions from the
@@ -17,6 +21,10 @@
 
   "assets": {
     "directory": ".",
+    "binding": "ASSETS",
+
+    // Only the form endpoint runs the Worker; pages and assets never do.
+    "run_worker_first": ["/api/*"],
 
     // Asset paths in the markup are relative, so a trailing slash is meaningful:
     // /contact/ would resolve assets to /contact/assets/... and arrive unstyled.

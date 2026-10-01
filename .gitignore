@@ -17,3 +17,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# wrangler dev secrets (TURNSTILE_SECRET). Never commit.
+.dev.vars
+.dev.vars.*

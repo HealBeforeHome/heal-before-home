@@ -54,6 +54,7 @@ const PRUNE = process.argv.includes('--prune');
 const API = 'https://api.hubapi.com';
 const GROUP = 'contactinformation';
 const SCRIPT = 'assets/js/hubspot-forms.js';
+const WORKER = 'worker/index.js';
 
 /* Properties HubSpot ships with - never create these. */
 const STANDARD = new Set(['email', 'firstname', 'lastname', 'company', 'website', 'phone', 'jobtitle']);
@@ -730,6 +731,32 @@ function paste(guids) {
   return changed;
 }
 
+/* worker/index.js keeps its own form id -> GUID allowlist (it refuses any form
+   it does not know), so a new GUID has to land there too. Same rule as above:
+   only an unset entry is filled; one that disagrees is reported, not changed. */
+function pasteWorker(guids) {
+  let src = readFileSync(WORKER, 'utf8');
+  let changed = 0;
+  for (const [key, guid] of Object.entries(guids)) {
+    if (!guid) continue;
+    const re = new RegExp(`('${key}':\\s*')([^']*)(')`);
+    const m = src.match(re);
+    if (!m) {
+      console.log(`  ${WORKER} has no '${key}' entry - add it to FORMS there by hand.`);
+      continue;
+    }
+    if (m[2] === guid) continue;
+    if (m[2] && m[2] !== 'PASTE-HUBSPOT-FORM-GUID') {
+      console.log(`  ${WORKER} has '${key}' -> ${m[2]}, not ${guid} - check which is current.`);
+      continue;
+    }
+    src = src.replace(re, `$1${guid}$3`);
+    changed++;
+  }
+  if (changed) writeFileSync(WORKER, src);
+  return changed;
+}
+
 async function main() {
   if (!TOKEN && !DRY) {
     console.error('Set HUBSPOT_TOKEN first (see the header of this file), or pass --dry-run.');
@@ -794,6 +821,8 @@ ${failed.length} form(s) not created: ${failed.join(', ')}`);
     const n = paste(Object.fromEntries(found));
     console.log(`\nPasted ${n} GUID${n === 1 ? '' : 's'} into ${SCRIPT}.`);
     if (n < found.length) console.log('The rest were already filled in - left alone.');
+    const w = pasteWorker(Object.fromEntries(found));
+    if (w) console.log(`Pasted ${w} GUID${w === 1 ? '' : 's'} into ${WORKER} - redeploy for the Worker to accept them.`);
   } else if (!DRY) {
     console.log('\nRe-run with --write to paste these in automatically.');
   }

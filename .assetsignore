@@ -16,3 +16,7 @@ HUBSPOT-SETUP.md
 wrangler.jsonc
 _archive
 _templates
+# The Worker source and its local secrets (wrangler dev reads .dev.vars).
+worker
+.dev.vars
+.dev.vars.*

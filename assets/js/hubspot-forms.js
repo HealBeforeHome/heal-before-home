@@ -5,23 +5,34 @@
  * styling and validation as everything around them, and the values land in
  * HubSpot through the public Forms submission API.
  *
+ * Each submission carries a Cloudflare Turnstile token and goes to the site's
+ * own /api/submit (worker/index.js), which verifies the token and only then
+ * forwards the payload to HubSpot. The widget is invisible unless Cloudflare
+ * wants a click, in which case it appears just above the submit button.
+ *
  * To wire a form up:
  *   1. build the form in HubSpot with matching field internal names (see the
  *      Forms section of README.md for the list each form needs),
  *   2. turn the form's CAPTCHA ("SPAM prevention") switch OFF - HubSpot refuses
  *      API submissions for a form that has it on, answering with
- *      FORM_HAS_RECAPTCHA_ENABLED. The honeypot in the markup guards it instead.
- *      Switching it on in HubSpot stops every form on the site: that is exactly
- *      what happened on 29 September 2026, when CAPTCHA was enabled on all four
- *      forms and every submission failed until `hubspot-provision.mjs --repair`
- *      turned it off again on 30 September,
- *   3. paste the form's GUID into FORMS below, keyed by the form's id attribute.
+ *      FORM_HAS_RECAPTCHA_ENABLED. Turnstile guards it instead. Switching it on
+ *      in HubSpot stops every form on the site: that is exactly what happened
+ *      on 29 September 2026, when CAPTCHA was enabled on all four forms and
+ *      every submission failed until `hubspot-provision.mjs --repair` turned it
+ *      off again on 30 September,
+ *   3. paste the form's GUID into FORMS below, keyed by the form's id attribute,
+ *      AND into FORMS in worker/index.js, which refuses any form id it lacks.
  *
  * The GUID is the last path segment of the form's editor URL:
  *   app.hubspot.com/forms/343416288/editor/<GUID>/edit/form
  */
 (function () {
-  var PORTAL = '343416288';
+  /* The Turnstile widget's site key (Cloudflare dashboard > Turnstile). Public
+     by design; the matching secret lives only in the Worker's TURNSTILE_SECRET.
+     Locally, Cloudflare's always-pass test key is used instead, since the real
+     one is restricted to the site's hostnames. */
+  var TURNSTILE_SITEKEY = '0x4AAAAAAFLW4MV_675Krfff';
+  var TEST_SITEKEY = '1x00000000000000000000AA';
 
   /* ---------------------------------------------------------------------
      The only thing that needs editing when a form is added or replaced.
@@ -70,16 +81,13 @@
     }
   };
 
-  var ENDPOINT = 'https://api.hsforms.com/submissions/v3/integration/submit/';
+  /* worker/index.js: verifies the Turnstile token, then forwards to HubSpot. */
+  var ENDPOINT = '/api/submit';
 
-  /* Spam guards. HubSpot's own CAPTCHA has to stay off (see the note at the top
-     of this file), the portal id and every GUID are public, and the endpoint
-     takes anonymous POSTs - so these are what stands between a scripted bot and
-     the CRM. Neither stops anyone who has read this file; they stop the
-     commodity bots that crawl for exposed form endpoints, which is what
-     actually shows up. If real spam ever arrives, the answer is Turnstile
-     behind a Worker that proxies the submission, which would also let HubSpot's
-     own protection be switched back on.
+  /* Spam guards. Turnstile, checked server-side by the Worker, is the real one.
+     The honeypots and the timing floor below stay as a cheap first layer: they
+     turn away the crudest bots without spending a Turnstile check, and they
+     answer with a fake success where Turnstile would answer with a refusal.
 
      Every name here is a decoy field, hidden by .hp and skipped by collect().
      Anything typed into one came from something that cannot see the page. */
@@ -97,6 +105,105 @@
 
   function warn(message, detail) {
     if (window.console) console.warn('HubSpot: ' + message, detail === undefined ? '' : detail);
+  }
+
+  /* ---------------------------------------------------------------------
+     Turnstile. The script is injected here, once, rather than tagged in
+     every page, so the journey form that site.js loads into a modal later
+     is covered by the same path as the rest. _headers allows the origin.
+     --------------------------------------------------------------------- */
+  var TURNSTILE_JS = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=';
+  var turnstileReady = null;
+
+  function sitekey() {
+    var host = window.location.hostname;
+    return host === 'localhost' || host === '127.0.0.1' ? TEST_SITEKEY : TURNSTILE_SITEKEY;
+  }
+
+  /* Resolves with window.turnstile, or rejects when it will never arrive - a
+     blocker, a network failure - so the submit can say so instead of hanging. */
+  function loadTurnstile() {
+    if (turnstileReady) return turnstileReady;
+    turnstileReady = new Promise(function (resolve, reject) {
+      if (window.turnstile) return resolve(window.turnstile);
+      var callback = '__hbhTurnstileReady';
+      var timer = setTimeout(function () { reject(new Error('Turnstile did not load in time')); }, 20000);
+      window[callback] = function () {
+        clearTimeout(timer);
+        resolve(window.turnstile);
+      };
+      var script = document.createElement('script');
+      script.src = TURNSTILE_JS + callback;
+      script.async = true;
+      script.onerror = function () {
+        clearTimeout(timer);
+        reject(new Error('Turnstile script failed to load'));
+      };
+      document.head.appendChild(script);
+    });
+    /* Let a later submit try again rather than inherit one bad load. */
+    turnstileReady.catch(function () { turnstileReady = null; });
+    return turnstileReady;
+  }
+
+  /* One widget per form, as the form's last child - after the submit button
+     rather than beside it, since the buttons sit in rows (.form-nav, .btn-row,
+     the newsletter's flex line) that a checkbox would crowd. It is run on
+     submit (execution: 'execute') rather than on page load, so a token is
+     always fresh - they expire after five minutes, and the journey form
+     alone can take longer than that. Returns getToken(), which yields a new
+     single-use token each call. */
+  function guard(form) {
+    var slot = document.createElement('div');
+    slot.className = 'turnstile-slot';
+    form.appendChild(slot);
+
+    var widget = null;
+    var pending = null;
+
+    function settle(ok, value) {
+      if (!pending) return;
+      var p = pending;
+      pending = null;
+      if (ok) p.resolve(value);
+      else p.reject(value);
+    }
+
+    function render(turnstile) {
+      if (widget !== null) return widget;
+      widget = turnstile.render(slot, {
+        sitekey: sitekey(),
+        action: form.id,
+        execution: 'execute',
+        appearance: 'interaction-only',
+        retry: 'never',
+        callback: function (token) { settle(true, token); },
+        'error-callback': function (code) {
+          settle(false, new Error('Turnstile error ' + code));
+          return true;
+        },
+        'expired-callback': function () { settle(false, new Error('Turnstile token expired')); },
+        'timeout-callback': function () { settle(false, new Error('Turnstile challenge timed out')); }
+      });
+      return widget;
+    }
+
+    /* Rendered up front so any interactive check is ready by the time the
+       visitor reaches the button; a failure here is retried on submit. */
+    loadTurnstile().then(render).catch(function () {});
+
+    return function getToken() {
+      return loadTurnstile().then(function (turnstile) {
+        render(turnstile);
+        settle(false, new Error('superseded'));
+        return new Promise(function (resolve, reject) {
+          pending = { resolve: resolve, reject: reject };
+          /* Tokens are single-use: clear the last one before asking again. */
+          turnstile.reset(widget);
+          turnstile.execute(widget);
+        });
+      });
+    };
   }
 
   /* HubSpot models a person as firstname + lastname, while the enquiry forms ask
@@ -178,11 +285,18 @@
     return body;
   }
 
-  function post(form, config, withConsent) {
-    return fetch(ENDPOINT + PORTAL + '/' + config.guid, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload(form, config, withConsent))
+  /* Each call earns its own Turnstile token: the consent retry below is a
+     second submission, and the Worker spends a token per submission. */
+  function post(form, config, withConsent, getToken) {
+    return getToken().then(function (token) {
+      return fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ form: form.id, token: token, body: payload(form, config, withConsent) })
+      });
+    }, function (err) {
+      err.turnstile = true;
+      throw err;
     }).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (data) {
         return { ok: res.ok, data: data };
@@ -383,6 +497,7 @@
     var statusClasses = status ? status.className : '';
 
     guardFormats(form);
+    var getToken = guard(form);
 
     /* A form serving several enquiry routes (see "Enquiry routes" in site.js)
        carries the thank-you for the current route in data-success. */
@@ -438,6 +553,11 @@
         warn('no form GUID set for "' + form.id + '" - see FORMS in assets/js/hubspot-forms.js');
         return;
       }
+      if (sitekey().indexOf('PASTE') === 0) {
+        say(ERROR, 'error');
+        warn('no Turnstile site key set - see TURNSTILE_SITEKEY in assets/js/hubspot-forms.js');
+        return;
+      }
 
       button.disabled = true;
       var original = button.textContent;
@@ -448,9 +568,9 @@
          payload and add consent only if it complains about it. A form that
          signs the visitor up to a subscription always sends it: HubSpot accepts
          that submission without consent too, and the opt-in would be lost. */
-      post(form, config, !!config.subscriptionId)
+      post(form, config, !!config.subscriptionId, getToken)
         .then(function (r) {
-          if (!r.ok && mentionsConsent(r.data)) return post(form, config, true);
+          if (!r.ok && mentionsConsent(r.data)) return post(form, config, true, getToken);
           return r;
         })
         .then(function (r) {
@@ -464,7 +584,7 @@
         })
         .catch(function (err) {
           say(ERROR, 'error');
-          warn('submission error for "' + form.id + '":', err);
+          warn((err && err.turnstile ? 'verification unavailable' : 'submission error') + ' for "' + form.id + '":', err);
         })
         .then(function () {
           button.disabled = false;
