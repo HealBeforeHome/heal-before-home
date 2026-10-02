@@ -842,6 +842,29 @@ p:last-child{ margin-bottom:0; }
 /* The controls travel as one group - pause, slide lines, arrows - centred on the
    same axis as the CTA above them, so button and controls read as one stack. */
 .hero--home .hero-controls-inner{ justify-content:center; gap:clamp(1rem,2vw,1.4rem); }
+
+/* The page's one orchestrated entrance. The photograph is already easing out of
+   its slow zoom; over it the headline settles first, then the tagline and CTA
+   rise together from the foot, and the carousel chrome fades in last since it is
+   not part of the message. Pure CSS, so it runs without site.js, and `both` holds
+   each piece at its start state through its delay. */
+@keyframes hero-rise{
+  from{ opacity:0; transform:translateY(18px); }
+  to  { opacity:1; transform:none; }
+}
+@keyframes hero-fade{ from{ opacity:0; } to{ opacity:1; } }
+.hero--home h1          { animation:hero-rise 1.2s var(--ease) .2s both; }
+.hero--home .hero-tagline{ animation:hero-rise 1.1s var(--ease) .75s both; }
+.hero--home .btn-row    { animation:hero-rise 1.1s var(--ease) .95s both; }
+.hero--home .hero-controls{ animation:hero-fade 1s var(--ease) 1.4s both; }
+/* The blanket reduced-motion rule shortens durations but leaves the delays, which
+   would hold the text invisible and then snap it in. Off entirely instead. */
+@media (prefers-reduced-motion: reduce){
+  .hero--home h1,
+  .hero--home .hero-tagline,
+  .hero--home .btn-row,
+  .hero--home .hero-controls{ animation:none; }
+}
 .hero--home .hero-controls{
   /* relative, not static: z-index only applies to a positioned box, and without it
      .hero::after - the veil at z-index 1 - paints over the buttons. */
