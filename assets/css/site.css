@@ -1914,24 +1914,17 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
 }
 
 /* ---- home hero on a phone ----
-   Portrait phone, landscape photographs, and a hero the copy makes ~700px tall:
-   covering that box enlarged every slide until only the middle third of it
-   showed. The photo now covers the top of the hero and fades into the veil
-   colour, so it is scaled to a shorter box and shows about half its width while
-   the text still sits over it. The slow zoom goes too - on a crop this tight the
-   extra 7% was the difference between a landscape and a close-up. */
+   The hero fills the first screen below the 67px header, and the photograph
+   covers all of it. With only the headline at the top and the tagline and CTA
+   at the foot, the middle of the frame is the photograph's, so a tall portrait
+   crop of each slide reads as an image rather than a strip. The slide sources
+   in index.html are sized to this box (sizes="calc((100vh - 67px) * 1.78)")
+   and include the full-size file, so the crop stays sharp. The slow zoom stays
+   off: on a crop this tight the extra 7% turns a landscape into a close-up. */
 @media (max-width:700px){
-  /* With only the headline and CTAs left, the 86svh frame left ~200px of bare
-     veil under the controls. A shorter frame keeps the cluster on the photo. */
   .hero--home{
-    background:rgb(var(--veil));
-    min-height:clamp(440px,58vh,500px);
-    min-height:clamp(440px,58svh,500px);
-  }
-  .hero--home .hero-track{
-    bottom:auto; height:min(100%, 128vw);
-    -webkit-mask-image:linear-gradient(to bottom, #000 68%, transparent);
-            mask-image:linear-gradient(to bottom, #000 68%, transparent);
+    min-height:clamp(520px,calc(100vh - 67px),820px);
+    min-height:clamp(520px,calc(100svh - 67px),820px);
   }
   .hero--home .hero-slide img,
   .hero--home .hero-slide.is-active img,
