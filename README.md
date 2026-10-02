@@ -241,8 +241,13 @@ Run the real thing — static assets, clean URLs, `_headers`, `_redirects` and t
 `/api/submit` Worker — with:
 
 ```
-npx wrangler dev
+npx wrangler dev --persist-to $HOME/.wrangler-hbh-state
 ```
+
+The `--persist-to` flag matters. The assets directory is the repo root, so wrangler
+watches everything here, including its own `.wrangler/state` databases, which it
+writes to constantly. Left in the default place, every write triggers a reload and
+the server restarts in an endless loop. Keeping the state outside the repo stops it.
 
 For the forms to submit, create `.dev.vars` in the repo root holding Cloudflare's
 always-pass Turnstile test secret (see *Turnstile* in HUBSPOT-SETUP.md). It is ignored

@@ -677,10 +677,10 @@ p:last-child{ margin-bottom:0; }
 .hero h1 em{ font-style:italic; }
 /* The home hero leads with a longer sentence than the interior heroes, so it needs
    a wider measure than the 15ch above - at 15ch it breaks into four short lines. */
-/* The home hero is just the headline and the CTA row, so the photograph carries
-   the frame. The headline runs ~17% under --fs-hero (which the interior pages do
-   not use) and its bottom margin is the one gap left: headline to buttons. The
-   standfirst and tagline live in the .intro band below the hero. */
+/* The home hero is just the headline and the CTA, so the photograph carries the
+   frame. The headline runs ~17% under --fs-hero (which the interior pages do not
+   use); its bottom margin is only a floor for when the frame is short and the CTA
+   comes up to meet it. The kicker, tagline and standfirst live in .intro below. */
 .hero--home h1{
   font-size:clamp(2rem,1.1rem + 3.9vw,4.65rem);
   max-width:24ch; margin-bottom:clamp(2rem,3.6vw,2.9rem);
@@ -795,7 +795,10 @@ p:last-child{ margin-bottom:0; }
   .hero--page .hero-content::before{ --hero-band-solid:2.4rem; }
 }
 
-/* The home hero centres its text; the interior heroes stay bottom-aligned.
+/* The home hero splits its two pieces: the headline sits at the top of the frame,
+   in the sky above the subject of every slide (the mountains, the bath), and the
+   CTA sits at the foot just above the controls. The interior heroes stay
+   bottom-aligned.
 
    The carousel controls come out of absolute positioning here and into the column
    with the text. Pinned to the foot of the frame they were anchored to the wrong
@@ -813,19 +816,32 @@ p:last-child{ margin-bottom:0; }
    cross axis, and would right-align both children. */
 .hero--home{
   flex-direction:column;
-  justify-content:center;
   align-items:stretch;
 }
 .hero--home .hero-content{
-  /* Even top and bottom, and the bottom value is now also the text-to-controls
-     gap. Kept in the token as well as the shorthand because the kicker's contrast
-     band under @media (min-width:1024px) is anchored to --hero-pad-top. */
+  /* Fills the frame above the controls; the CTA row's auto margin then pushes it
+     to the foot, leaving the headline alone at the top. The bottom padding is the
+     CTA-to-controls gap. Kept in the token as well as the shorthand because the
+     contrast band under @media (min-width:1024px) is anchored to --hero-pad-top. */
+  flex:1 0 auto;
+  display:flex; flex-direction:column;
   --hero-pad-top:clamp(3.25rem,6vw,4.5rem);
-  padding-block:var(--hero-pad-top) var(--hero-pad-top);
-  /* Lifts the text one spacing step above centre; the controls stay put. The
-     contrast band is drawn on this box, so it rises with the text. */
-  top:calc(-1 * clamp(1.25rem,2.5vw,2rem));
+  padding-block:var(--hero-pad-top) clamp(1.75rem,3vw,2.5rem);
 }
+/* The tagline leads the foot group: its auto margin pushes it and the CTA down
+   together, so the brand line reads as the button's caption. */
+.hero--home .hero-tagline{
+  margin:auto auto clamp(1.1rem,2vw,1.5rem);
+  font-size:clamp(1.2rem,.95rem + 1vw,1.75rem);
+}
+.hero--home .btn-row{ justify-content:center; }
+/* Centred on the frame's axis: headline, CTA and the controls beneath them all
+   share one centre line, so the photograph reads as symmetrical around them. */
+.hero--home .hero-content{ text-align:center; }
+.hero--home h1{ margin-inline:auto; }
+/* The controls travel as one group - pause, slide lines, arrows - centred on the
+   same axis as the CTA above them, so button and controls read as one stack. */
+.hero--home .hero-controls-inner{ justify-content:center; gap:clamp(1rem,2vw,1.4rem); }
 .hero--home .hero-controls{
   /* relative, not static: z-index only applies to a positioned box, and without it
      .hero::after - the veil at z-index 1 - paints over the buttons. */
@@ -865,24 +881,23 @@ p:last-child{ margin-bottom:0; }
      hundreds of pixels to spare and simply reads as more open. */
   .hero--home .hero-content{
     --hero-pad-top:2.75rem;
-    padding-block:var(--hero-pad-top) var(--hero-pad-top);
+    padding-block:var(--hero-pad-top) 2.25rem;
   }
   /* ~17% under the old 3.4-4.4rem laptop scale, for a quieter headline. */
   .hero--home h1{ font-size:clamp(2.8rem,1rem + 2.8vw,3.65rem); }
 }
 
 /* =========================================================
-   Home introduction: the standfirst and tagline the hero used to carry,
-   set on the cream ground as a quiet transition into the value bar.
-   The tagline stays under .pullquote's size so it does not compete with
-   the Philosophy line two sections down.
+   Home introduction: the kicker and standfirst the hero used to carry, set
+   on the cream ground as a quiet transition into the value bar. The title
+   stays under .pullquote's size so it does not compete with the Philosophy
+   line two sections down.
    ========================================================= */
-.intro .lead{ max-width:58ch; color:var(--ink); }
-.intro-tagline{
-  font-family:var(--display); font-style:italic; font-weight:300;
-  font-size:clamp(1.3rem,1rem + 1.1vw,1.85rem); line-height:1.3;
-  color:var(--forest); margin:clamp(1.1rem,2vw,1.6rem) 0 0;
+.intro-title{
+  font-size:clamp(1.6rem,1.15rem + 1.6vw,2.45rem); line-height:1.15;
+  max-width:32ch; margin:0 auto;
 }
+.intro .lead{ max-width:58ch; color:var(--ink); margin:clamp(1.6rem,3vw,2.25rem) auto 0; }
 
 /* =========================================================
    Value bar: the concierge-not-clinic anchor
@@ -902,8 +917,10 @@ p:last-child{ margin-bottom:0; }
 /* One Point of Coordination on the home page: a single item across the bar,
    with the journey sequence as its closing line. */
 .valuebar-grid--single{ grid-template-columns:1fr; }
-.valuebar-grid--single .valuebar-item{ padding-inline:0; }
-.valuebar-grid--single .valuebar-item p{ max-width:78ch; }
+/* Centred to follow the hero and the introduction above it, so the opening
+   run of the page shares one axis. A centred block wants a shorter measure. */
+.valuebar-grid--single .valuebar-item{ padding-inline:0; text-align:center; }
+.valuebar-grid--single .valuebar-item p{ max-width:62ch; margin-inline:auto; }
 .valuebar-grid--single .valuebar-item p + p{ margin-top:.9rem; }
 .valuebar-grid--single .valuebar-item .valuebar-flow{
   margin-top:1.25rem; font-size:.78rem; font-weight:600; letter-spacing:.18em;
@@ -1739,7 +1756,7 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
   .header-inner{ min-height:52px; }
   /* The bottom value is the gap to the controls row, which is in flow here; on a
      390px-tall screen 3.25rem of it was height the CTA row could not spare. */
-  .hero--home .hero-content{ padding-block:1.25rem 1.75rem; top:0; }
+  .hero--home .hero-content{ padding-block:1.25rem 1.75rem; }
   .hero--page .hero-content{ padding-block:1.5rem; }
   /* Releasing the min-height is not enough on its own: the hero type is sized off
      the VIEWPORT WIDTH, and a landscape phone is wide. At 844px the headline
