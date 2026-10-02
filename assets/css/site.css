@@ -1914,17 +1914,17 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
 }
 
 /* ---- home hero on a phone ----
-   The hero fills the first screen below the 67px header, and the photograph
-   covers all of it. With only the headline at the top and the tagline and CTA
-   at the foot, the middle of the frame is the photograph's, so a tall portrait
-   crop of each slide reads as an image rather than a strip. The slide sources
-   in index.html are sized to this box (sizes="calc((100vh - 67px) * 1.78)")
-   and include the full-size file, so the crop stays sharp. The slow zoom stays
+   The hero takes about 70% of the screen, with the photograph covering all of
+   it, so the ivory introduction shows beneath it on first load. With only the
+   headline at the top and the tagline and CTA at the foot, the middle of the
+   frame is the photograph's. The slide sources in index.html are sized to this
+   box (sizes="calc(70vh * 1.78)") and include the full-size file, so the crop
+   stays sharp. The slow zoom stays
    off: on a crop this tight the extra 7% turns a landscape into a close-up. */
 @media (max-width:700px){
   .hero--home{
-    min-height:clamp(520px,calc(100vh - 67px),820px);
-    min-height:clamp(520px,calc(100svh - 67px),820px);
+    min-height:clamp(480px,70vh,700px);
+    min-height:clamp(480px,70svh,700px);
   }
   .hero--home .hero-slide img,
   .hero--home .hero-slide.is-active img,
