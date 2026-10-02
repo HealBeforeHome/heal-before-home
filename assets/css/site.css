@@ -92,6 +92,19 @@
                                  NOT the section green, so the images keep
                                  their own colour instead of reading tinted */
   --gold:          #d6b878;
+  /* Hero overlay, in three layers of --veil. Contrast is budgeted against the
+     worst case - a pure white photo pixel behind the glyph - so it holds for any
+     photograph and any crop. Ivory over --veil on white needs a composite of
+     .601 for 4.5:1 (normal text) and .469 for 3:1 (large text, and the carousel
+     icons under SC 1.4.11). Rather than hold the whole photograph at the darker
+     figure, the base is light and a scrim is added only where the text sits:
+       base over the whole photo                       .36
+       + text scrim:  1 - (.64 x .59) = .622  ->  4.80:1   normal text
+       + large scrim: 1 - (.64 x .79) = .494  ->  3.09:1   large text / UI
+     Change the base and both scrims have to be re-solved from it. */
+  --hero-veil:        .36;
+  --hero-scrim-text:  .41;
+  --hero-scrim-large: .21;
   /* Strength of the capiz shell texture in the header. One dial, 0 to 1.
      The swatch is used untouched: every value in it already sits between 180
      and 255, so even at full strength the bar stays pale and warm and the
@@ -132,6 +145,10 @@
      ~350px; desktop sizes are unchanged at 1440. */
   --fs-hero:  clamp(2rem, .88rem + 5.12vw, 5.6rem);
   --fs-h1:    clamp(1.85rem, 1.1rem + 3.45vw, 4.2rem);
+  /* The interior hero headline, ~18% under --fs-h1 at every width so the
+     photograph carries more of the frame. Floors at 24.8px, so it stays large
+     text (3:1) even on the narrowest phone. */
+  --fs-hero-page: clamp(1.55rem, .9rem + 2.85vw, 3.45rem);
   --fs-h2:    clamp(1.95rem, 1.35rem + 2.1vw, 3.15rem);
   --fs-h3:    clamp(1.35rem, 1.12rem + 0.82vw, 1.85rem);
   --fs-h4:    clamp(1.12rem, 1.02rem + 0.38vw, 1.32rem);
@@ -636,21 +653,16 @@ p:last-child{ margin-bottom:0; }
    transition suppressed; site.js drops .is-priming after the first paint, and
    the zoom then runs like every other slide. Without JS it simply stays put. */
 .hero-slide.is-active.is-priming img{ transform:scale(1.07); transition:none; }
-/* .61 is the safe default: it covers normal-size text at 4.64:1 against a white
-   photo pixel, which is the real worst case - hero-palawan peaks at 1.000 and
-   hero-cebu at 0.999. The lighter value below is conditional on the text actually
-   being large enough to earn it. */
+/* The base veil alone carries no text: every line of hero copy sits on a scrim
+   (see --hero-veil in :root). The worst case is real - hero-palawan peaks at a
+   1.000 pixel and hero-cebu at 0.999. */
 .hero::after{
   content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
-  background:rgba(var(--veil),.61);
+  background:rgba(var(--veil),var(--hero-veil));
 }
 .hero-content{
   position:relative; z-index:2; width:100%;
-  /* Held in a token because the kicker's contrast band under @media (min-width:1024px)
-     is anchored to the top padding: the two have to move together or the band stops
-     covering the kicker. */
-  --hero-pad-top:clamp(3.25rem,7vw,5.5rem);
-  padding-block:var(--hero-pad-top) clamp(5rem,8vw,6.75rem);
+  padding-block:clamp(3.25rem,7vw,5.5rem) clamp(5rem,8vw,6.75rem);
   color:var(--ivory);
   /* Belt and braces, not part of the contrast budget: the overlay is sized so the
      text passes on its own against a white pixel. This only covers the case where a
@@ -658,18 +670,15 @@ p:last-child{ margin-bottom:0; }
      but the edge still reads soft. */
   text-shadow:0 1px 12px rgba(var(--veil),.45);
 }
-/* The kicker is the one piece of small text in the hero, so it alone needs 4.5:1
-   while everything else clears 3:1. Rather than hold the whole overlay at .61 for
-   one short line, this adds .24 over the base across the top of the text block,
-   which composites to .61 there and leaves the rest of the photograph at .49.
-   Anchored to .hero-content, not to a percentage of the frame: the text block is
-   bottom-aligned and its height varies, so the kicker sits near the top of the hero
-   on desktop but around 63% of it on a phone. Tying the band to the content means
-   it follows the kicker instead of guessing where it landed. Full-bleed via 100vw
-   because .hero-content is max-width constrained and a band with visible side edges
-   would read as a panel; .hero clips the overflow. */
+/* The scrims are pseudo-elements at z-index -1 inside .hero-content, which is a
+   stacking context at z-index 2: they paint over the veil and under the text.
+   They are anchored to the text they protect, not to a percentage of the frame,
+   because the text moves with the viewport and the frame does not. Each runs
+   off the edge of the hero and lets .hero clip it, so no edge shows. */
 
-.hero .kicker{ color:var(--ivory); }
+/* The one line of tracked micro-type in the hero; 700 rather than the 500 used
+   on cream, since light-on-photo type reads thinner than its weight. */
+.hero .kicker{ color:var(--ivory); font-weight:700; letter-spacing:.2em; }
 .hero h1{
   font-size:var(--fs-hero); color:var(--ivory); max-width:15ch;
   margin-bottom:.38em; letter-spacing:-.018em;
@@ -692,17 +701,20 @@ p:last-child{ margin-bottom:0; }
    display italic at a fraction of the size and in the same warm tint as the
    kicker above, so the two frame the headline rather than compete with it. */
 .hero-tagline{
-  font-family:var(--display); font-style:italic; font-weight:300;
+  /* 400, not the display 300: the hairline italic read faint over a photograph. */
+  font-family:var(--display); font-style:italic; font-weight:400;
   font-size:clamp(1.15rem,.84rem + 1.42vw,2.1rem);   /* large text from 744px up */
   color:var(--ivory);
   max-width:40ch; margin:0 0 clamp(1.1rem,2vw,1.6rem);
 }
 .hero-sub{
-  /* Caps at 24.8px. It has to clear 24px by 1024 to count as large text, but the
-     previous 28px cap left it level with the tagline - 28.0 against 28.8 - which
-     flattened the middle of the hierarchy. Holding it just over the threshold keeps
-     the standfirst reading as body copy. */
-  font-size:clamp(1rem,.67rem + 1.36vw,1.55rem);    /* large text from 977px up */
+  /* Caps at 21.6px, 13-15% under the old 24.8px from a tablet up, so the type
+     gives ground to the photograph. That makes it normal text at every width,
+     which is why it sits on the 4.5:1 text scrim. The 16px floor is kept: on a
+     phone it is already as small as body copy should go. 400 rather than the
+     body 300, because light-on-photo type reads thinner than its weight. */
+  font-size:clamp(1rem,.6rem + 1.12vw,1.35rem);
+  font-weight:400;
   color:var(--ivory); max-width:52ch; line-height:1.6; margin-bottom:2rem;
 }
 .hero-controls{
@@ -711,11 +723,13 @@ p:last-child{ margin-bottom:0; }
 .hero-controls-inner{ display:flex; align-items:center; justify-content:space-between; gap:1rem; }
 .hero-playback{ display:flex; align-items:center; gap:clamp(.7rem,2vw,1.1rem); }
 .hero-dots{ display:flex; gap:.55rem; align-items:center; }
-/* The visible dot is a 2px bar, but the button around it is padded out to the 24px
-   minimum target size and the bar painted into the content box, so the hit area is
-   finger-sized without the rule growing. */
+/* The visible dot is a 2px bar, but the button around it is padded out to 24px
+   tall and the bar painted into the content box, so the hit area is finger-sized
+   without the rule growing. At 18px wide it is under 24 on that axis, which SC
+   2.5.8 allows through its spacing exception: with the .55rem gap the dots sit
+   26.8px apart, so a 24px circle on each never touches the next. */
 .hero-dots button{
-  width:26px; height:24px; padding-block:11px; padding-inline:0; border:0; cursor:pointer;
+  width:18px; height:24px; padding-block:11px; padding-inline:0; border:0; cursor:pointer;
   background:rgba(255,255,240,.3); background-clip:content-box;
   position:relative; overflow:hidden;
   transition:background .3s var(--ease);
@@ -727,15 +741,17 @@ p:last-child{ margin-bottom:0; }
 .hero-dots button[aria-pressed="true"]::after{ transform:scaleX(1); transition:transform .4s var(--ease); }
 .hero-dots button:hover{ background:rgba(255,255,240,.6); }
 /* Pause/play shares the arrows' shape. It stays visible where the arrows are
-   dropped on narrow screens, since it is the only control that stops the motion. */
+   dropped on narrow screens, since it is the only control that stops the motion.
+   32px keeps them quiet against the photograph and still clears the 24px
+   minimum target (SC 2.5.8). */
 .hero-arrows{ display:flex; gap:.5rem; }
-.hero-toggle svg{ width:15px; height:15px; }
+.hero-toggle svg{ width:12px; height:12px; }
 .hero-toggle .icon-play{ display:none; }
 .hero-toggle.is-paused .icon-pause{ display:none; }
 .hero-toggle.is-paused .icon-play{ display:block; }
 .hero-arrows button,
 .hero-toggle{
-  width:44px; height:44px; display:flex; align-items:center; justify-content:center;
+  width:32px; height:32px; display:flex; align-items:center; justify-content:center;
   background:rgba(250,247,241,.08); border:1px solid rgba(255,255,240,.28);
   color:var(--ivory); cursor:pointer; border-radius:50%;
   backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
@@ -743,56 +759,80 @@ p:last-child{ margin-bottom:0; }
 }
 .hero-arrows button:hover,
 .hero-toggle:hover{ background:rgba(250,247,241,.2); border-color:rgba(255,255,240,.55); }
-.hero-arrows svg{ width:15px; height:15px; }
+.hero-arrows svg{ width:12px; height:12px; }
 @media (max-width:560px){
   .hero-arrows{ display:none; }
   .hero-controls-inner{ justify-content:flex-start; }
 }
 
-/* Above ~1024px the tagline renders at 24px or more, which makes it large text at
-   3:1, and the headline already was. The kicker and - since it came down to 20px -
-   the standfirst are normal text needing 4.5:1, which .49 does not carry (3.20:1
-   against a white photo pixel; 4.5:1 needs .601). So the photograph drops to .49
-   and a band covers the text block from the kicker through the standfirst.
-   Below this width everything renders smaller - 16.8px on a phone, which is where
-   it should be - so the flat .61 above applies. The overlay follows the rendered
-   size rather than assuming it. */
-@media (min-width:1024px){
-  .hero::after{ background:rgba(var(--veil),.49); }
+/* ---- hero scrims ----
+   Interior heroes: the text block is bottom-left, so the scrim is a full-height
+   panel from the left edge of the screen to the right edge of the text measure,
+   easing out over --hero-scrim-fade. Everything right of that is the photograph
+   on the base veil alone. On a phone the measure is wider than the screen, so
+   the panel covers the whole hero and the fade falls off-screen.
+   Sized from the containing block (.hero-content, a centred .wrap): 50% - 50vw
+   is the screen's left edge, and the width runs from there past the gutter and
+   the measure. --hero-measure has to be at least as wide as the widest line of
+   hero copy; the max-widths below are capped at it so no line can outrun the
+   solid part of the panel. */
+.hero--page{ --hero-measure:39rem; --hero-scrim-fade:16rem; }
+.hero--wide{ --hero-measure:46rem; }
+.hero--page .hero-content::before{
+  content:""; position:absolute; z-index:-1; pointer-events:none;
+  top:-100vh; bottom:-100vh;
+  left:calc(50% - 50vw);
+  width:calc(50vw - 50% + var(--gutter) + var(--hero-measure) + var(--hero-scrim-fade));
+  background:linear-gradient(to left,
+    rgba(var(--veil),0) 0,
+    rgba(var(--veil),calc(var(--hero-scrim-text) * .156)) calc(var(--hero-scrim-fade) * .25),
+    rgba(var(--veil),calc(var(--hero-scrim-text) * .5))   calc(var(--hero-scrim-fade) * .5),
+    rgba(var(--veil),calc(var(--hero-scrim-text) * .844)) calc(var(--hero-scrim-fade) * .75),
+    rgba(var(--veil),var(--hero-scrim-text)) var(--hero-scrim-fade));
+}
 
-  /* Starts a full viewport above the text block, not at its top edge. The block is
-     bottom-aligned, so whenever the hero is taller than its content there is a strip
-     above it - 14px at 1920x1080 - and anchoring the band at top:0 left that strip
-     on the base alone, with a hard edge where the band began.
-     Running it off the top and letting .hero clip the excess means full strength all
-     the way up, with the only transition being the falloff below the text.
-     Stops are absolute lengths rather than percentages for the same reason: the
-     element height now includes the 100vh overhang, so percentages would drift with
-     the viewport instead of tracking the text.
-     --hero-band-solid is where full strength ends. It used to be 2.4rem, the foot of
-     the kicker, because everything below the kicker was large text. The standfirst
-     is normal text at 20px now, so it has to reach the foot of THAT instead:
-     measured from the top of .hero-content the paragraph ends at 441px at 1440 and
-     448px at 1920, which is padding-top + 24.6rem and + 25rem, so 26rem clears both
-     with room for the headline to breathe at other widths. The falloff keeps its
-     original ~28rem span below that so it still reads as vignetting. */
-  .hero-content::before{
-    --hero-band-solid:26rem;
-    content:""; position:absolute; top:-100vh; left:50%; transform:translateX(-50%);
-    width:100vw;
-    height:calc(100vh + var(--hero-pad-top) + var(--hero-band-solid) + 27.6rem);
-    z-index:-1; pointer-events:none;
-    background:linear-gradient(to bottom,
-      rgba(var(--veil),.24) 0,
-      rgba(var(--veil),.24) calc(100vh + var(--hero-pad-top) + var(--hero-band-solid)),
-      rgba(var(--veil),.17) calc(100vh + var(--hero-pad-top) + var(--hero-band-solid) + 6.6rem),
-      rgba(var(--veil),.10) calc(100vh + var(--hero-pad-top) + var(--hero-band-solid) + 13.6rem),
-      rgba(var(--veil),.04) calc(100vh + var(--hero-pad-top) + var(--hero-band-solid) + 21.6rem),
-      rgba(var(--veil),0)   calc(100vh + var(--hero-pad-top) + var(--hero-band-solid) + 27.6rem));
-  }
-  /* Page heroes keep the old geometry: their standfirst is untouched at 24.8px, so
-     large text at 3:1, and only the kicker needs the band. */
-  .hero--page .hero-content::before{ --hero-band-solid:2.4rem; }
+/* An interior hero with one even veil instead of the left-hand scrim, for pages
+   whose photograph reads badly split into a dark and a light half. The standfirst
+   is normal text, so the whole frame has to carry 4.5:1 against a white pixel:
+   .60 is the lightest veil that does (4.51:1); .59 drops to 4.39:1. */
+.hero--even{ --hero-veil:.60; }
+.hero--even .hero-content::before{ content:none; }
+
+/* Home hero: the headline is at the top of the frame and the tagline, CTA and
+   controls at the foot, so the middle of the photograph carries no text at all
+   and sits on the base veil. Two full-bleed scrims, each running off its own end
+   of the hero and easing out toward the middle over --hero-scrim-fall:
+   - behind the headline, the large-text scrim (it never renders under 24px);
+   - from just above the tagline to the foot, the text scrim. The tagline is
+     large text on a laptop but not on a phone, and it read faint at 3:1, so it
+     gets 4.5:1 at every width. The same scrim carries the controls.
+   Where a short frame brings the two together they overlap, which only darkens
+   and so can only add contrast. */
+.hero--home{ --hero-scrim-fall:8rem; }
+.hero--home h1,
+.hero--home .hero-tagline{ position:relative; }
+.hero--home h1::before,
+.hero--home .hero-tagline::before{
+  content:""; position:absolute; z-index:-1; pointer-events:none;
+  left:50%; width:100vw; transform:translateX(-50%);
+}
+.hero--home h1::before{
+  top:-100vh; bottom:calc(-1rem - var(--hero-scrim-fall));
+  background:linear-gradient(to top,
+    rgba(var(--veil),0) 0,
+    rgba(var(--veil),calc(var(--hero-scrim-large) * .156)) calc(var(--hero-scrim-fall) * .25),
+    rgba(var(--veil),calc(var(--hero-scrim-large) * .5))   calc(var(--hero-scrim-fall) * .5),
+    rgba(var(--veil),calc(var(--hero-scrim-large) * .844)) calc(var(--hero-scrim-fall) * .75),
+    rgba(var(--veil),var(--hero-scrim-large)) var(--hero-scrim-fall));
+}
+.hero--home .hero-tagline::before{
+  top:calc(-1rem - var(--hero-scrim-fall)); bottom:-100vh;
+  background:linear-gradient(to bottom,
+    rgba(var(--veil),0) 0,
+    rgba(var(--veil),calc(var(--hero-scrim-text) * .156)) calc(var(--hero-scrim-fall) * .25),
+    rgba(var(--veil),calc(var(--hero-scrim-text) * .5))   calc(var(--hero-scrim-fall) * .5),
+    rgba(var(--veil),calc(var(--hero-scrim-text) * .844)) calc(var(--hero-scrim-fall) * .75),
+    rgba(var(--veil),var(--hero-scrim-text)) var(--hero-scrim-fall));
 }
 
 /* The home hero splits its two pieces: the headline sits at the top of the frame,
@@ -821,12 +861,10 @@ p:last-child{ margin-bottom:0; }
 .hero--home .hero-content{
   /* Fills the frame above the controls; the CTA row's auto margin then pushes it
      to the foot, leaving the headline alone at the top. The bottom padding is the
-     CTA-to-controls gap. Kept in the token as well as the shorthand because the
-     contrast band under @media (min-width:1024px) is anchored to --hero-pad-top. */
+     CTA-to-controls gap. */
   flex:1 0 auto;
   display:flex; flex-direction:column;
-  --hero-pad-top:clamp(3.25rem,6vw,4.5rem);
-  padding-block:var(--hero-pad-top) clamp(1.75rem,3vw,2.5rem);
+  padding-block:clamp(3.25rem,6vw,4.5rem) clamp(1.75rem,3vw,2.5rem);
 }
 /* The tagline leads the foot group: its auto margin pushes it and the CTA down
    together, so the brand line reads as the button's caption. */
@@ -876,16 +914,25 @@ p:last-child{ margin-bottom:0; }
   padding-bottom:clamp(2rem,3.5vw,2.75rem);
 }
 
-/* Page hero (interior pages) */
+/* Page hero (interior pages). The measures are in ch, so the smaller type keeps
+   the same line breaks; each is capped at --hero-measure so the copy can never
+   run past the solid part of the scrim. */
 .hero--page .hero-content{ padding-block:clamp(3rem,6vw,4.75rem); }
-.hero--page h1{ font-size:var(--fs-h1); max-width:20ch; }
-.hero--page .hero-sub{ margin-bottom:0; }
+.hero--page h1{
+  font-size:var(--fs-hero-page); max-width:min(20ch,var(--hero-measure));
+  /* .38em of the smaller headline closed up on the standfirst; this restores
+     about the gap the old size had. */
+  margin-bottom:.5em;
+}
+.hero--page .hero-sub{ margin-bottom:0; max-width:min(52ch,var(--hero-measure)); }
+.hero--page .hero-tagline{ max-width:min(40ch,var(--hero-measure)); }
+.hero--page .btn-row{ max-width:var(--hero-measure); }
 /* The two collection heroes carry more copy than the other interior heroes, and
    at 20ch / 52ch it stacked into a narrow column with the right half of the
    photograph empty. Opened toward the home hero's proportions, not all the way:
    the type here stays at the interior size. */
-.hero--wide h1{ max-width:24ch; }
-.hero--wide .hero-sub{ max-width:62ch; }
+.hero--wide h1{ max-width:min(24ch,var(--hero-measure)); }
+.hero--wide .hero-sub{ max-width:min(62ch,var(--hero-measure)); }
 
 @media (min-width:1024px){
   /* The home hero was running past the fold: measured at 1440x740 the CTA row
@@ -893,18 +940,15 @@ p:last-child{ margin-bottom:0; }
      and the carousel controls sat 172px under it. Everything here is the same
      fix the landscape-phone block makes for the same reason - widen the measure,
      ease the type, close the gaps - applied to the axis that is short on a laptop.
-     What it deliberately does NOT touch is the rendered size of the standfirst and
-     the tagline: both have to stay at or above 24px to count as large text at 3:1,
-     which is what lets the photograph sit at .49 rather than .61. So the height
-     comes out of line count and leading instead. Which is also why the extra air
+     The height comes out of line count and leading rather than the tagline's
+     size. Which is also why the extra air
      added to the base rhythm above is only partly carried here: at 1440x740 the
      frame is 636px and the stack now measures ~629px, so on a laptop the added
      room is redistributed out of the centring surplus rather than pushing the
      controls toward the fold. Every taller window centres in a frame with
      hundreds of pixels to spare and simply reads as more open. */
   .hero--home .hero-content{
-    --hero-pad-top:2.75rem;
-    padding-block:var(--hero-pad-top) 2.25rem;
+    padding-block:2.75rem 2.25rem;
   }
   /* ~17% under the old 3.4-4.4rem laptop scale, for a quieter headline. */
   .hero--home h1{ font-size:clamp(2.8rem,1rem + 2.8vw,3.65rem); }
@@ -1791,7 +1835,16 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
   /* A landscape phone is WIDE - 844px - so the portrait 52ch measure wastes the
      width and runs this standfirst to six lines. At 90ch it sets in three, which
      is what puts the CTA row back above the fold. */
-  .hero-sub{ font-size:.94rem; line-height:1.5; margin-bottom:1rem; max-width:90ch; }
+  .hero-sub,
+  .hero--page .hero-sub{ font-size:.94rem; line-height:1.5; margin-bottom:1rem; max-width:90ch; }
+  /* The text fills a 390px-tall frame here, so there is no free photograph for
+     the scrims to give back. The interior scrim widens to the whole screen to
+     cover the 90ch standfirst; the home hero drops its scrims for one flat veil
+     at the text-scrim composite (.622, 4.80:1) rather than let the two overlap. */
+  .hero--page{ --hero-measure:100vw; }
+  .hero--home{ --hero-veil:.622; }
+  .hero--home h1::before,
+  .hero--home .hero-tagline::before{ content:none; }
 }
 
 /* ---- small uppercase labels ----
@@ -1929,5 +1982,5 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
   .hero--home .hero-slide img,
   .hero--home .hero-slide.is-active img,
   .hero--home .hero-slide.is-active.is-priming img{ transform:none; transition:none; }
-  .hero--home .hero-content{ --hero-pad-top:2.25rem; }
+  .hero--home .hero-content{ padding-top:2.25rem; }
 }
