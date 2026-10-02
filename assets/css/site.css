@@ -1824,9 +1824,12 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
   /* A focused row is scrolled with the arrow keys; the ring sits inside the
      row, since outside it would be clipped by the page edge. */
   .swipe-row:focus-visible{ outline-offset:-2px; }
-  /* Cards with a drawer grow when it opens; start alignment keeps the other
-     cards in the row at their own height instead of stretching to match. */
-  .collection-grid.swipe-row{ align-items:start; }
+  /* Closed, the cards stretch to one height, so the row reads evenly and the
+     drawer rows (pushed to each card's foot) line up. Cards with a drawer grow
+     when it opens; while one is open the row drops to start alignment, so the
+     other cards keep their own height instead of stretching to match. */
+  .collection-grid.swipe-row{ align-items:stretch; }
+  .collection-grid.swipe-row:has(.acc-trigger[aria-expanded="true"]){ align-items:start; }
   /* The lift means nothing on touch, and on a card half off the edge it
      reads as a glitch. */
   .swipe-row .card:hover{ transform:none; box-shadow:none; }

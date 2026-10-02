@@ -89,11 +89,13 @@
        moment - which is the normal case when closing with Escape - the browser has
        nowhere to put focus and drops it on <body>, so the next Tab restarts from the
        top of the document. Hand focus back to the toggle before that can happen. */
+    /* The page stays scrollable while the drawer is open (the client's call):
+       the drawer is fixed under the sticky header, so it stays put while the
+       page moves behind it. */
     var setNav = function (open) {
       var focusInside = nav.contains(document.activeElement);
       toggle.setAttribute('aria-expanded', String(open));
       nav.classList.toggle('is-open', open);
-      document.body.style.overflow = open && isOverlay() ? 'hidden' : '';
       if (!open && focusInside) toggle.focus();
       if (!open) closeGroups();
     };
@@ -103,16 +105,23 @@
     nav.addEventListener('click', function (e) {
       if (e.target.closest('a')) setNav(false);
     });
+    /* A tap anywhere outside the open drawer closes it. The toggle is left out
+       because its own handler already flips the state. */
+    document.addEventListener('click', function (e) {
+      if (!isOverlay() || toggle.getAttribute('aria-expanded') !== 'true') return;
+      if (nav.contains(e.target) || toggle.contains(e.target)) return;
+      setNav(false);
+    });
     document.addEventListener('keydown', function (e) {
       if (e.key !== 'Escape') return;
       if (toggle.getAttribute('aria-expanded') !== 'true') return;
       setNav(false);
     });
 
-    /* While the panel covers the page, Tab must not walk into the content behind it:
-       the body is scroll-locked, so focus would land somewhere the visitor cannot
-       see or scroll to. Only while it is actually an overlay - above the breakpoint the nav
-       is just a row in the header and should behave like ordinary content. */
+    /* While the panel covers the page, Tab must not walk into the content behind it,
+       where focus would land on links hidden under the drawer. Only while it is
+       actually an overlay - above the breakpoint the nav is just a row in the header
+       and should behave like ordinary content. */
     nav.addEventListener('keydown', function (e) {
       if (e.key !== 'Tab') return;
       if (!isOverlay() || toggle.getAttribute('aria-expanded') !== 'true') return;
