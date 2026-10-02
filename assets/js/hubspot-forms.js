@@ -180,6 +180,11 @@
         execution: 'execute',
         appearance: 'interaction-only',
         retry: 'never',
+        /* By default the widget also writes its token into a hidden
+           cf-turnstile-response input inside the form, which collect() would
+           then forward to HubSpot as an answer. The token travels separately
+           (see submit()), so the input is not wanted. */
+        'response-field': false,
         /* The widget sits below the submit button, which in the journey modal
            or a long page can be off-screen - leaving only "Sending…" while
            Cloudflare waits for a click nobody knows to make. */
@@ -244,6 +249,7 @@
 
     Array.prototype.forEach.call(form.elements, function (el) {
       if (!el.name || TRAPS.indexOf(el.name) !== -1 || el.type === 'submit' || el.disabled) return;
+      if (/^cf[-_]turnstile/.test(el.name)) return;   // the security token, never an answer
       if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) return;
 
       var value = String(el.value || '').trim();

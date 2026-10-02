@@ -123,6 +123,12 @@ async function submit(request, env) {
      analytics, as the browser's own request used to carry it. */
   const body = input.body;
   body.context = Object.assign({}, body.context, ip ? { ipAddress: ip } : {});
+  /* The Turnstile token is not an answer: drop it if a page still sends it as
+     a field (a browser holding an older hubspot-forms.js does), so it never
+     lands on the contact or in a notification email. */
+  if (Array.isArray(body.fields)) {
+    body.fields = body.fields.filter((f) => !(f && /^cf[-_]turnstile/.test(String(f.name))));
+  }
 
   let res, text;
   try {
