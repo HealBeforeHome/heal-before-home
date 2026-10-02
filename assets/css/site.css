@@ -677,26 +677,14 @@ p:last-child{ margin-bottom:0; }
 .hero h1 em{ font-style:italic; }
 /* The home hero leads with a longer sentence than the interior heroes, so it needs
    a wider measure than the 15ch above - at 15ch it breaks into four short lines. */
-.hero--home h1{ max-width:24ch; margin-bottom:max(.75rem,.3em); }
-/* The home hero stacks five elements, and an even rhythm between them reads as
-   one undifferentiated column. So the gaps climb in four steps, each roughly a
-   third wider than the one above it, and the size of a gap is what says whether
-   two things belong together:
-
-     kicker    -> headline    tight; the kicker is a label ON the headline
-     headline  -> tagline     tight; both are display type, one display cluster
-     tagline   -> standfirst  a break; display gives way to body copy
-     standfirst-> CTA row     wider; copy gives way to an action
-     CTA row   -> controls    widest, and set by .hero-content's padding below;
-                              the carousel chrome is not part of the message
-
-   On a phone the headline gap is em-based against a 32px headline, which would
-   compute smaller than the kicker's - hence the max(); the ladder has to hold at
-   both ends of the range, not just where it was drawn.
-   Home only: .hero--page carries two elements and wants none of this. */
-.hero--home .kicker{ margin-bottom:clamp(.7rem,1.5vw,.95rem); }
-.hero--home .hero-tagline{ margin-bottom:clamp(1.5rem,2.6vw,2.1rem); }
-.hero--home .hero-sub{ line-height:1.68; margin-bottom:clamp(2rem,3.4vw,2.75rem); }
+/* The home hero is just the headline and the CTA row, so the photograph carries
+   the frame. The headline runs ~17% under --fs-hero (which the interior pages do
+   not use) and its bottom margin is the one gap left: headline to buttons. The
+   standfirst and tagline live in the .intro band below the hero. */
+.hero--home h1{
+  font-size:clamp(1.7rem,.75rem + 4.25vw,4.65rem);
+  max-width:24ch; margin-bottom:clamp(1.6rem,3vw,2.4rem);
+}
 .hero--home .btn-row{ gap:1.1rem; }
 /* The brand phrase used to be the headline; it now sits beneath it, set in the
    display italic at a fraction of the size and in the same warm tint as the
@@ -832,6 +820,9 @@ p:last-child{ margin-bottom:0; }
      band under @media (min-width:1024px) is anchored to --hero-pad-top. */
   --hero-pad-top:clamp(3.25rem,6vw,4.5rem);
   padding-block:var(--hero-pad-top) var(--hero-pad-top);
+  /* Lifts the text one spacing step above centre; the controls stay put. The
+     contrast band is drawn on this box, so it rises with the text. */
+  top:calc(-1 * clamp(1.25rem,2.5vw,2rem));
 }
 .hero--home .hero-controls{
   /* relative, not static: z-index only applies to a positioned box, and without it
@@ -874,27 +865,21 @@ p:last-child{ margin-bottom:0; }
     --hero-pad-top:2.75rem;
     padding-block:var(--hero-pad-top) var(--hero-pad-top);
   }
-  /* The headline set in two lines at the old 89.6px cap and still sets in two at
-     70.4px, so the extra scale was buying height, not structure. */
-  .hero--home h1{
-    font-size:clamp(3.4rem,1.2rem + 3.4vw,4.4rem);
-    margin-bottom:.26em;
-  }
-  /* The same four steps, held to a 1440x740 budget: 13.6 / 17.7 / 28.8 / 36 / 44px.
-     The kicker comes IN from the base value rather than out - on a laptop the
-     headline is 68px and a 24px gap under an 11.5px label detached it. */
-  .hero--home .kicker{ margin-bottom:.85rem; }
-  .hero--home .hero-tagline{ margin-bottom:1.8rem; }
-  /* Down from 24.8px, which was sized to clear the 24px large-text threshold so
-     the photograph could sit at .49. At 20px it is normal text needing 4.5:1, and
-     .49 only carries 3.20:1 - so the kicker's band below is extended to cover this
-     paragraph too, which is what pays for the smaller size. The measure opens to
-     72ch at the same time: 66ch of a 20px face is a narrower column than it was of
-     a 24.8px one, and would have taken the paragraph to seven lines rather than
-     down to five. Leading comes up slightly because smaller type wants more. */
-  .hero--home .hero-sub{
-    font-size:1.25rem; max-width:72ch; line-height:1.62; margin-bottom:2.25rem;
-  }
+  /* ~17% under the old 3.4-4.4rem laptop scale, for a quieter headline. */
+  .hero--home h1{ font-size:clamp(2.8rem,1rem + 2.8vw,3.65rem); }
+}
+
+/* =========================================================
+   Home introduction: the standfirst and tagline the hero used to carry,
+   set on the cream ground as a quiet transition into the value bar.
+   The tagline stays under .pullquote's size so it does not compete with
+   the Philosophy line two sections down.
+   ========================================================= */
+.intro .lead{ max-width:58ch; color:var(--ink); }
+.intro-tagline{
+  font-family:var(--display); font-style:italic; font-weight:300;
+  font-size:clamp(1.3rem,1rem + 1.1vw,1.85rem); line-height:1.3;
+  color:var(--forest); margin:clamp(1.1rem,2vw,1.6rem) 0 0;
 }
 
 /* =========================================================
@@ -1749,29 +1734,19 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
   .header-inner{ min-height:52px; }
   /* The bottom value is the gap to the controls row, which is in flow here; on a
      390px-tall screen 3.25rem of it was height the CTA row could not spare. */
-  .hero--home .hero-content{ padding-block:1.25rem 1.75rem; }
+  .hero--home .hero-content{ padding-block:1.25rem 1.75rem; top:0; }
   .hero--page .hero-content{ padding-block:1.5rem; }
   /* Releasing the min-height is not enough on its own: the hero type is sized off
      the VIEWPORT WIDTH, and a landscape phone is wide. At 844px the headline
      resolves to ~57px and the block alone stands taller than the 390px screen.
      These cap the three fluid sizes against the axis that is actually short, so
      the headline and the CTA row land above the fold together. */
-  .hero--home h1{ font-size:clamp(1.8rem,1.2rem + 2.4vw,2.3rem); margin-bottom:.28em; }
-  /* Same ladder, compressed hardest: 8 / 10.3 / 13.6 / 16 / 28px. The tagline rule
-     carries .hero--home so it outranks the base ladder above rather than losing to
-     it on specificity - .hero-tagline alone would never apply here. */
-  .hero--home .kicker{ margin-bottom:.5rem; }
-  .hero--home .hero-tagline{ margin-bottom:.85rem; }
+  .hero--home h1{ font-size:clamp(1.5rem,1rem + 2vw,1.9rem); margin-bottom:1rem; }
   .hero-tagline{ font-size:1.1rem; }
   /* A landscape phone is WIDE - 844px - so the portrait 52ch measure wastes the
      width and runs this standfirst to six lines. At 90ch it sets in three, which
-     is what puts the CTA row back above the fold.
-     Carries .hero--home so it outranks the desktop block's own .hero--home .hero-sub
-     rather than tying with it: a window both wide (>=1024) and short (<=600) matches
-     BOTH media queries, and on a tie the desktop one would win on source order and
-     put the height back. Everything short and landscape wants these values. */
-  .hero-sub,
-  .hero--home .hero-sub{ font-size:.94rem; line-height:1.5; margin-bottom:1rem; max-width:90ch; }
+     is what puts the CTA row back above the fold. */
+  .hero-sub{ font-size:.94rem; line-height:1.5; margin-bottom:1rem; max-width:90ch; }
 }
 
 /* ---- small uppercase labels ----
@@ -1901,9 +1876,15 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
    the text still sits over it. The slow zoom goes too - on a crop this tight the
    extra 7% was the difference between a landscape and a close-up. */
 @media (max-width:700px){
-  .hero--home{ background:rgb(var(--veil)); }
+  /* With only the headline and CTAs left, the 86svh frame left ~200px of bare
+     veil under the controls. A shorter frame keeps the cluster on the photo. */
+  .hero--home{
+    background:rgb(var(--veil));
+    min-height:clamp(460px,64vh,540px);
+    min-height:clamp(460px,64svh,540px);
+  }
   .hero--home .hero-track{
-    bottom:auto; height:min(100%, 118vw);
+    bottom:auto; height:min(100%, 128vw);
     -webkit-mask-image:linear-gradient(to bottom, #000 68%, transparent);
             mask-image:linear-gradient(to bottom, #000 68%, transparent);
   }
@@ -1911,5 +1892,4 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
   .hero--home .hero-slide.is-active img,
   .hero--home .hero-slide.is-active.is-priming img{ transform:none; transition:none; }
   .hero--home .hero-content{ --hero-pad-top:2.25rem; }
-  .hero--home .hero-sub{ font-size:.97rem; line-height:1.56; }
 }
