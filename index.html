@@ -189,7 +189,7 @@
   </div>
 </header>
 
-<main id="main">
+<main id="main" class="home">
 
   <!-- ============ HERO ============ -->
   <section class="hero hero--home" data-carousel data-interval="5000" aria-label="Heal Before Home">
@@ -323,9 +323,10 @@
 
   <!-- ============ WHY THE PHILIPPINES ============
        Restored from the old Why the Philippines page (git, commit 0e3cf89), with the destination
-       cards from /philippines-medical-travel. No top padding: it continues the
-       Philippines Collection teaser above on the same ground. -->
-  <section class="section" style="padding-top:0">
+       cards from /philippines-medical-travel. It continues the Philippines
+       Collection teaser above on the same ground; the .home rule in site.css
+       drops its top padding so the gap stays one section unit. -->
+  <section class="section">
     <div class="wrap">
       <div class="section-head center" data-reveal style="max-width:62ch">
         <span class="kicker">Why the Philippines</span>
@@ -522,7 +523,7 @@
   <!-- ============ AREAS OF CARE ============
        Same tiles as the preview on /philippines-medical-travel; the full
        specialty pages stay on /areas-of-care. -->
-  <section class="section section--tight">
+  <section class="section">
     <div class="wrap">
       <div class="section-head" data-reveal style="display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; max-width:none; flex-wrap:wrap;">
         <div style="max-width:60ch">

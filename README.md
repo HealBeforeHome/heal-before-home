@@ -31,7 +31,7 @@ use `https://www.healbeforehome.com`.
 | `/` | `index.html` |
 | `/philippines-medical-travel` | `philippines-medical-travel.html` (collection page; header dropdown) |
 | `/bc-executive-collection` | `bc-executive-collection.html` (**hidden** since the 30 Sept 2026 brief: unlinked, `noindex`, out of the sitemap) |
-| `/insights` | `insights.html` (**hidden** since the 30 Sept 2026 brief: unlinked, `noindex`, out of the sitemap; articles from `_templates/insight-article.html`) |
+| `/insights` | **Archived** 2 Oct 2026 (the client's call): the file is `_archive/insights/insights.html` (not deployed) and the URL 302s to the home page. Articles come from `_templates/insight-article.html` |
 | `/planning-medical-wellness-journey-philippines`, `/executive-recovery-more-than-a-wellness-benefit` | the two launch Insights articles. **Archived** 1 Oct 2026 while Insights is hidden: the files are in `_archive/insights/` (not deployed), the URLs 302 to the home page (`_redirects`), and neither is in the sitemap. The cards on the hidden `/insights` page still point at them. See *Restoring an archived page* |
 | `/getting-started` | `getting-started.html` |
 | `/areas-of-care` | `areas-of-care.html` |
@@ -187,7 +187,10 @@ the stepper in `site.js`.
    it returns, the home page's two-card INSIGHTS section is in git history
    (`_archive/home-insights-section.html`, see *Restoring retired content*).
 
-Insights is currently paused: both launch articles are in `_archive/insights/`. To
+Insights is currently paused: the `/insights` page and both launch articles are in
+`_archive/insights/`. Restore the page first (as below, plus removing its `noindex`,
+adding it to the sitemap and `llms.txt`, and putting the **Insights** link back in the
+header nav after Our Story on every page). To
 bring them back, follow *Restoring an archived page*.
 
 Never publish an article before its complete approved body has been supplied.
@@ -287,7 +290,10 @@ publish one again:
 3. Add its URL back to `sitemap.xml` (with a `<lastmod>`) and to `llms.txt`. Remove `noindex` from the page if it should
    be indexed: `executive-recovery-more-than-a-wellness-benefit.html` carries one,
    the planning article does not.
-4. Make sure something links to it (the `/insights` page, once that is unhidden).
+4. Make sure something links to it (the `/insights` page, once that is restored).
+   Note: the executive-recovery article ends with a Vancouver Pilot section and a
+   `contact#bc` button, which belong to the still-hidden BC Executive Collection;
+   cut those or restore BC before publishing it.
 
 ## Restoring retired content
 

@@ -220,6 +220,12 @@ p:last-child{ margin-bottom:0; }
 .wrap--narrow{ max-width:var(--max-narrow); }
 .section{ padding-block:var(--section-y); }
 .section--tight{ padding-block:var(--section-y-tight); }
+/* Home page rhythm: every gap is one --section-y. Two cream sections in a row
+   would otherwise stack their padding into a double gap, so the second drops
+   its top padding. Coloured bands (sand, dark, the CTA) keep both, giving one
+   unit either side of each colour change. */
+.home > .section:not(.section--sand):not(.section--dark):not(.cta-band)
+  + .section:not(.section--sand):not(.section--dark):not(.cta-band){ padding-top:0; }
 .section--sand{ background:var(--sand); }
 .section--dark{ background:var(--green-section); color:rgba(255,255,240,.86); }
 .section--dark h1,.section--dark h2,.section--dark h3,.section--dark h4{ color:var(--ivory); }
