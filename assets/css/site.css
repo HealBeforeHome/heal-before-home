@@ -119,10 +119,11 @@
   --nav-ink:       #3f4c46;
 
   --ink:        var(--forest);
-  /* Primary body copy - paragraphs, list items, descriptions - in a charcoal
-     slate (3 October 2026 brief). 13.03:1 on cream, 11.32:1 on sand. Headings
-     keep --forest; --ink-muted is now for labels, legends and small print. */
-  --text:       #2C2C2E;
+  /* Primary body copy - paragraphs, list items, descriptions. #313131, the
+     client's Amanpulo charcoal reference (5 October 2026), a touch softer than
+     the #2C2C2E of the 3 October brief. 12.17:1 on cream, 10.56:1 on sand.
+     Headings keep --forest; --ink-muted is for labels, legends and small print. */
+  --text:       #313131;
   --ink-muted:  #55615b;   /* 5.25:1 on sand, 6.05:1 on cream */
   --line:       rgba(30,42,37,.13);
   --line-soft:  rgba(30,42,37,.07);

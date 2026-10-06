@@ -140,7 +140,7 @@ Sans (body) — the same pairing the Framer site used, but **self-hosted** from
 third-party resource is Cloudflare Turnstile (script and challenge frame), and the
 Content-Security-Policy in `_headers` allows no other external origin.
 
-Body copy (paragraphs, list items, descriptions) is `--text` `#2C2C2E` at weight 400 and
+Body copy (paragraphs, list items, descriptions) is `--text` `#313131` at weight 400 and
 line-height 1.65; headings stay `--forest`. Hero photographs carry **no overlay** (3 October
 2026 brief): every hero has only a bottom-up gradient over its lower 40% (`.hero::after`)
 and the client's `.hero-text-overlay` text-shadow, which is on each `.hero-content`. Don't
