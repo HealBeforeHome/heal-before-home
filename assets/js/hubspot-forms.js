@@ -70,7 +70,7 @@
     'coaching-intake': {
       /* Set by `node hubspot-provision.mjs --write` after "Website: coaching
          intake" is created. Until then the form says it could not send. */
-      guid: 'PASTE-HUBSPOT-FORM-GUID',
+      guid: 'd200df22-e2c5-430d-b7bf-008f59c6a82c',
       consent:
         'I understand that Confidence & Transition Coaching is supportive and non-clinical. ' +
         'It does not provide psychotherapy, psychological assessment, psychiatric care, medical ' +
