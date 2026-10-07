@@ -563,6 +563,20 @@
       status.hidden = false;
     }
 
+    /* The thank-you replaces the whole form, so the page loses that much height
+       under the visitor and the browser, holding its scroll position, lands them
+       in the footer. Bring the message to the middle of the screen instead, and
+       move focus to it so a screen reader or keyboard user starts from there. */
+    function finish() {
+      form.hidden = true;
+      say(successText(), 'ok');
+      if (!status) return;
+      status.setAttribute('tabindex', '-1');
+      status.focus({ preventScroll: true });
+      var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      status.scrollIntoView({ block: 'center', behavior: still ? 'auto' : 'smooth' });
+    }
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
 
@@ -580,8 +594,7 @@
            visitor sees the thank-you and nothing reaches HubSpot. */
         warn('"' + form.id + '" not sent - treated as automated (' +
           (tripped ? 'a hidden decoy field was filled' : 'sent within ' + MIN_SUBMIT_MS + 'ms of the page loading') + ')');
-        form.hidden = true;
-        say(successText(), 'ok');
+        finish();
         return;
       }
 
@@ -626,8 +639,7 @@
         })
         .then(function (r) {
           if (r.ok) {
-            form.hidden = true;
-            say(successText(), 'ok');
+            finish();
             return;
           }
           say(ERROR, 'error');

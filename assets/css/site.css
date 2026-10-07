@@ -1407,6 +1407,9 @@ html.modal-open{ overflow:hidden; }
 }
 .form-status.is-ok{ background:rgba(25,75,50,.08); border-left:2px solid var(--cta-green); color:var(--forest); }
 .form-status.is-error{ background:rgba(150,60,40,.08); border-left:2px solid #96422c; color:#7a3522; }
+/* Focused by script after a successful send, only so assistive tech starts
+   there; it is not a control, so no focus ring. */
+.form-status:focus{ outline:none; }
 /* The coaching intake's thank-you takes the form's place with a soft fade. */
 @keyframes status-in{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
 .form-status--fade.is-ok{ animation:status-in .7s var(--ease) both; }
