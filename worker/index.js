@@ -31,7 +31,9 @@ const FORMS = {
   'community-form': '6923309e-5ff5-4333-aa2b-b94b62b72240',
   'journey-enquiry': '5890a799-9aca-4362-b89f-f30b3b9d47d4',
   'provider-enquiry': '8a7b23bb-ef40-440e-adcb-64efe1930b14',
-  'newsletter-form': 'b9f3af16-f3f1-4e18-8e7e-42f201f3a1e3'
+  'newsletter-form': 'b9f3af16-f3f1-4e18-8e7e-42f201f3a1e3',
+  /* Filled by `node hubspot-provision.mjs --write`; refused until then. */
+  'coaching-intake': 'PASTE-HUBSPOT-FORM-GUID'
 };
 
 /* Where a token may have been issued. localhost is for `wrangler dev`, where
@@ -86,7 +88,8 @@ async function submit(request, env) {
   }
 
   const guid = input && Object.prototype.hasOwnProperty.call(FORMS, input.form) && FORMS[input.form];
-  if (!guid) return json(400, { error: 'form' });
+  /* A form whose GUID has not been provisioned yet is refused, not forwarded. */
+  if (!guid || guid.indexOf('PASTE') === 0) return json(400, { error: 'form' });
   if (typeof input.token !== 'string' || !input.token || !input.body || typeof input.body !== 'object') {
     return json(400, { error: 'input' });
   }

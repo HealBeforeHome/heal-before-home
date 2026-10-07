@@ -59,7 +59,7 @@ working form.
 
 ## Forms
 
-All four forms submit to **HubSpot** (portal `343416288`) through the public Forms
+All five forms submit to **HubSpot** (portal `343416288`) through the public Forms
 submission API, behind **Cloudflare Turnstile**. `assets/js/hubspot-forms.js` intercepts the
 submit, gets a Turnstile token, and sends JSON to the site's own `/api/submit`
 (`worker/index.js`), which verifies the token and forwards the submission to HubSpot; the
@@ -72,6 +72,7 @@ site's own, so the fields look and behave like everything else on the page.
 | Provider enquiry | `/for-providers` | `provider-enquiry` |
 | Newsletter | the footer of every page | `newsletter-form` |
 | Community interest | `/community-initiative-interest` | `community-form` |
+| Coaching intake | `/confidence-transition-coaching` | `coaching-intake` |
 
 Each form's GUID and its consent and success wording live in the `FORMS` table at the top
 of `assets/js/hubspot-forms.js`. The GUID also goes in `FORMS` in `worker/index.js`, which
@@ -141,7 +142,9 @@ third-party resource is Cloudflare Turnstile (script and challenge frame), and t
 Content-Security-Policy in `_headers` allows no other external origin.
 
 Body copy (paragraphs, list items, descriptions) is `--text` `#313131` at weight 400 and
-line-height 1.65; headings stay `--forest`. Hero photographs carry **no overlay** (3 October
+line-height 1.65; headings stay `--forest`. The first text section under the hero on the home, Signature
+Experience, Philippines Medical Travel and Getting Started pages carries `.text-light`, which sets
+the same colour in Alegreya Sans 300 (client request, 7 October 2026). Hero photographs carry **no overlay** (3 October
 2026 brief): every hero has only a bottom-up gradient over its lower 40% (`.hero::after`)
 and the client's `.hero-text-overlay` text-shadow, which is on each `.hero-content`. Don't
 reintroduce a veil without the client's sign-off.

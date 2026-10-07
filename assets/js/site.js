@@ -585,9 +585,11 @@
   /* ---------------------------------------------------------
      Conditional form fields. A control carrying data-controls="<id>" and
      data-show-value="<value>" reveals that block only while it holds that
-     value. Hiding also clears the block, so hubspot-forms.js never posts an
-     answer to a question the guest can no longer see. Takes a root so the
-     journey form can be wired again after the modal loads it.
+     value; a checkbox carrying data-controls reveals it while ticked (the
+     coaching intake's "Other" boxes). Hiding also clears the block, so
+     hubspot-forms.js never posts an answer to a question the guest can no
+     longer see. Takes a root so the journey form can be wired again after the
+     modal loads it.
      --------------------------------------------------------- */
   function initConditionals(root) {
     Array.prototype.forEach.call(root.querySelectorAll('[data-controls]'), function (control) {
@@ -598,7 +600,7 @@
       var want = control.getAttribute('data-show-value');
 
       function sync(clearOnHide) {
-        var show = control.value === want;
+        var show = control.type === 'checkbox' ? control.checked : control.value === want;
         if (!show && clearOnHide) {
           Array.prototype.forEach.call(target.querySelectorAll('input, select, textarea'), function (f) {
             if (f.type === 'checkbox' || f.type === 'radio') f.checked = false;

@@ -67,6 +67,17 @@
         'provided to respond to your enquiry and communicate with you about a possible partnership.',
       success: 'Thank you. Your enquiry has been received, and our team will review it shortly.'
     },
+    'coaching-intake': {
+      /* Set by `node hubspot-provision.mjs --write` after "Website: coaching
+         intake" is created. Until then the form says it could not send. */
+      guid: 'PASTE-HUBSPOT-FORM-GUID',
+      consent:
+        'I understand that Confidence & Transition Coaching is supportive and non-clinical. ' +
+        'It does not provide psychotherapy, psychological assessment, psychiatric care, medical ' +
+        'advice or emergency support. I consent to Heal Before Home using the information I ' +
+        'provide to review my inquiry and coordinate appropriate independent support where requested.',
+      success: 'Thank you. Your confidential intake has been received. Our coordination team will review your inquiry and connect with you shortly.'
+    },
     'newsletter-form': {
       guid: 'b9f3af16-f3f1-4e18-8e7e-42f201f3a1e3',
       consent:
@@ -345,6 +356,12 @@
   function describe(form, el) {
     var message = el.validationMessage || 'Please check this field.';
     var label = el.id ? form.querySelector('label[for="' + el.id + '"]') : null;
+    /* A checkbox or radio in a group has no label of its own pointing at it;
+       the question is the group's legend. */
+    if (!label) {
+      var group = el.closest('fieldset');
+      label = group && group.querySelector('legend:not(.sr-only)');
+    }
     if (!label) return message;
     var name = label.textContent.replace(/\*/g, '').replace(/\s+/g, ' ').trim().replace(/:$/, '');
     if (!name) return message;
@@ -447,7 +464,26 @@
     el.setCustomValidity(formatError(el));
   }
 
+  /* HTML can require one radio in a group but not "at least one" checkbox: a
+     required attribute on each box would demand every box. A fieldset marked
+     data-required-group carries the rule on its first box instead, through
+     setCustomValidity, so firstInvalid() and the submit handler treat it like
+     any other required control. */
+  function guardGroups(form) {
+    Array.prototype.forEach.call(form.querySelectorAll('fieldset[data-required-group]'), function (group) {
+      var boxes = group.querySelectorAll('input[type="checkbox"]');
+      if (!boxes.length) return;
+      function sync() {
+        var any = Array.prototype.some.call(boxes, function (b) { return b.checked; });
+        boxes[0].setCustomValidity(any ? '' : 'Please select at least one option.');
+      }
+      sync();
+      group.addEventListener('change', sync);
+    });
+  }
+
   function guardFormats(form) {
+    guardGroups(form);
     var fields = Array.prototype.filter.call(form.elements, function (el) {
       return el.name && TRAPS.indexOf(el.name) === -1 && kindOf(el);
     });

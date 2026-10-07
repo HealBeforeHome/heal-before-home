@@ -270,6 +270,12 @@ p:last-child{ margin-bottom:0; }
    small print (dates, footnotes) stays a step lighter. */
 .muted{ color:var(--text); }
 .small.muted{ color:var(--ink-muted); }
+/* The first text section under the hero on the home, Signature Experience,
+   Philippines Medical Travel and Getting Started pages, set lighter at the
+   client's request (7 October 2026): the same #313131, in Alegreya Sans 300.
+   12.17:1 on cream. Put the class on the <section>. */
+.text-light p,
+.text-light li{ color:var(--text); font-weight:300; }
 .small{ font-size:var(--fs-small); }
 .center{ text-align:center; }
 .center p,.center .lead{ margin-inline:auto; }
@@ -917,7 +923,7 @@ p:last-child{ margin-bottom:0; }
   font-size:clamp(1.6rem,1.15rem + 1.6vw,2.45rem); line-height:1.15;
   max-width:32ch; margin:0 auto;
 }
-.intro .lead{ max-width:58ch; color:var(--ink); margin:clamp(1.6rem,3vw,2.25rem) auto 0; }
+.intro .lead{ max-width:58ch; color:var(--text); margin:clamp(1.6rem,3vw,2.25rem) auto 0; }
 
 /* =========================================================
    Value bar: the concierge-not-clinic anchor
@@ -1401,6 +1407,10 @@ html.modal-open{ overflow:hidden; }
 }
 .form-status.is-ok{ background:rgba(25,75,50,.08); border-left:2px solid var(--cta-green); color:var(--forest); }
 .form-status.is-error{ background:rgba(150,60,40,.08); border-left:2px solid #96422c; color:#7a3522; }
+/* The coaching intake's thank-you takes the form's place with a soft fade. */
+@keyframes status-in{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+.form-status--fade.is-ok{ animation:status-in .7s var(--ease) both; }
+@media (prefers-reduced-motion: reduce){ .form-status--fade.is-ok{ animation:none; } }
 
 /* The status now sits after the form rather than inside it, so that hiding the
    form on success does not take the thank-you with it. */
@@ -1554,6 +1564,25 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
 .note-strip p{ margin:0; font-size:.95rem; color:var(--text); max-width:80ch; }
 .section--dark .note-strip{ background:rgba(255,255,240,.06); border-left-color:rgba(255,255,240,.3); }
 .section--dark .note-strip p{ color:rgba(255,255,240,.75); }
+/* A quiet cream panel for a short statement set inside a sand band, where a
+   sand .note-strip would disappear: the home Financial Transparency
+   Commitment. */
+.callout{
+  background:var(--cream); border-left:2px solid var(--gold);
+  padding:clamp(1.4rem,3vw,2.25rem) clamp(1.3rem,3vw,2.5rem);
+  margin-top:clamp(2.25rem,4vw,3.25rem); border-radius:2px;
+}
+.callout h3{ margin-bottom:.8rem; }
+.callout p{ max-width:72ch; }
+/* The same panel on a cream section: Perimenopause & Healthy Aging. */
+.callout--sand{ background:var(--sand); }
+/* A section subheading under an H2, in the display italic: "Seamless
+   Non-Clinical Coordination" on the coaching page. */
+.subhead{
+  font-family:var(--display); font-style:italic; font-weight:400;
+  font-size:clamp(1.2rem,1rem + .7vw,1.55rem); line-height:1.3;
+  color:var(--sage); margin:-.15em 0 0; letter-spacing:0;
+}
 /* An accordion nested in a journey step. .journey-body flattens paragraph
    margins for its own short step copy, which would otherwise run a panel of real
    copy together; these put the rhythm back without touching the step itself. */

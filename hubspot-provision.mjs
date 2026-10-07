@@ -78,7 +78,9 @@ const FORMS = [
      forms editor, which the API may read but not modify - so its CAPTCHA could
      never be turned off and it has never accepted a submission. Recreated here
      as a form we own. */
-  { key: 'community-form',   file: 'community-initiative-interest.html', hsName: 'Website: community interest' }
+  { key: 'community-form',   file: 'community-initiative-interest.html', hsName: 'Website: community interest' },
+  /* The Confidence & Transition Coaching intake (5 October 2026 brief). */
+  { key: 'coaching-intake',  file: 'confidence-transition-coaching.html', hsName: 'Website: coaching intake' }
 ];
 
 /* ---------------------------------------------------------------- markup --- */
@@ -407,7 +409,8 @@ const PAGE_OF = {
   'journey-enquiry': ['contact.html', 'journey-enquiry'],
   'provider-enquiry': ['for-providers.html', 'provider-enquiry'],
   'newsletter-form': ['index.html', 'newsletter-form'],
-  'community-form': ['community-initiative-interest.html', 'community-form']
+  'community-form': ['community-initiative-interest.html', 'community-form'],
+  'coaching-intake': ['confidence-transition-coaching.html', 'coaching-intake']
 };
 
 /* Compare each HubSpot form against what its page actually sends. Answers the
