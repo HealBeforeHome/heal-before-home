@@ -836,6 +836,15 @@ p:last-child{ margin-bottom:0; }
    share one centre line, so the photograph reads as symmetrical around them. */
 .hero--home .hero-content{ text-align:center; }
 .hero--home h1{ margin-inline:auto; }
+/* The headline sits a little lower in the frame (client, 5 October 2026),
+   by an amount tied to the screen's HEIGHT: ~32px on a 900px-tall window,
+   ~27px on a phone, ~19px on a 740px laptop and nothing below about 640px,
+   where the frame has no room to spare. The tagline and CTA stay pinned to
+   the foot, so only the headline moves. */
+.hero--home h1{ margin-top:clamp(0px, 8vh - 2.5rem, 2.75rem); }
+@supports (height:100svh){
+  .hero--home h1{ margin-top:clamp(0px, 8svh - 2.5rem, 2.75rem); }
+}
 /* The controls travel as one group - pause, slide lines, arrows - centred on the
    same axis as the CTA above them, so button and controls read as one stack. */
 .hero--home .hero-controls-inner{ justify-content:center; gap:clamp(1rem,2vw,1.4rem); }
