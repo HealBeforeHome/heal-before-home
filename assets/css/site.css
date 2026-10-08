@@ -923,7 +923,7 @@ p:last-child{ margin-bottom:0; }
   font-size:clamp(1.6rem,1.15rem + 1.6vw,2.45rem); line-height:1.15;
   max-width:32ch; margin:0 auto;
 }
-.intro .lead{ max-width:58ch; color:var(--text); margin:clamp(1.6rem,3vw,2.25rem) auto 0; }
+.intro .lead{ max-width:58ch; margin:clamp(1.6rem,3vw,2.25rem) auto 0; }
 
 /* =========================================================
    Value bar: the concierge-not-clinic anchor
@@ -1964,4 +1964,23 @@ html.reveal-failsafe [data-reveal]{ opacity:1; transform:none; }
   .hero--home .hero-slide.is-active img,
   .hero--home .hero-slide.is-active.is-priming img{ transform:none; transition:none; }
   .hero--home .hero-content{ padding-top:2.25rem; }
+}
+
+/* =========================================================
+   Below-hero intro sections only (client CSS, 7 October 2026): the first
+   text section under the hero on the home, Signature Experience, Philippines
+   Medical Travel and Getting Started pages, a step softer than the sections
+   further down (headings --forest, body --text). Weight 300 still comes from
+   .text-light. Kept at the END of this file on purpose: .prose p sets the
+   body colour at the same specificity and would otherwise win.
+   Measured on cream: #464646 8.83:1 (AAA); #555555 6.97:1, well clear of AA
+   (4.5:1) and a hair under AAA (7:1). The lower sections measure 13.90:1
+   (headings) and 12.17:1 (body).
+   ========================================================= */
+.section-below-hero h2 {
+    color: #464646;
+}
+
+.section-below-hero p {
+    color: #555555;
 }
