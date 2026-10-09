@@ -32,9 +32,12 @@
 # irreversible. Add includeSubDomains once every subdomain is confirmed HTTPS.
 #
 # CSP: everything is first-party except Cloudflare Turnstile (its script and the
-# challenge iframe, both on challenges.cloudflare.com), so the policy is tight.
-# Form submissions go to the site's own /api/submit, which forwards to HubSpot
-# server-side, so connect-src is 'self' alone. Two deliberate concessions:
+# challenge iframe, both on challenges.cloudflare.com) and Google Analytics 4,
+# so the policy is tight. GA is loaded by assets/js/analytics.js only after the
+# visitor accepts the cookie banner; its hosts (gtag.js on googletagmanager.com,
+# hits to *.google-analytics.com / *.analytics.google.com) are the only other
+# entries in script-src, img-src and connect-src. Form submissions go to the
+# site's own /api/submit, which forwards to HubSpot server-side. Two deliberate concessions:
 #   - style-src needs 'unsafe-inline' for the ~200 inline style="" attributes and
 #     site.js's el.style.setProperty for --reveal-delay.
 #   - form-action 'none' is intentional. No form here submits natively; every one
@@ -53,4 +56,4 @@
   Strict-Transport-Security: max-age=31536000
   Cross-Origin-Opener-Policy: same-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), display-capture=(), autoplay=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-67F3+sihOvmHhP28srzYcny0qh3HqnWxeWkNMAhKNgY=' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src https://challenges.cloudflare.com; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-67F3+sihOvmHhP28srzYcny0qh3HqnWxeWkNMAhKNgY=' https://challenges.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com; font-src 'self'; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; frame-src https://challenges.cloudflare.com; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; upgrade-insecure-requests

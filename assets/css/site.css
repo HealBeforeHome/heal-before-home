@@ -1515,6 +1515,42 @@ html.modal-open{ overflow:hidden; }
 .footer-legal{ list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:.4rem 1.6rem; }
 .footer-legal a{ color:rgba(255,255,240,.7); text-decoration:none; transition:color .3s var(--ease); }
 .footer-legal a:hover{ color:var(--ivory); }
+/* "Cookie Settings" is a button (it opens the consent banner, it goes nowhere),
+   dressed as one of the legal links beside it. */
+.footer-legal button{
+  font:inherit; color:rgba(255,255,240,.7); background:none; border:0; padding:0;
+  cursor:pointer; transition:color .3s var(--ease);
+}
+.footer-legal button:hover{ color:var(--ivory); }
+/* The same control inline in running text (Privacy Policy): reads as a link. */
+.link-button{
+  background:none; border:0; padding:0; cursor:pointer;
+  color:inherit; text-decoration:underline;
+}
+
+/* ---------- cookie consent banner (built by analytics.js) ---------- */
+/* Above the sticky header (100), below the skip link (200). Not modal: the page
+   stays usable, and nothing is tracked until Accept is pressed. */
+.cookie-banner{
+  position:fixed; left:0; right:0; bottom:0; z-index:150;
+  background:var(--cream); color:var(--text);
+  border-top:1px solid var(--line);
+  box-shadow:0 -10px 30px rgba(20,29,25,.08);
+  padding:1.1rem var(--gutter);
+}
+.cookie-banner[hidden]{ display:none; }
+.cookie-banner__inner{
+  max-width:var(--max); margin-inline:auto;
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1rem 2rem;
+}
+.cookie-banner__text{ margin:0; font-size:var(--fs-small); line-height:1.55; max-width:70ch; }
+.cookie-banner__text a{ color:var(--forest); }
+.cookie-banner__actions{ display:flex; gap:.75rem; flex-shrink:0; }
+.cookie-banner .btn{ padding:.75rem 1.6rem; }
+@media (max-width:560px){
+  .cookie-banner__actions{ width:100%; }
+  .cookie-banner__actions .btn{ flex:1; }
+}
 .footer-disclaimer{
   padding-block:clamp(1.5rem,3vw,2rem); border-bottom:1px solid var(--line-light);
 }
